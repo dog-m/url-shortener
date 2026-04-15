@@ -8,9 +8,9 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 
 @app.get('/')
 async def root():
-    return {'message': 'Hello World'}
+    return FileResponse('./frontend/index.html', media_type="text/html")
 
 
 @app.get('/favicon.ico', include_in_schema=False)
 async def favicon():
-    return FileResponse('./static/favicon.ico')
+    return FileResponse('./frontend/favicon.png', media_type="image/png")
