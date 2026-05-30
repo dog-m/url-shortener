@@ -4,8 +4,35 @@
         <title>Url shortener</title>
         <link rel="stylesheet" type="text/css" href="/static/main.css">
         <script lang="javascript" src="/static/main.js"></script>
+        <style>
+            #container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 92vh;
+            }
+
+            #center {
+                border: 1px solid #000;
+                border-radius: 20px;
+                padding: 20px;
+                width: 250px;
+            }
+        </style>
     </head>
     <body>
-        <p>Nothing yet.</p>
+        <div id="container">
+            <div id="center">
+                <center>
+                    <h1>URL shortener</h1>
+                    <hr>
+                    <div style="display: flex;">
+                        <a href="/login">Log-in</a>
+                        <hr>
+                        <a href="/register">Register</a>
+                    </div>
+                </center>
+            </div>
+        </div>
     </body>
 </html>
