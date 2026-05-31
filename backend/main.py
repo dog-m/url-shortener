@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from .api.frontend import frontend_router
+from backend.api.frontend import frontend_router
+from backend.api.urls import url_router
 
 #
 
@@ -29,6 +30,7 @@ app = FastAPI(
 
 # routers
 app.include_router(frontend_router)
+app.include_router(url_router)
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
 
@@ -38,3 +40,4 @@ async def health_check():
     return {
         'status': 'healthy',
     }
+
