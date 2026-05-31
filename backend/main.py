@@ -1,16 +1,40 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-app = FastAPI()
+from .api.frontend import frontend_router
+
+#
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """Application lifespan handler."""
+    # startup
+    pass
+
+    yield
+
+    # shutdown
+    pass
+
+
+app = FastAPI(
+    title='URL Shortener service',
+    description='A description ?',
+    version='1.0',
+    lifespan=lifespan,
+)
+
+
+# routers
+app.include_router(frontend_router)
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
 
-@app.get('/')
-async def root():
-    return FileResponse('./frontend/index.html', media_type="text/html")
-
-
-@app.get('/favicon.ico', include_in_schema=False)
-async def favicon():
-    return FileResponse('./frontend/favicon.png', media_type="image/png")
+# container-related handler
+@app.get('/health')
+async def health_check():
+    return {
+        'status': 'healthy',
+    }
