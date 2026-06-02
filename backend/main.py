@@ -6,8 +6,9 @@ from fastapi.staticfiles import StaticFiles
 from backend.api.frontend import frontend_router
 from backend.api.urls import url_router
 from backend.db.database import init_db
-from backend.models.url import URL
-from backend.models.user import User
+from backend.models.click import ClickEventEntry
+from backend.models.url import UrlEntry
+from backend.models.user import UserEntry
 
 #
 
@@ -15,7 +16,8 @@ from backend.models.user import User
 async def lifespan(_: FastAPI):
     """Application lifespan handler."""
     # startup
-    _ = (User, URL, )  # TODO: this is no longer needed since I have no service layer yet (but still left here to create tables)
+    # TODO: this is no longer needed since I have no service layer yet (but still left here to create tables)
+    _ = (UserEntry, UrlEntry, ClickEventEntry)
     init_db()
 
     yield
