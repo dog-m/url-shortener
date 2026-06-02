@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 frontend_router = APIRouter(tags=['frontend'])
 
 
-@frontend_router.get('/')
+@frontend_router.get('/', response_class=FileResponse, include_in_schema=False)
 async def root():
     return FileResponse(
         './frontend/index.html',
@@ -14,7 +14,7 @@ async def root():
     )
 
 
-@frontend_router.get('/favicon.ico', include_in_schema=False)
+@frontend_router.get('/favicon.ico', response_class=FileResponse, include_in_schema=False)
 async def favicon():
     return FileResponse(
         './frontend/favicon.png',
