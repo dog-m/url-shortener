@@ -12,7 +12,7 @@ USER_EMAIL_MAX_LEN = 255
 USER_NAME_MAX_LEN  = 100
 
 
-class UserEntry(BaseDbModel):
+class UserDto(BaseDbModel):
     __tablename__ = "users"
 
     id: Mapped[uuid.UUID]           = mapped_column(UUID, primary_key=True, index=True)

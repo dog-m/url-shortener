@@ -14,7 +14,7 @@ CLICK_HEADER_REFERER_DOMAIN_MAX_LEN  = 255
 CLICK_HEADER_ACCEPT_LANGUAGE_MAX_LEN = 128
 
 
-class ClickEventEntry(BaseDbModel):
+class ClickEventDto(BaseDbModel):
     __tablename__ = "clicks"
 
     id: Mapped[uuid.UUID]         = mapped_column(UUID, primary_key=True, index=True)

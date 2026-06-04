@@ -12,7 +12,7 @@ URL_TITLE_MAX_LEN       = 255
 URL_DESCRIPTION_MAX_LEN = 512
 
 
-class UrlEntry(BaseDbModel):
+class UrlDto(BaseDbModel):
     __tablename__ = "urls"
 
     id: Mapped[str]                     = mapped_column(String(URL_ID_MAX_LEN), primary_key=True, index=True)
