@@ -25,6 +25,11 @@ class Settings(BaseSettings):
     # CORS info
     cors_origins: list[str] = Field(default=['*'], description='Allowed CORS origins')
 
+    # caching
+    redis_url: str | None    = Field(default=None, description='Redis connection URL')
+    cache_ttl: int           = Field(default=3600, description='Default cache entry TLL')
+    cache_status_header: str = Field(default='X-FastAPI-Cache', description='Status header for cached responses')
+
 
 
 @lru_cache(maxsize=1)  # awkward Singleton
