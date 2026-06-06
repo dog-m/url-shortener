@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from backend.api.frontend import frontend_router
 from backend.api.urls import url_router
 from backend.db.database import init_db
+from backend.frontend.pages import frontend_router
 from backend.models.click import ClickEventDto
 from backend.models.url import UrlDto
 from backend.models.user import UserDto
@@ -18,7 +18,7 @@ async def lifespan(_: FastAPI):
     # startup
     # TODO: this is no longer needed since I have no service layer yet (but still left here to create tables)
     _ = (UserDto, UrlDto, ClickEventDto)
-    init_db()
+    await init_db()
 
     yield
 
