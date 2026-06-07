@@ -11,3 +11,24 @@
     padding: 20px;
     width: 250px;
 }
+
+header, footer {
+    display: block;
+    left: 0px;
+    right: 0px;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+header {
+    position: absolute;
+    top: 0px;
+    background-color: #ccc;
+}
+
+footer {
+    position: relative;
+    bottom: 0px;
+    background-color: #eee;
+}

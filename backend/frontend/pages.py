@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Response
 from fastapi.responses import FileResponse, RedirectResponse
 
 #
@@ -47,3 +47,10 @@ async def sitemap():
         media_type='text/xml',
     )
 
+
+
+async def not_found_error_handler(req: Request, e: Exception) -> Response:  # noqa: ARG001
+    return FileResponse(
+        './frontend/404.html',
+        media_type='text/html',
+    )

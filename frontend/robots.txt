@@ -1,6 +1,6 @@
 User-agent: *
 Crawl-delay: 10
-Disallow: /login
-Disallow: /register
+Allow: /
+Disallow: /*
 Disallow: /u/*
-Disallow: /u/**
+Sitemap: https://example.com/sitemap.xml
