@@ -10,14 +10,18 @@
             <p>header</p>
         </header>
         <div class="centered-container">
-            <div class="centered-center">
+            <div class="centered-center round-corners">
                 <center>
                     <h1>URL shortener</h1>
                     <hr>
                     <div style="display: flex;">
-                        <a href="/login">Log-in</a>
-                        <hr>
-                        <a href="/register">Register</a>
+                        <form action="/api/v1/login" method="post" enctype="application/x-www-form-urlencoded">
+                            <input type="email" name="username" placeholder="Your email" required />
+                            <br/>
+                            <input type="password" name="password" placeholder="Your password" required />
+                            <br/>
+                            <input type="submit" value="Log-in" />
+                        </form>
                     </div>
                 </center>
             </div>

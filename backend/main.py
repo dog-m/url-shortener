@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from backend.api.urls import url_router
+from backend.api.v1.auth import auth_router
+from backend.api.v1.urls import url_router
 from backend.core.caching import clear_caches, init_caches
 from backend.db.database import init_db
 from backend.frontend.pages import frontend_router, not_found_error_handler
@@ -44,6 +45,7 @@ app = FastAPI(
 # routers
 app.include_router(frontend_router)
 app.include_router(url_router)
+app.include_router(auth_router)
 app.mount('/static', StaticFiles(directory='static'), name='static')
 app.add_exception_handler(404, not_found_error_handler)
 

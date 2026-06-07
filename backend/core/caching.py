@@ -39,4 +39,4 @@ async def init_caches() -> None:
 
 
 async def clear_caches() -> None:
-    FastAPICache.get_backend().clear()
+    await FastAPICache.get_backend().clear()

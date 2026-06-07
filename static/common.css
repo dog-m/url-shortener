@@ -7,9 +7,16 @@
 
 .centered-center {
     border: 1px solid #000;
-    border-radius: 20px;
     padding: 20px;
     width: 250px;
+}
+
+.round-corners {
+    border-radius: 20px;
+}
+
+body {
+    font: 1.2em Arial, sans-serif;
 }
 
 header, footer {

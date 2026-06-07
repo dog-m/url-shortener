@@ -1,6 +1,11 @@
 from datetime import UTC, datetime
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncAttrs,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import DeclarativeBase
 
 from backend.core.config import get_settings
@@ -21,7 +26,7 @@ engine = create_async_engine(
 
 
 
-class BaseDbModel(DeclarativeBase):
+class BaseDbModel(AsyncAttrs, DeclarativeBase):
     pass
 
 
@@ -35,8 +40,10 @@ async def init_db() -> None:
 
 # https://habr.com/ru/articles/1044300/
 # https://docs.sqlalchemy.org/en/21/orm/extensions/asyncio.html
+async_session = async_sessionmaker(engine, expire_on_commit=False)
+
 async def get_db_session() -> AsyncSession: # type: ignore
-    async with async_sessionmaker(engine) as session:
+    async with async_session() as session:
         yield session
 
 
