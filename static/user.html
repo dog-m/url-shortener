@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>URL Shortener service</title>
+        <link rel="stylesheet" type="text/css" href="/static/common.css">
+        <script lang="javascript" src="/static/common.js"></script>
+        <script lang="javascript">
+            var is_loaded = false;
+            const PAGE_ATTR_NAME = "page-active";
+
+            function switchPageById(target_id) {
+                // hide currently active page
+                for (let page of document.getElementsByClassName('page'))
+                    if (page.hasAttribute(PAGE_ATTR_NAME)) {
+                        page.removeAttribute(PAGE_ATTR_NAME);
+                        break;
+                    }
+
+                // show requested page
+                document.getElementById(target_id).setAttribute(PAGE_ATTR_NAME, "");
+            }
+
+            function switchPage(element) {
+                let target_id = element.getAttribute('href').replace('#', '');
+                switchPageById(target_id);
+            }
+
+
+            function updateUserUrls() {
+                // clear things up
+                let page = document.getElementById('page-urls');
+                page.innerHTML = '';
+
+                // add placeholder text while we wait for the data
+                let text = page.appendChild(document.createElement('p'));
+                text.textContent = 'Loading...';
+
+                function on_data(json) {
+                    console.info(json);
+                }
+
+                function on_failure(reason) {
+                    text.textContent = 'Unable to fetch URLs.';
+                    console.error(reason);
+                }
+
+                //fetch('/health')
+                fetch('/api/v1/urls?user=...')
+                .then((value) => {
+                    value.json()
+                    .then(on_data)
+                    .catch(on_failure);
+                }).catch(on_failure);
+            }
+
+
+            function init() {
+                switchPageById('page-info');
+
+                is_loaded = true;
+                console.info('loaded');
+            }
+
+            function destruct() {
+                is_loaded = false;
+                console.info('unloaded');
+            }
+        </script>
+    </head>
+    <body onload="init()" onunload="destruct()">
+        <header>
+            <nav>
+                <div>URL Shortener service</div>
+            </nav>
+            <nav>
+                <div class="sidebar">
+                    <ul>
+                        <li><a href="#page-info" onclick="switchPage(this)">User info</a></li>
+                        <li><a href="#page-urls" onclick="switchPage(this); updateUserUrls();">URLs</a></li>
+                        <li><a href="/logout">Log-out</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <main>
+            <div class="pages">
+                <div id="page-info" class="page">
+                    <p>User info page.</p>
+                </div>
+                <div id="page-urls" class="page">
+                    <p>A list of user's URLs.</p>
+                </div>
+            </div>
+        </main>
+    </body>
+</html>

@@ -1,3 +1,7 @@
+html {
+    font: 1.2em Arial, sans-serif;
+}
+
 .centered-container {
     display: flex;
     justify-content: center;
@@ -15,27 +19,58 @@
     border-radius: 20px;
 }
 
-body {
-    font: 1.2em Arial, sans-serif;
-}
-
 header, footer {
     display: block;
-    left: 0px;
-    right: 0px;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    left: 0;
+    right: 0;
+    position: sticky;
 }
 
 header {
-    position: absolute;
-    top: 0px;
+    top: 0;
     background-color: #ccc;
 }
 
 footer {
-    position: relative;
-    bottom: 0px;
+    position: absolute;
+    bottom: 0;
     background-color: #eee;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+.sidebar ul {
+    list-style: none;
+    contain: content;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+}
+
+.sidebar li {
+    height: 1.2rem;
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
+}
+
+.pages {
+    display: block;
+}
+
+.page {
+    background-color: #eee;
+    display: none;
+}
+
+.page[page-active] {
+    background-color: #eee;
+    display: inherit;
 }

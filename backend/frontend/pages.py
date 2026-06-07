@@ -52,5 +52,7 @@ async def sitemap():
 async def not_found_error_handler(req: Request, e: Exception) -> Response:  # noqa: ARG001
     return FileResponse(
         './frontend/404.html',
+        status_code=404,
+        headers={},
         media_type='text/html',
     )

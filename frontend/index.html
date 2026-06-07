@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Url shortener</title>
+        <title>URL Shortener service</title>
         <link rel="stylesheet" type="text/css" href="/static/common.css">
         <script lang="javascript" src="/static/common.js"></script>
     </head>
     <body>
         <header>
-            <p>header</p>
+            <nav>
+                <div>URL Shortener service</div>
+            </nav>
         </header>
         <div class="centered-container">
             <div class="centered-center round-corners">
                 <center>
-                    <h1>URL shortener</h1>
+                    <h1>Log-in</h1>
                     <hr>
                     <div style="display: flex;">
                         <form action="/api/v1/login" method="post" enctype="application/x-www-form-urlencoded">
@@ -26,8 +28,5 @@
                 </center>
             </div>
         </div>
-        <footer>
-            <p>footer</p>
-        </footer>
     </body>
 </html>
