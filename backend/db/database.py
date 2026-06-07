@@ -1,10 +1,6 @@
 from datetime import UTC, datetime
 
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from backend.core.config import get_settings
@@ -38,8 +34,9 @@ async def init_db() -> None:
 
 
 # https://habr.com/ru/articles/1044300/
+# https://docs.sqlalchemy.org/en/21/orm/extensions/asyncio.html
 async def get_db_session() -> AsyncSession: # type: ignore
-    async with async_sessionmaker() as session:
+    async with async_sessionmaker(engine) as session:
         yield session
 
 

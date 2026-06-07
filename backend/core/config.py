@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # db info
     database_url: str = Field(
-        default='postgresql+psycopg://postgres:postgres@localhost:5432/url_shortener',
+        default='sqlite+aiosqlite:///./url_shortener.db',
         description='Database connection URL',
     )
 
