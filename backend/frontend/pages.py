@@ -1,58 +1,58 @@
 from fastapi import APIRouter, Request, Response
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 #
 
-frontend_router = APIRouter(tags=['frontend'])
+
+frontend_router = APIRouter(tags=['frontend'], include_in_schema=False)
+frontend_files  = StaticFiles(directory='./frontend', html=False)
 
 
 
-@frontend_router.get('/', response_class=FileResponse, include_in_schema=False)
+@frontend_router.api_route('/index.html', methods=['GET', 'HEAD'])
+async def root_explicit(req: Request):
+    return await frontend_files.get_response(
+        path=req.url.path[1:],
+        scope=req.scope,
+    )
+
+
+@frontend_router.api_route('/', methods=['GET', 'HEAD'])
 async def root():
-    return FileResponse(
-        './frontend/index.html',
-        media_type='text/html',
+    return RedirectResponse('/index.html')
+
+
+
+@frontend_router.api_route('/favicon.ico', methods=['GET', 'HEAD'])
+async def favicon(req: Request):
+    return await frontend_files.get_response(
+        path='favicon.png',
+        scope=req.scope,
     )
 
 
 
-@frontend_router.get('/index.html', response_class=RedirectResponse, include_in_schema=False)
-async def root_alt():
-    return RedirectResponse('/')
-
-
-
-@frontend_router.get('/favicon.ico', response_class=FileResponse, include_in_schema=False)
-async def favicon():
-    return FileResponse(
-        './frontend/favicon.png',
-        media_type='image/png',
+@frontend_router.api_route('/robots.txt', methods=['GET', 'HEAD'])
+async def robots(req: Request):
+    return await frontend_files.get_response(
+        path=req.url.path[1:],
+        scope=req.scope,
     )
 
 
 
-@frontend_router.get('/robots.txt', response_class=FileResponse, include_in_schema=False)
-async def robots():
-    return FileResponse(
-        './frontend/robots.txt',
-        media_type='text/plain',
-    )
-
-
-
-@frontend_router.get('/sitemap.xml', response_class=FileResponse, include_in_schema=False)
-async def sitemap():
-    return FileResponse(
-        './frontend/sitemap.xml',
-        media_type='text/xml',
+@frontend_router.api_route('/sitemap.xml', methods=['GET', 'HEAD'])
+async def sitemap(req: Request):
+    return await frontend_files.get_response(
+        path=req.url.path[1:],
+        scope=req.scope,
     )
 
 
 
 async def not_found_error_handler(req: Request, e: Exception) -> Response:  # noqa: ARG001
-    return FileResponse(
-        './frontend/404.html',
-        status_code=404,
-        headers={},
-        media_type='text/html',
-    )
+    res = await frontend_files.get_response('404.html', req.scope)
+    res.status_code = 404
+    return res
+
