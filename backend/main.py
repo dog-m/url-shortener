@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.api import api_auth_router, api_urls_router
@@ -12,6 +13,7 @@ from backend.frontend import (
     frontend_user_router,
     not_found_error_handler,
 )
+from backend.middleware.request_limiter import RequestLimiter, RequestLimiterCache
 from backend.models.click import ClickEventDto
 from backend.models.url import UrlDto
 from backend.models.user import UserDto
@@ -45,29 +47,31 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-
-# routers
-
-# frontend
-app.include_router(frontend_index_router)
-app.include_router(frontend_seo_router)
-app.include_router(frontend_user_router)
-
-# api
-app.include_router(api_urls_router)
-app.include_router(api_auth_router)
-
-# misc
-app.mount('/static', StaticFiles(directory='static'), name='static')
-
-# errors
-app.add_exception_handler(404, not_found_error_handler)
-
-
 # container-related handler
 @app.get('/health')
 async def health_check():
     return {
         'status': 'healthy',
     }
+
+
+
+# frontend routes
+app.include_router(frontend_index_router)
+app.include_router(frontend_seo_router)
+app.include_router(frontend_user_router)
+
+# api routes
+app.include_router(api_urls_router)
+app.include_router(api_auth_router)
+
+# misc routes
+app.mount('/static', StaticFiles(directory='static'), name='static')
+
+# errors
+app.add_exception_handler(404, not_found_error_handler)
+
+# application-wide middleware
+app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
+app.add_middleware(RequestLimiter, cache=RequestLimiterCache())
 

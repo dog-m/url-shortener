@@ -12,7 +12,6 @@ def new_html_redirector(target_url: str, *, delay_sec: int = 1) -> Response:
         <html>
             <head><meta http-equiv="refresh" content="{delay_sec};url={target_url}" /></head>
             <body></body>
-        </html>
-        ''',
+        </html>''',
     )
 
