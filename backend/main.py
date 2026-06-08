@@ -3,11 +3,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from backend.api.v1.auth import auth_router
-from backend.api.v1.urls import url_router
+from backend.api import api_auth_router, api_urls_router
 from backend.core.caching import clear_caches, init_caches
 from backend.db.database import init_db
-from backend.frontend.pages import frontend_router, not_found_error_handler
+from backend.frontend import (
+    frontend_index_router,
+    frontend_seo_router,
+    frontend_user_router,
+    not_found_error_handler,
+)
 from backend.models.click import ClickEventDto
 from backend.models.url import UrlDto
 from backend.models.user import UserDto
@@ -43,10 +47,20 @@ app = FastAPI(
 
 
 # routers
-app.include_router(frontend_router)
-app.include_router(url_router)
-app.include_router(auth_router)
+
+# frontend
+app.include_router(frontend_index_router)
+app.include_router(frontend_seo_router)
+app.include_router(frontend_user_router)
+
+# api
+app.include_router(api_urls_router)
+app.include_router(api_auth_router)
+
+# misc
 app.mount('/static', StaticFiles(directory='static'), name='static')
+
+# errors
 app.add_exception_handler(404, not_found_error_handler)
 
 

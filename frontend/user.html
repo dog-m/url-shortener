@@ -6,18 +6,21 @@
         <script lang="javascript" src="/static/common.js"></script>
         <script lang="javascript">
             var is_loaded = false;
-            const PAGE_ATTR_NAME = "page-active";
+            const PAGE_CONTAINER_ID     = 'pages';
+            const PAGE_ATTR_ACTIVE_NAME = 'page-active';
 
             function switchPageById(target_id) {
                 // hide currently active page
-                for (let page of document.getElementsByClassName('page'))
-                    if (page.hasAttribute(PAGE_ATTR_NAME)) {
-                        page.removeAttribute(PAGE_ATTR_NAME);
+                for (let page of document.getElementById(PAGE_CONTAINER_ID).children)
+                    if (page.hasAttribute(PAGE_ATTR_ACTIVE_NAME)) {
+                        page.removeAttribute(PAGE_ATTR_ACTIVE_NAME);
                         break;
                     }
 
                 // show requested page
-                document.getElementById(target_id).setAttribute(PAGE_ATTR_NAME, "");
+                let page = document.getElementById(target_id);
+                if (page !== null)
+                    page.setAttribute(PAGE_ATTR_ACTIVE_NAME, '');
             }
 
             function switchPage(element) {
@@ -28,7 +31,7 @@
 
             function updateUserUrls() {
                 // clear things up
-                let page = document.getElementById('page-urls');
+                let page = document.getElementById('page-url-list');
                 page.innerHTML = '';
 
                 // add placeholder text while we wait for the data
@@ -47,15 +50,16 @@
                 //fetch('/health')
                 fetch('/api/v1/urls?user=...')
                 .then((value) => {
-                    value.json()
-                    .then(on_data)
-                    .catch(on_failure);
+                    if (value.ok)
+                        value.json().then(on_data);
+                    else
+                        on_failure('not-ok');
                 }).catch(on_failure);
             }
 
 
             function init() {
-                switchPageById('page-info');
+                switchPageById('page-user-info');
 
                 is_loaded = true;
                 console.info('loaded');
@@ -75,19 +79,19 @@
             <nav>
                 <div class="sidebar">
                     <ul>
-                        <li><a href="#page-info" onclick="switchPage(this)">User info</a></li>
-                        <li><a href="#page-urls" onclick="switchPage(this); updateUserUrls();">URLs</a></li>
-                        <li><a href="/logout">Log-out</a></li>
+                        <li><a href="#page-user-info" onclick="switchPage(this)">User info</a></li>
+                        <li><a href="#page-url-list"  onclick="switchPage(this); updateUserUrls();">URLs</a></li>
+                        <li><a href="/api/v1/logout">Log-out</a></li>
                     </ul>
                 </div>
             </nav>
         </header>
         <main>
-            <div class="pages">
-                <div id="page-info" class="page">
+            <div id="pages">
+                <div class="page" id="page-user-info">
                     <p>User info page.</p>
                 </div>
-                <div id="page-urls" class="page">
+                <div class="page" id="page-url-list">
                     <p>A list of user's URLs.</p>
                 </div>
             </div>

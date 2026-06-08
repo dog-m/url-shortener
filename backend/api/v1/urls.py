@@ -4,10 +4,10 @@ from fastapi.responses import RedirectResponse
 #
 
 
-url_router = APIRouter()
+api_urls_router = APIRouter(prefix='', tags=['api', 'urls'])
 
 
-@url_router.get('/u/{id}', response_class=RedirectResponse)
+@api_urls_router.get('/u/{id}')
 async def visit_url(
     id: str,
     #user: User | None = Depends(get_user),

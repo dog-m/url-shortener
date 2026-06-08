@@ -1,5 +1,6 @@
 html {
     font: 1.2em Arial, sans-serif;
+    background-color: #fff;
 }
 
 .centered-container {
@@ -10,7 +11,8 @@ html {
 }
 
 .centered-center {
-    border: 1px solid #000;
+    border: 3px dotted #888;
+    background-color: #eee;
     padding: 20px;
     width: 250px;
 }
@@ -59,10 +61,6 @@ nav {
     height: 1.2rem;
     padding-left: 0.6rem;
     padding-right: 0.6rem;
-}
-
-.pages {
-    display: block;
 }
 
 .page {
