@@ -13,7 +13,7 @@ from backend.frontend import (
     frontend_user_router,
     not_found_error_handler,
 )
-from backend.middleware.request_limiter import RequestLimiter
+from backend.middleware.request_limiter import DefaultRateLimiterCache, RequestLimiter
 from backend.models.click import ClickEventDto
 from backend.models.url import UrlDto
 from backend.models.user import UserDto
@@ -71,7 +71,7 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 # errors
 app.add_exception_handler(404, not_found_error_handler)
 
-# application-wide middleware
+# application-wide middleware stack (order matters)
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
-app.add_middleware(RequestLimiter)
+app.add_middleware(RequestLimiter, cache=DefaultRateLimiterCache())
 

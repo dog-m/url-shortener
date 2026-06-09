@@ -1,5 +1,7 @@
 import time
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import override
 
 from fastapi import Response
 from fastapi.middleware import Middleware
@@ -17,35 +19,29 @@ class RequestCacheEntry:
 
 
 
-# https://fastapi.tiangolo.com/advanced/middleware/
-class RequestLimiter(Middleware):
-    def __init__(
-        self,
-        app: ASGIApp,
-        cache_prefix: str = 'rate-limiter',
-        request_budget: int = 10,  # count
-        refresh_window: float = 5.0,  # seconds
-        abuse_penalty_multiplier: float = 2.0,  # seconds
-        abuse_budget_cutoff: int = -10,  # count
-    ) -> None:
-        assert request_budget > 0
-        assert refresh_window > 0.0
-        assert abuse_penalty_multiplier > 0.0
-        assert abuse_budget_cutoff <= 0
-        self.app = app
-        self.cache_prefix = cache_prefix
-        self.request_budget = request_budget - 1
-        self.refresh_window = refresh_window
-        self.abuse_penalty_multiplier = abuse_penalty_multiplier
-        self.abuse_budget_cutoff = abuse_budget_cutoff
+class RequestLimiterCache(ABC):
+
+    @abstractmethod
+    async def get_entry(self, key: str) -> RequestCacheEntry | None: ...
+
+    @abstractmethod
+    async def set_entry(self, id: str, request_budget: int, next_refresh: float) -> None: ...
 
 
-    def get_prefixed_key(self, key: str) -> str:
-        return f"{self.cache_prefix}+{key}"
+
+# NOTE: there is no management of stale entries that are accessed very rarely
+class DefaultRateLimiterCache(RequestLimiterCache):
+    def __init__(self, entry_prefix: str = 'rate-limiter'):
+        self.entry_prefix = entry_prefix
 
 
+    def _with_prefix(self, key: str) -> str:
+        return f"{self.entry_prefix}+{key}"
+
+
+    @override
     async def get_entry(self, key: str) -> RequestCacheEntry | None:
-        k = self.get_prefixed_key(key)
+        k = self._with_prefix(key)
         if data := await FastAPICache.get_backend().get(k):
             try:
                 obj = FastAPICache.get_coder().decode(data)
@@ -59,24 +55,65 @@ class RequestLimiter(Middleware):
         return None
 
 
+    @override
     async def set_entry(self, id: str, request_budget: int, next_refresh: float) -> None:
         entry = RequestCacheEntry(
             request_budget=request_budget,
             next_refresh=next_refresh,
         )
         await FastAPICache.get_backend().set(
-            key=self.get_prefixed_key(id),
+            key=self._with_prefix(id),
             value=FastAPICache.get_coder().encode(entry),
-            expire=int(entry.next_refresh + 1)
+            expire=int(entry.next_refresh + 1),  # probably requires manual cleanup for stale/infrequent entries
         )
+
+
+
+RATE_LIMITER_DEFAULT_RESPONSE = '''
+<!DOCTYPE html>
+<html>
+    <head><title>429 - Too Many Requests</title></head>
+    <body><h1>Too Many Requests</h1></body>
+</html>
+'''
+
+
+
+# https://fastapi.tiangolo.com/advanced/middleware/
+class RequestLimiter(Middleware):
+    def __init__(
+        self,
+        app: ASGIApp,
+        cache: RequestLimiterCache,
+        request_budget: int = 10,  # count
+        refresh_window: float = 5.0,  # seconds
+        abuse_penalty_multiplier: float = 2.0,  # seconds
+        abuse_budget_cutoff: int = -10,  # count
+        response_content: str | None = RATE_LIMITER_DEFAULT_RESPONSE,
+        use_port_as_id: bool = False,  # NOTE: this might/will cause issues with clients behind NAT
+    ) -> None:
+        assert cache is not None
+        assert request_budget > 0
+        assert refresh_window > 0.0
+        assert abuse_penalty_multiplier > 0.0
+        assert abuse_budget_cutoff <= 0
+        #
+        self.app = app
+        self.cache = cache
+        self.request_budget = request_budget - 1
+        self.refresh_window = refresh_window
+        self.abuse_penalty_multiplier = abuse_penalty_multiplier
+        self.abuse_budget_cutoff = abuse_budget_cutoff
+        self.response_content = response_content
+        self.use_port_as_id = use_port_as_id
 
 
     async def is_too_many(self, scope: Scope) -> bool:
         if addr := scope.get('client'):  # ip+port
-            client_id = str(addr[0])
+            client_id = str(addr if self.use_port_as_id else addr[0])
             current_time = time.time()
 
-            if entry := await self.get_entry(client_id):
+            if entry := await self.cache.get_entry(client_id):
                 # the client has sent requests to us already
 
                 # update stats
@@ -99,7 +136,7 @@ class RequestLimiter(Middleware):
                         new_refresh = current_time + self.refresh_window
 
                 # sync
-                await self.set_entry(
+                await self.cache.set_entry(
                     id=client_id,
                     request_budget=new_budget,
                     next_refresh=new_refresh,
@@ -109,7 +146,7 @@ class RequestLimiter(Middleware):
 
             else:
                 # first time meeting this client
-                await self.set_entry(
+                await self.cache.set_entry(
                     id=client_id,
                     request_budget=self.request_budget,
                     next_refresh=current_time + self.refresh_window,
@@ -120,11 +157,7 @@ class RequestLimiter(Middleware):
 
     async def build_response(self) -> Response:
         return HTMLResponse(
-            content='''<!DOCTYPE html>
-            <html>
-                <head><title>429 - Too Many Requests</title></head>
-                <body><h1>Too Many Requests</h1></body>
-            </html>''',
+            content=self.response_content,
             status_code=429,
         )
 
