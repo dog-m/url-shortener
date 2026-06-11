@@ -7,6 +7,7 @@ from fastapi import Response
 from fastapi.middleware import Middleware
 from fastapi.responses import HTMLResponse
 from fastapi_cache import FastAPICache
+from starlette.datastructures import Headers
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 #
@@ -91,6 +92,8 @@ class RequestLimiter(Middleware):
         abuse_budget_cutoff: int = -10,  # count
         response_content: str | None = RATE_LIMITER_DEFAULT_RESPONSE,
         use_port_as_id: bool = False,  # NOTE: this might/will cause issues with clients behind NAT
+        header_client_ip: str | None = None,  # might be 'X-Forwarded-For' or 'X-Real-IP'
+        header_client_ip_first: bool = True,
     ) -> None:
         assert cache is not None
         assert request_budget > 0
@@ -106,51 +109,68 @@ class RequestLimiter(Middleware):
         self.abuse_budget_cutoff = abuse_budget_cutoff
         self.response_content = response_content
         self.use_port_as_id = use_port_as_id
+        self.header_client_ip = header_client_ip
+        self.header_client_ip_first = header_client_ip_first
+
+
+    async def _get_client_id(self, scope: Scope) -> str:
+        # check special headers for client address when behind a proxy
+        if header := self.header_client_ip:
+            if value := Headers(scope=scope).get(header):
+                index = 0 if self.header_client_ip_first else -1
+                # https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
+                # https://habr.com/ru/companies/k2tech/articles/1045012/
+                return value.split(',')[index].strip()
+
+        # fallback to using connection metadata if present
+        if addr := scope.get('client'):  # ip+port
+            return str(addr if self.use_port_as_id else addr[0])
+        else:
+            return '(0.0.0.0, 65535)'
 
 
     async def is_too_many(self, scope: Scope) -> bool:
-        if addr := scope.get('client'):  # ip+port
-            client_id = str(addr if self.use_port_as_id else addr[0])
-            current_time = time.time()
+        client_id = await self._get_client_id(scope)
+        current_time = time.time()
 
-            if entry := await self.cache.get_entry(client_id):
-                # the client has sent requests to us already
+        if entry := await self.cache.get_entry(client_id):
+            # the client has sent requests to us already
 
-                # update stats
-                new_budget  = entry.request_budget - 1
-                new_refresh = entry.next_refresh
+            # update stats
+            new_budget  = entry.request_budget - 1
+            new_refresh = entry.next_refresh
 
-                # avoid hammering cache too much with misbehaving clients
-                if new_budget < self.abuse_budget_cutoff:
-                    if current_time < new_refresh:
-                        # block until timeout
-                        return True
+            # avoid hammering cache too much with misbehaving clients
+            if new_budget < self.abuse_budget_cutoff:
+                if current_time < new_refresh:
+                    # block until timeout
+                    return True
 
-                if new_budget < 0:
-                    if current_time < new_refresh:
-                        # too early to have a refresh - apply discouraging measures
-                        new_refresh += self.abuse_penalty_multiplier
-                    else:
-                        # refresh entry
-                        new_budget  = self.request_budget
-                        new_refresh = current_time + self.refresh_window
+            if new_budget < 0:
+                if current_time < new_refresh:
+                    # too early to have a refresh - apply discouraging measures
+                    new_refresh += self.abuse_penalty_multiplier
+                else:
+                    # refresh entry
+                    new_budget  = self.request_budget
+                    new_refresh = current_time + self.refresh_window
 
-                # sync
-                await self.cache.set_entry(
-                    id=client_id,
-                    request_budget=new_budget,
-                    next_refresh=new_refresh,
-                )
+            # sync
+            await self.cache.set_entry(
+                id=client_id,
+                request_budget=new_budget,
+                next_refresh=new_refresh,
+            )
 
-                return new_budget < 0
+            return new_budget < 0
 
-            else:
-                # first time meeting this client
-                await self.cache.set_entry(
-                    id=client_id,
-                    request_budget=self.request_budget,
-                    next_refresh=current_time + self.refresh_window,
-                )
+        else:
+            # first time meeting this client
+            await self.cache.set_entry(
+                id=client_id,
+                request_budget=self.request_budget,
+                next_refresh=current_time + self.refresh_window,
+            )
 
         return False
 
@@ -163,7 +183,7 @@ class RequestLimiter(Middleware):
 
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if await self.is_too_many(scope):
+        if scope['type'] != 'lifespan' and await self.is_too_many(scope):
             response = await self.build_response()
             await response(scope, receive, send)
 
