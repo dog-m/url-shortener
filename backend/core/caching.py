@@ -4,7 +4,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from fastapi_cache.coder import PickleCoder
 from redis.asyncio import Redis
 
-from backend.core.config import get_settings
+from backend.core.config import settings
 
 #
 
@@ -29,7 +29,6 @@ class ClearedInMemoryBackend(InMemoryBackend):
 
 
 async def init_caches() -> None:
-    settings = get_settings()
     if settings.redis_url is not None:
         backend = RedisBackend(Redis.from_url(settings.redis_url))
     else:

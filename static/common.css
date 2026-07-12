@@ -11,14 +11,14 @@ html {
 }
 
 .centered-center {
-    border: 3px dotted #888;
-    background-color: #eee;
+    box-shadow: 0 0 1em 1px #888;
+    background-color: #fff;
     padding: 20px;
     width: 250px;
 }
 
 .round-corners {
-    border-radius: 20px;
+    border-radius: 1.0em;
 }
 
 header, footer {

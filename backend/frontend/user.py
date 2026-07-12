@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.database import get_db_session
-from backend.frontend.common import frontend_files
+from backend.frontend.common import frontend_templates
 
 #
 
@@ -15,8 +15,8 @@ async def user_main(
     req: Request,
     session: AsyncSession = Depends(get_db_session),
 ):
-    return await frontend_files.get_response(
-        path='user.html',
-        scope=req.scope,
+    return frontend_templates.TemplateResponse(
+        request=req,
+        name='user/main.html',
     )
 

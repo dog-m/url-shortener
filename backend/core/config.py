@@ -1,4 +1,4 @@
-from functools import lru_cache
+import secrets
 from typing import final
 
 from pydantic import Field
@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     )
 
     # common info
-    debug: bool = Field(default=False, description='Debug mode')
+    debug: bool    = Field(default=False, description='Debug mode')
+    log_level: str = Field(default='INFO', description='Logging level')
 
     # db info
     database_url: str = Field(
@@ -30,9 +31,12 @@ class Settings(BaseSettings):
     cache_ttl: int           = Field(default=3600, description='Default cache entry TLL')
     cache_status_header: str = Field(default='X-FastAPI-Cache', description='Status header for cached responses')
 
+    # JWT info
+    jwt_secret_key: str                  = Field(default=secrets.token_urlsafe(32), description='JWT secret key')
+    jwt_algorithm: str                   = Field(default='HS256', description='JWT algorithm')  # HMAC with SHA-256
+    jwt_access_token_expire_minutes: int = Field(default=10, description='JWT access token expiration')
+    jwt_refresh_token_expire_days: int   = Field(default=30, description='JWT refresh token expiration')
 
 
-@lru_cache(maxsize=1)  # awkward Singleton
-def get_settings() -> Settings:
-    return Settings()
+settings = Settings()
 

@@ -48,7 +48,7 @@
                 }
 
                 //fetch('/health')
-                fetch('/api/v1/urls?user=...')
+                fetch('/api/v1/urls?user=...', { method: 'GET', redirect: 'error' })
                 .then((value) => {
                     if (value.ok)
                         value.json().then(on_data);
@@ -72,9 +72,10 @@
         </script>
     </head>
     <body onload="init()" onunload="destruct()">
+        {% set foo = 1 %}
         <header>
             <nav>
-                <div>URL Shortener service</div>
+                <div>URL Shortener service{{ foo }}</div>
             </nav>
             <nav>
                 <div class="sidebar">

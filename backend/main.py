@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -16,16 +16,19 @@ from backend.frontend import (
 from backend.middleware.request_limiter import DefaultRateLimiterCache, RequestLimiter
 from backend.models.click import ClickEventDto
 from backend.models.url import UrlDto
-from backend.models.user import UserDto
+from backend.models.user import User
+from backend.services.user import upsert_primary_superuser
 
 #
 
 
 async def on_startup(app: FastAPI) -> None:  # noqa: ARG001
     # TODO: this is no longer needed since I have no service layer yet (but still left here to create tables)
-    _ = (UserDto, UrlDto, ClickEventDto)
+    _ = (User, UrlDto, ClickEventDto)
     await init_db()
     await init_caches()
+    #
+    await upsert_primary_superuser()
 
 
 async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
@@ -36,8 +39,11 @@ async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await on_startup(app)
-    yield
-    await on_shutdown(app)
+    try:
+        #logger.info('Startup completed')
+        yield
+    finally:
+        await on_shutdown(app)
 
 
 app = FastAPI(
@@ -69,7 +75,7 @@ app.include_router(api_auth_router)
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
 # errors
-app.add_exception_handler(404, not_found_error_handler)
+app.add_exception_handler(status.HTTP_404_NOT_FOUND, not_found_error_handler)
 
 # application-wide middleware stack (order matters)
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)

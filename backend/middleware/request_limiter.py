@@ -1,9 +1,9 @@
-import time
+import asyncio
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import override
 
-from fastapi import Response
+from fastapi import Response, status
 from fastapi.middleware import Middleware
 from fastapi.responses import HTMLResponse
 from fastapi_cache import FastAPICache
@@ -103,7 +103,7 @@ class RequestLimiter(Middleware):
         #
         self.app = app
         self.cache = cache
-        self.request_budget = request_budget - 1
+        self.request_budget = request_budget
         self.refresh_window = refresh_window
         self.abuse_penalty_multiplier = abuse_penalty_multiplier
         self.abuse_budget_cutoff = abuse_budget_cutoff
@@ -131,7 +131,7 @@ class RequestLimiter(Middleware):
 
     async def is_too_many(self, scope: Scope) -> bool:
         client_id = await self._get_client_id(scope)
-        current_time = time.time()
+        current_time = asyncio.get_running_loop().time()
 
         if entry := await self.cache.get_entry(client_id):
             # the client has sent requests to us already
@@ -146,7 +146,7 @@ class RequestLimiter(Middleware):
                     # block until timeout
                     return True
 
-            if new_budget < 0:
+            if new_budget <= 0:
                 if current_time < new_refresh:
                     # too early to have a refresh - apply discouraging measures
                     new_refresh += self.abuse_penalty_multiplier
@@ -162,7 +162,7 @@ class RequestLimiter(Middleware):
                 next_refresh=new_refresh,
             )
 
-            return new_budget < 0
+            return new_budget <= 0
 
         else:
             # first time meeting this client
@@ -178,7 +178,7 @@ class RequestLimiter(Middleware):
     async def build_response(self) -> Response:
         return HTMLResponse(
             content=self.response_content,
-            status_code=429,
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
 

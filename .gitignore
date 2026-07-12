@@ -12,3 +12,6 @@ wheels/
 
 # sqlite databases
 *.db
+
+# logging
+/logs
