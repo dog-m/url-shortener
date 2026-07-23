@@ -49,15 +49,30 @@ async def get_current_user(
     if session is None:
         return None
 
-    return await get_user_by_session(db, session)
+    user = await get_user_by_session(db, session)
+    if not user.is_active:
+        return None
+
+    return user
 
 
 
 async def require_user(
-    db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User | None, Depends(get_current_user)] = None,
 ) -> User:
     if user:
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
+
+
+
+async def require_admin(
+    user: Annotated[User, Depends(require_user)],
+) -> User:
+    if user.is_superuser:
         return user
     else:
         raise HTTPException(
