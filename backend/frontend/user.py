@@ -18,10 +18,13 @@ frontend_user_router = APIRouter(tags=['frontend', 'user'], include_in_schema=Fa
 async def user_main(
     req: Request,
     db: Annotated[AsyncSession, Depends(get_db_session)],
-    user: Annotated[User, Depends(require_user)] = None,
+    user: Annotated[User, Depends(require_user)],
 ):
     return frontend_templates.TemplateResponse(
         request=req,
         name='user/main.html',
+        context={
+            'user': user,
+        }
     )
 
