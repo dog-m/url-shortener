@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = Field(default=10, description='JWT access token expiration')
     jwt_refresh_token_expire_days: int   = Field(default=30, description='JWT refresh token expiration')
 
+    user_session_expire_days: int        = Field(default=7, description='User session expiration')
+
 
 settings = Settings()
 

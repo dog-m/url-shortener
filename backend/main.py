@@ -14,8 +14,8 @@ from backend.frontend import (
     not_found_error_handler,
 )
 from backend.middleware.request_limiter import DefaultRateLimiterCache, RequestLimiter
-from backend.models.click import ClickEventDto
-from backend.models.url import UrlDto
+from backend.models.click import ClickEvent
+from backend.models.url import Url
 from backend.models.user import User
 from backend.services.user import upsert_primary_superuser
 
@@ -24,7 +24,7 @@ from backend.services.user import upsert_primary_superuser
 
 async def on_startup(app: FastAPI) -> None:  # noqa: ARG001
     # TODO: this is no longer needed since I have no service layer yet (but still left here to create tables)
-    _ = (User, UrlDto, ClickEventDto)
+    _ = (User, Url, ClickEvent)
     await init_db()
     await init_caches()
     #

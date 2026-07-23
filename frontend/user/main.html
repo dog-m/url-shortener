@@ -72,17 +72,21 @@
         </script>
     </head>
     <body onload="init()" onunload="destruct()">
-        {% set foo = 1 %}
+        {% set foo = 'jinja2-works' %}
         <header>
             <nav>
-                <div>URL Shortener service{{ foo }}</div>
+                <div>URL Shortener service, {{ foo }}</div>
             </nav>
             <nav>
                 <div class="sidebar">
                     <ul>
                         <li><a href="#page-user-info" onclick="switchPage(this)">User info</a></li>
                         <li><a href="#page-url-list"  onclick="switchPage(this); updateUserUrls();">URLs</a></li>
-                        <li><a href="/api/v1/logout">Log-out</a></li>
+                        <li>
+                            <form method="post" action="/api/v1/logout">
+                                <button type="submit">Log-out</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </nav>
