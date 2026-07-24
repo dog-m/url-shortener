@@ -4,7 +4,8 @@ from fastapi import FastAPI, status
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from backend.api import api_auth_router, api_urls_router
+from backend.api.urls import api_urls_router
+from backend.api.v1 import api_router
 from backend.core.caching import clear_caches, init_caches
 from backend.db.database import init_db
 from backend.frontend import (
@@ -69,7 +70,7 @@ app.include_router(frontend_user_router)
 
 # api routes
 app.include_router(api_urls_router)
-app.include_router(api_auth_router)
+app.include_router(api_router)
 
 # misc routes
 app.mount('/static', StaticFiles(directory='static'), name='static')

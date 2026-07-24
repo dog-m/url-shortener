@@ -1,6 +1,7 @@
-html {
+body {
     font: 1.2em Arial, sans-serif;
     background-color: #fff;
+    margin: 0;
 }
 
 .centered-container {
@@ -58,7 +59,7 @@ nav {
 }
 
 .sidebar li {
-    height: 1.2rem;
+    height: 1.5em;
     padding-left: 0.6rem;
     padding-right: 0.6rem;
 }
@@ -71,4 +72,10 @@ nav {
 .page[page-active] {
     background-color: #eee;
     display: inherit;
+}
+
+.ellipsis-text {
+  white-space: nowrap;      /* Keeps the text on a single line */
+  overflow: hidden;         /* Hides the text that overflows */
+  text-overflow: ellipsis;  /* Adds the "..." at the end */
 }

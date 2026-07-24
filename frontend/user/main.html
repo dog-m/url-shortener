@@ -40,6 +40,18 @@
 
                 function on_data(json) {
                     console.info(json);
+
+                    if (json.length === 0) {
+                        text.textContent = 'No URLs found';
+                    } else {
+                        text.textContent = '';
+                        for (u of json) {
+                            let item = document.createElement('p');
+                            item.textContent = JSON.stringify(u);
+                            item.classList.add('ellipsis-text');
+                            text.appendChild(item);
+                        }
+                    }
                 }
 
                 function on_failure(reason) {
@@ -48,13 +60,48 @@
                 }
 
                 //fetch('/health')
-                fetch('/api/v1/urls?user=...', { method: 'GET', redirect: 'error' })
+                fetch(
+                    '/api/v1/user/urls', {
+                        method: 'GET',
+                        redirect: 'error',
+                        credentials: 'same-origin',
+                        signal: AbortSignal.timeout(5 * 1000),
+                    }
+                )
                 .then((value) => {
                     if (value.ok)
                         value.json().then(on_data);
                     else
                         on_failure('not-ok');
-                }).catch(on_failure);
+                })
+                .catch(on_failure);
+            }
+
+
+            function debug_add_url() {
+                let something = Math.floor(Math.random() * 1000) % 1000;
+                fetch(
+                    '/api/v1/user/urls', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            original_url: `https://google.com/foo?q=${something}`,
+                            title: `bar+${something}`,
+                            //description: null,
+                        }),
+                        redirect: 'error',
+                        credentials: 'same-origin',
+                        signal: AbortSignal.timeout(5 * 1000),
+                    }
+                )
+                .then(async (value) => {
+                    console.log('OK:', await value.json());
+                })
+                .catch((reason) => {
+                    console.warn('Not OK:', reason);
+                });
             }
 
 
@@ -86,6 +133,9 @@
                             <form method="post" action="/api/v1/logout">
                                 <button type="submit">Log-out</button>
                             </form>
+                        </li>
+                        <li>
+                            <button type="button" onclick="debug_add_url()">[DEBUG] Add an URL</button>
                         </li>
                     </ul>
                 </div>
