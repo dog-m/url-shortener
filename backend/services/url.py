@@ -23,7 +23,7 @@ async def create_new_url(db: AsyncSession, owner: User, url_info: UrlCreate) -> 
 
             url = Url(
                 id=url_id,
-                original_url=url_info.original_url,
+                original_url=url_info.original_url.encoded_string(),
                 is_active=False,
                 title=url_info.title,
                 description=url_info.description,

@@ -59,9 +59,8 @@
                     console.error(reason);
                 }
 
-                //fetch('/health')
                 fetch(
-                    '/api/v1/user/urls', {
+                    '/api/v1/urls', {
                         method: 'GET',
                         redirect: 'error',
                         credentials: 'same-origin',
@@ -81,7 +80,7 @@
             function debug_add_url() {
                 let something = Math.floor(Math.random() * 1000) % 1000;
                 fetch(
-                    '/api/v1/user/urls', {
+                    '/api/v1/urls', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -119,10 +118,9 @@
         </script>
     </head>
     <body onload="init()" onunload="destruct()">
-        {% set foo = 'jinja2-works' %}
         <header>
             <nav>
-                <div>URL Shortener service. Greetings, {{ user.name | capitalize }}.</div>
+                <div>URL Shortener service.</div>
             </nav>
             <nav>
                 <div class="sidebar">
@@ -144,7 +142,24 @@
         <main>
             <div id="pages">
                 <div class="page" id="page-user-info">
+                    <h4>Greetings, {{ user.name | capitalize }}.</h4>
                     <p>User info page.</p>
+                    <form method="PATCH" action="/api/v1/user">
+                        <div>
+                            <label for="user-name">Your name:</label>
+                            <input type="text" id="user-name" value="{{ user.name }}"/>
+                        </div>
+                        <div>
+                            <label for="user-email">E-mail:</label>
+                            <input type="email" id="user-email" value="{{ user.email }}"  />
+                        </div>
+                        <div>
+                            <label for="user-password">Password:</label>
+                            <input type="password" id="user-password" value="{{ '\n' * 20 }}"/>
+                        </div>
+                        <input type="submit" value="Update">
+                    </form>
+                    <p><i>(Last update: {{ user.updated_at }})</i></p>
                 </div>
                 <div class="page" id="page-url-list">
                     <p>A list of user's URLs.</p>

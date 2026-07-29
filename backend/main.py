@@ -4,7 +4,7 @@ from fastapi import FastAPI, status
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from backend.api.urls import api_urls_router
+from backend.api.urls_primary import api_urls_router
 from backend.api.v1 import api_router
 from backend.core.caching import clear_caches, init_caches
 from backend.db.database import init_db

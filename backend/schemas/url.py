@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 
 #
 
@@ -18,7 +18,7 @@ class UrlInfo(BaseModel):
 
 
 class UrlCreate(BaseModel):
-    original_url: str
+    original_url: HttpUrl
     title: str | None = None
     description: str | None = None
 
