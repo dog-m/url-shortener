@@ -15,3 +15,13 @@ class UserInfo(BaseModel):
     registered_at: datetime
     updated_at: datetime
 
+
+
+class UserUpdate(BaseModel):
+    id: uuid.UUID
+    email: EmailStr
+    name: str
+    is_active: bool
+    is_superuser: bool
+    password: str | None = None
+

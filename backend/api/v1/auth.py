@@ -38,13 +38,10 @@ async def login(
     print('[!!!]', id)  # TODO: log-in idempotency
 
     if not redirect.startswith('/'):  # only allow endpoints on this site
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid redirect target",
-        )
+        redirect = FRONTEND_USER_MAIN
 
     user = await get_user_by_email(db, form_data.username)
-    if not user or not password_verify(form_data.password, user.hashed_password):
+    if not user or not password_verify(form_data.password, user.hashed_password):  # FIXME: user registration!
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",

@@ -79,3 +79,7 @@ nav {
   overflow: hidden;         /* Hides the text that overflows */
   text-overflow: ellipsis;  /* Adds the "..." at the end */
 }
+
+form input {
+    padding: 2px 15px;
+}
