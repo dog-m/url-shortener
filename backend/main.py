@@ -3,10 +3,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from backend.api.urls_primary import api_urls_router
 from backend.api.v1 import api_router
 from backend.core.caching import clear_caches, init_caches
+from backend.core.exceptions import rate_limit_exceeded_handler
+from backend.core.security import limiter
 from backend.db.database import init_db
 from backend.frontend import (
     frontend_index_router,
@@ -14,7 +18,6 @@ from backend.frontend import (
     frontend_user_router,
     not_found_error_handler,
 )
-from backend.middleware.request_limiter import DefaultRateLimiterCache, RequestLimiter
 from backend.models.click import ClickEvent
 from backend.models.url import Url
 from backend.models.user import User
@@ -53,6 +56,7 @@ app = FastAPI(
     version='1.0',
     lifespan=lifespan,
 )
+app.state.limiter = limiter
 
 # container-related handler
 @app.get('/health')
@@ -77,8 +81,10 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 
 # errors
 app.add_exception_handler(status.HTTP_404_NOT_FOUND, not_found_error_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # application-wide middleware stack (order matters)
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
-app.add_middleware(RequestLimiter, cache=DefaultRateLimiterCache())
+#app.add_middleware(RequestLimiter, cache=DefaultRateLimiterCache())  # custom rate limiter (unused)
+app.add_middleware(SlowAPIMiddleware)
 

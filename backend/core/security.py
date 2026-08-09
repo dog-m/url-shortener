@@ -2,10 +2,24 @@ import secrets
 from datetime import UTC, datetime, timedelta
 
 import jwt
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from backend.core.config import settings
 
 #
+
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=['5/second'],
+    key_style='endpoint',
+    strategy='sliding-window-counter',
+    storage_uri=settings.redis_url,
+    key_prefix='RATE-LIMITER:',
+    headers_enabled=True,
+)
+
 
 
 def create_access_token(data: dict) -> str:
