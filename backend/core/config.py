@@ -31,13 +31,16 @@ class Settings(BaseSettings):
     cache_ttl: int           = Field(default=3600, description='Default cache entry TLL')
     cache_status_header: str = Field(default='X-FastAPI-Cache', description='Status header for cached responses')
 
-    # JWT info
+    # security-related info
     jwt_secret_key: str                  = Field(default=secrets.token_urlsafe(32), description='JWT secret key')
     jwt_algorithm: str                   = Field(default='HS256', description='JWT algorithm')  # HMAC with SHA-256
     jwt_access_token_expire_minutes: int = Field(default=10, description='JWT access token expiration')
     jwt_refresh_token_expire_days: int   = Field(default=30, description='JWT refresh token expiration')
 
     user_session_expire_days: int        = Field(default=7, description='User session expiration')
+
+    rate_limits: list[str] = Field(default=['5/second'], description='Application-wide default rate limits')
+
 
 
 settings = Settings()

@@ -1,5 +1,7 @@
+import html
 import secrets
 from datetime import UTC, datetime, timedelta
+from urllib.parse import urlparse
 
 import jwt
 from slowapi import Limiter
@@ -12,13 +14,28 @@ from backend.core.config import settings
 
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=['5/second'],
+    default_limits=settings.rate_limits,
     key_style='endpoint',
     strategy='sliding-window-counter',
     storage_uri=settings.redis_url,
     key_prefix='RATE-LIMITER:',
     headers_enabled=True,
 )
+
+
+
+_SAFE_PROTOCOLS = { 'http', 'https', 'HTTP', 'HTTPS', }
+
+def is_safe_url(url: str) -> bool:
+    try:
+        return urlparse(url, allow_fragments=False).scheme in _SAFE_PROTOCOLS
+    except ValueError:
+        return False
+
+
+
+def sanitize_html(text: str) -> str:
+    return html.escape(text, quote=True)
 
 
 
