@@ -23,7 +23,7 @@ async def user_info(
 
 @api_user_router.post('/user')
 async def update_user(
-    new_info: Annotated[UserUpdate, Form(...)],
+    new_info: Annotated[UserUpdate, Form()],
     user: Annotated[User, Depends(require_user)],
 ):
     if new_info.password and '\n' in new_info.password:  # check placeholder value

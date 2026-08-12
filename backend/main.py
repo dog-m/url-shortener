@@ -12,12 +12,8 @@ from backend.core.caching import clear_caches, init_caches
 from backend.core.exceptions import rate_limit_exceeded_handler
 from backend.core.security import limiter
 from backend.db.database import init_db
-from backend.frontend import (
-    frontend_index_router,
-    frontend_seo_router,
-    frontend_user_router,
-    not_found_error_handler,
-)
+from backend.frontend import frontend_router
+from backend.frontend.errors import not_found_error_handler
 from backend.models.click import ClickEvent
 from backend.models.url import Url
 from backend.models.user import User
@@ -67,10 +63,8 @@ async def health_check():
 
 
 
-# frontend routes
-app.include_router(frontend_index_router)
-app.include_router(frontend_seo_router)
-app.include_router(frontend_user_router)
+# frontend
+app.include_router(frontend_router)
 
 # api routes
 app.include_router(api_urls_router)

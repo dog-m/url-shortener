@@ -22,7 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/v1/login')  # TODO: ???
 
 
 FRONTEND_INDEX     = '/'
-FRONTEND_USER_MAIN = '/user'
+FRONTEND_USER_MAIN = '/profile'
 
 
 api_auth_router = APIRouter(prefix='', tags=['api', 'auth'])

@@ -77,9 +77,9 @@
             }
 
 
-            function debug_add_url() {
+            async function debug_add_url() {
                 let something = Math.floor(Math.random() * 1000) % 1000;
-                fetch(
+                await fetch(
                     '/api/v1/urls', {
                         method: 'POST',
                         headers: {

@@ -1,4 +1,17 @@
-from .errors import not_found_error_handler as not_found_error_handler
-from .index import frontend_index_router as frontend_index_router
-from .seo import frontend_seo_router as frontend_seo_router
-from .user import frontend_user_router as frontend_user_router
+from fastapi import APIRouter
+
+from .admin import frontend_admin_router
+from .index import frontend_index_router
+from .seo import frontend_seo_router
+from .user import frontend_user_router
+
+#
+
+
+frontend_router = APIRouter(tags=['frontend'], include_in_schema=False)
+
+frontend_router.include_router(frontend_index_router)
+frontend_router.include_router(frontend_seo_router)
+frontend_router.include_router(frontend_user_router)
+frontend_router.include_router(frontend_admin_router)
+
