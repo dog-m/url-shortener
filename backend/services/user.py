@@ -71,7 +71,7 @@ async def create_user(
 
 
 
-async def get_user(db: AsyncSession, user_id: UUID) -> User | None:
+async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User | None:
     assert user_id
 
     return await db.get(User, user_id)
@@ -87,12 +87,12 @@ async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
 
 
 
-async def get_all_users_batched(db: AsyncSession, *, offset: int = 0, batch_size: int = 50) -> Sequence[User]:
+async def get_all_users_batched(db: AsyncSession, *, offset_items: int = 0, batch_size: int = 50) -> Sequence[User]:
     assert batch_size >= 0
-    assert offset >= 0
+    assert offset_items >= 0
 
     res = await db.execute(
-        select(User).order_by(User.name, User.id).offset(offset).limit(batch_size)
+        select(User).order_by(User.name, User.id).offset(offset_items).limit(batch_size)
     )
     return res.scalars().all()
 
