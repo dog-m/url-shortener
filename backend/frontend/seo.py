@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Request
+from fastapi.responses import FileResponse
 
 from backend.frontend.common import frontend_files
 
 #
 
 
-frontend_seo_router = APIRouter(tags=['frontend', 'SEO'], include_in_schema=False)
+frontend_seo_router = APIRouter(tags=['frontend', 'SEO'])
 
 
-@frontend_seo_router.api_route('/robots.txt', methods=['GET', 'HEAD'])
+@frontend_seo_router.api_route('/robots.txt', methods=['GET', 'HEAD'], response_class=FileResponse)
 async def robots(req: Request):
     return await frontend_files.get_response(
         path=req.url.path[1:],
@@ -16,7 +17,7 @@ async def robots(req: Request):
     )
 
 
-@frontend_seo_router.api_route('/sitemap.xml', methods=['GET', 'HEAD'])
+@frontend_seo_router.api_route('/sitemap.xml', methods=['GET', 'HEAD'], response_class=FileResponse)
 async def sitemap(req: Request):
     return await frontend_files.get_response(
         path=req.url.path[1:],

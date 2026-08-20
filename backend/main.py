@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status
@@ -17,6 +18,7 @@ from backend.frontend.errors import not_found_error_handler
 from backend.models.click import ClickEvent
 from backend.models.url import Url
 from backend.models.user import User
+from backend.services.audit import event_upload_task
 from backend.services.user import upsert_primary_superuser
 
 #
@@ -38,6 +40,7 @@ async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    asyncio.create_task(event_upload_task())
     await on_startup(app)
     try:
         #logger.info('Startup completed')

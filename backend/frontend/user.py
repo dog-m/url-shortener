@@ -1,6 +1,7 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.dependencies import require_user
@@ -12,11 +13,11 @@ from backend.services.url import find_url_by_id, find_urls_batched
 #
 
 
-frontend_user_router = APIRouter(tags=['frontend', 'user'], include_in_schema=False)
+frontend_user_router = APIRouter(tags=['user'])
 
 
 
-@frontend_user_router.api_route('/profile', methods=['GET', 'HEAD'])
+@frontend_user_router.api_route('/profile', methods=['GET', 'HEAD'], response_class=HTMLResponse)
 async def user_profile(
     req: Request,
     user: Annotated[User, Depends(require_user)],
@@ -33,7 +34,7 @@ async def user_profile(
 
 
 
-@frontend_user_router.api_route('/urls', methods=['GET', 'HEAD'])
+@frontend_user_router.api_route('/urls', methods=['GET', 'HEAD'], response_class=HTMLResponse)
 async def user_url_list(
     req: Request,
     db: Annotated[AsyncSession, Depends(get_db_session)],
@@ -41,23 +42,26 @@ async def user_url_list(
     query: Annotated[str, Query(alias='q')] = '',
     page: Annotated[str, Query()] = '0',
     sort: Annotated[str, Query()] = 'updated',
-    asc: Annotated[str, Query()] = '0',
+    asc: Annotated[Literal['0', '1'], Query(min_length=1, max_length=1, pattern='^(0|1)$')] = '0',
+    user_id: Annotated[str | None, Path(min_length=1, max_length=38)] = None,  # MS GUID format
 ):
     # parameter cleanup
     page       = page.strip()
     page_index = max(0, int(page) if page.isnumeric() else 0)
     query      = query[:500].strip()
     sort       = sort.strip().lower()
-    asc        = asc.strip()
     page_size  = 50
+
+    # access checks
+    owner = user_id if user_id and user.is_superuser else user
 
     # fetch
     urls = await find_urls_batched(
         db,
-        owner=user,
         text=query,
+        owner=owner,
         sort_criteria=sort,
-        sort_asc=asc != '0',
+        sort_asc=asc == '1',
         batch_size=page_size,
         offset_items=page_index * page_size,
     )
@@ -78,7 +82,7 @@ async def user_url_list(
 
 
 
-@frontend_user_router.api_route('/urls/new', methods=['GET', 'HEAD'])
+@frontend_user_router.api_route('/urls/new', methods=['GET', 'HEAD'], response_class=HTMLResponse)
 async def user_url_new(
     req: Request,
     user: Annotated[User, Depends(require_user)],
@@ -95,7 +99,7 @@ async def user_url_new(
 
 
 
-@frontend_user_router.api_route('/urls/{url_id}', methods=['GET', 'HEAD'])
+@frontend_user_router.api_route('/urls/{url_id}', methods=['GET', 'HEAD'], response_class=HTMLResponse)
 async def user_url_edit(
     req: Request,
     url_id: Annotated[str, Path(min_length=1, max_length=32)],
