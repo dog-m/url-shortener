@@ -1,4 +1,5 @@
 from typing import Annotated, Literal
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
 from fastapi.responses import HTMLResponse
@@ -43,7 +44,7 @@ async def user_url_list(
     page: Annotated[str, Query()] = '0',
     sort: Annotated[str, Query()] = 'updated',
     asc: Annotated[Literal['0', '1'], Query(min_length=1, max_length=1, pattern='^(0|1)$')] = '0',
-    user_id: Annotated[str | None, Path(min_length=1, max_length=38)] = None,  # MS GUID format
+    user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format
 ):
     # parameter cleanup
     page       = page.strip()

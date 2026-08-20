@@ -1,6 +1,7 @@
 import random
 import string
 from collections.abc import Sequence
+from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -65,7 +66,7 @@ async def find_urls_batched(
     *,
     offset_items: int = 0,
     batch_size: int = 50,
-    owner: User | str | None = None,
+    owner: User | UUID | None = None,
     text: str = '',
     sort_criteria: str = 'updated',
     sort_asc: bool = False,
@@ -80,8 +81,7 @@ async def find_urls_batched(
             stmt = stmt.where(Url.owner_id == owner)
     text = text.strip()
     if text:
-        text = f"%{text}%"
-        stmt = stmt.where(Url.title.ilike(text) | Url.description.ilike(text))
+        stmt = stmt.where(Url.title.icontains(text, autoescape=True) | Url.description.icontains(text, autoescape=True))
 
     # ordering/sorting
     criteria = _FIND_URLS__SORTING_CRITERIA.get(sort_criteria.lower(), _FIND_URLS__DEFAULT_SORTING)
