@@ -4,7 +4,7 @@
 
 {% block title %}Your addresses / {{ super() }}{% endblock %}
 
-{% block head %}
+{%- block head -%}
 <script lang="javascript">
     async function debug_add_url() {
         let something = Math.floor(Math.random() * 1000) % 1000;
@@ -32,32 +32,32 @@
         });
     }
 </script>
-{% endblock %}
+{%- endblock -%}
 
-{% block page_content %}
+{%- block page_content -%}
 <button type="button" onclick="debug_add_url()">[DEBUG] Add a URL</button>
 <form method="get" action="/urls" autocomplete="off">
-    <input type="text" name="q" placeholder="Let's look for..." value="{{ query | e }}" />
+    <input type="text" name="q" placeholder="Let's look for..." value="{{- query | e -}}" />
     <input type="submit" value="Search!" />
 </form>
 <ul>
-    {% for u in urls %}
+    {%- for url in urls -%}
         <li>
             <div>
                 <div>
-                    <a href="/urls/{{ u.id }}">u/{{ u.id }}</a>
+                    <a href="/urls/{{- url.id -}}">u/{{- url.id -}}</a>
                     <span>
-                        {{ u.title | e }}
+                        {{- url.title | e -}}
                     </span>
                 </div>
                 <div class="ellipsis-text">
-                    {{ u.description | e }}
+                    {{- url.description | e -}}
                 </div>
             </div>
         </li>
-    {% else %}
-        <p>No items found.</p>
-    {% endfor %}
+    {%- else -%}
+        <p>No addresses found.</p>
+    {%- endfor -%}
 </ul>
 <p>Page: #{{ page + 1 }} @ {{ page_size }} links per page.</p>
-{% endblock %}
+{%- endblock -%}

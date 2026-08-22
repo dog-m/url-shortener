@@ -2,10 +2,10 @@
 
 {% set PAGE = 'url-edit' %}
 
-{% block title %}Edit "{{ user.name }}" profile / {{ super() }}{% endblock %}
+{% block title %}Edit "{{- user.name -}}" profile / {{ super() }}{% endblock %}
 
-{% block page_content %}
+{%- block page_content -%}
 <p>
-    Editing {{ profile.name | e }}'s profile.
+    Editing {{- profile.name | e -}}'s profile.
 </p>
-{% endblock %}
+{%- endblock -%}

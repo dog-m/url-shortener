@@ -2,12 +2,12 @@
 
 {% macro tab_classes(ids) %}tab{% if PAGE in ids %} active{% endif %}{% endmacro %}
 
-{%- macro for_privileged() -%}{% if not user.is_superuser %}hidden{% endif %}{%- endmacro -%}
+{% macro for_privileged() %}{% if not user.is_superuser %} hidden{% endif %}{% endmacro %}
 
-{% block content %}
+{%- block content -%}
 <header>
     <nav>
-        <div>URL Shortener service.</div>
+        <div>{{ SERVICE_NAME }}</div>
     </nav>
     <nav class="tabs">
         <ul>
@@ -22,7 +22,7 @@
                 </li>
             </a>
             <a href="/users">
-                <li class="{{ tab_classes(['users']) }}{{ for_privileged() }}">
+                <li class="{{ tab_classes(['users', 'user-edit', 'user-new']) }}{{ for_privileged() }}">
                     Users
                 </li>
             </a>
@@ -30,9 +30,9 @@
     </nav>
 </header>
 <main class="page">
-    {% block page_content %}{% endblock %}
+    {%- block page_content required -%}{%- endblock -%}
 </main>
 <footer>
-    <!--nothing here for now-->
+    <!--nothing's here for now-->
 </footer>
-{% endblock %}
+{%- endblock -%}
