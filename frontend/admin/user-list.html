@@ -1,5 +1,20 @@
 {% extends 'user/base.html' %}
 
-{% set PAGE = 'url-edit' %}
+{% set PAGE = 'users' %}
 
 {% block title %}Users / {{ super() }}{% endblock %}
+
+{% block page_content %}
+<ul>
+    {% for user in users %}
+        <li>
+            <div>
+                <div>
+                    <a href="/user/{{user.id}}/profile">{{ user.name | e }}</a>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+<p>Page: #{{ page + 1 }} @ {{ page_size }} links per page.</p>
+{% endblock %}

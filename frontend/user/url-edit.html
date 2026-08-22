@@ -3,3 +3,11 @@
 {% set PAGE = 'url-edit' %}
 
 {% block title %}Edit URL / {{ super() }}{% endblock %}
+
+{% block page_content %}
+    {{ url.id }}
+    {{ url.title }}
+    {{ url.description }}
+    {{ url.created_at }}
+    {{ url.updated_at }}
+{% endblock %}

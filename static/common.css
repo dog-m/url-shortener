@@ -18,10 +18,6 @@ body {
     width: 250px;
 }
 
-.round-corners {
-    border-radius: 1.0em;
-}
-
 header, footer {
     display: block;
     left: 0;
@@ -49,37 +45,62 @@ nav {
     padding-bottom: 0.5em;
 }
 
-.sidebar ul {
+form input {
+    padding: 5px 10px;
+}
+
+/* handles for tabs/pages */
+
+.tabs {
+    justify-content: left;
+    margin-left: 1em;
+    padding-bottom: 0;
+}
+
+.tabs ul {
     list-style: none;
     contain: content;
-    display: flex;
     margin: 0;
+    display: flex;
     padding: 0;
     overflow: auto;
 }
 
-.sidebar li {
+.tabs li {
     height: 1.5em;
     padding-left: 0.6rem;
     padding-right: 0.6rem;
 }
 
-.page {
-    background-color: #eee;
-    display: none;
+.tab {
+    padding-top: 0.25em;
 }
 
-.page[page-active] {
-    background-color: #eee;
-    display: inherit;
+.tab.active, .tab.active:hover {
+    background: #fff;
+    display: block;
+}
+
+.tab:hover {
+    background: #fff8;
+}
+
+.page {
+    margin: 1em;
+}
+
+/* utilities and shortcuts */
+
+.round-corners {
+    border-radius: 1.0em;
+}
+
+.hidden {
+    display: none;
 }
 
 .ellipsis-text {
   white-space: nowrap;      /* Keeps the text on a single line */
   overflow: hidden;         /* Hides the text that overflows */
   text-overflow: ellipsis;  /* Adds the "..." at the end */
-}
-
-form input {
-    padding: 2px 15px;
 }
