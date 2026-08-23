@@ -8,6 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio.session import AsyncSession
 
 from backend.core.config import settings
+from backend.core.tasks import periodic_task
+from backend.db.database import get_db_session
 from backend.models.session import SESSION_ID_MAX_LEN, Session
 from backend.models.user import User
 
@@ -79,4 +81,14 @@ async def terminate_all_sessions(db: AsyncSession, user: User) -> None:
         delete(Session).where(Session.user_id == user.id)
     )
     await db.commit()
+
+
+
+@periodic_task(60)
+async def task_remove_stale_sessions() -> None:
+    async for db in get_db_session():
+        await db.execute(
+            delete(Session).where(datetime.now(UTC) > Session.expires_at)
+        )
+        db.commit()
 

@@ -1,13 +1,9 @@
-import asyncio
+from backend.core.tasks import periodic_task
 
 #
 
 
-async def event_upload_task() -> None:
-    while True:
-        print('[~] TODO: event sync task')  # TODO: event sync task, also change interval
-        await asyncio.sleep(100.0)
-
-
-
+@periodic_task(100.0)
+async def task_event_upload() -> None:
+    print('[~] TODO: event sync task')
 
