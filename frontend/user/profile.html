@@ -5,8 +5,8 @@
 {% block title %}Profile / {{ super() }}{% endblock %}
 
 {%- block page_content -%}
-<h4>Greetings, {{- user.name | e -}}.</h4>
-<p>User info page.</p>
+<h4>Profile</h4>
+<p>Greetings, {{ user.name | e }}.</p>
 <form method="POST" action="/api/v1/user" enctype="application/x-www-form-urlencoded" autocomplete="off">
     <input type="hidden" name="id" value="{{- user.id -}}" />
     <input type="hidden" name="is_active" value="{{- user.is_active -}}" />

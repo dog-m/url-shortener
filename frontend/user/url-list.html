@@ -45,10 +45,11 @@
         <li>
             <div>
                 <div>
-                    <a href="/urls/{{- url.id -}}">u/{{- url.id -}}</a>
-                    <span>
-                        {{- url.title | e -}}
-                    </span>
+                    <a href="/urls/{{- url.id -}}">
+                        u/{{ url.id }}
+                        <span>{{ url.title | e }}</span>
+                    </a>
+                    [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]
                 </div>
                 <div class="ellipsis-text">
                     {{- url.description | e -}}

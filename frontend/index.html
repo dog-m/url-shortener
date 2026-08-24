@@ -1,32 +1,32 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>URL Shortener service</title>
-        <link rel="stylesheet" type="text/css" href="/static/common.css">
-        <script lang="javascript" src="/static/common.js"></script>
-    </head>
-    <body>
-        <header>
-            <nav>
-                <div>URL Shortener service</div>
-            </nav>
-        </header>
-        <div class="centered-container">
-            <div class="centered-center round-corners">
-                <center>
-                    <h1>Log-in</h1>
-                    <hr>
-                    <div style="display: flex;">
-                        <form action="/api/v1/login" method="post" enctype="application/x-www-form-urlencoded" autocomplete="off">
-                            <input type="email" name="username" placeholder="Your email" required />
-                            <br/>
-                            <input type="password" name="password" placeholder="Your password" required />
-                            <br/>
-                            <input type="submit" value="Log-in" />
-                        </form>
-                    </div>
-                </center>
-            </div>
+<html lang="en">
+<head>
+    <title>URL Shortener service</title>
+    <link rel="stylesheet" type="text/css" href="/static/common.css">
+    <script lang="javascript" src="/static/common.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div>URL Shortener service</div>
+        </nav>
+    </header>
+    <div class="centered-container">
+        <div class="centered-center round-corners">
+            <center>
+                <h1>Log-in</h1>
+                <hr>
+                <div style="display: flex;">
+                    <form action="/api/v1/login" method="post" enctype="application/x-www-form-urlencoded" autocomplete="off">
+                        <input type="email" name="username" placeholder="Your email" required />
+                        <br/>
+                        <input type="password" name="password" placeholder="Your password" required />
+                        <br/>
+                        <input type="submit" value="Log-in" />
+                    </form>
+                </div>
+            </center>
         </div>
-    </body>
+    </div>
+</body>
 </html>
