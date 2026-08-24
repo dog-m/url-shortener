@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import UUID, DateTime, ForeignKey, String
@@ -30,4 +31,17 @@ class ClickEvent(BaseDbModel):
 
     # "ru,en;q=0.9,en-US;q=0.8"
     headers_accept_language: Mapped[str | None] = mapped_column(String(CLICK_HEADER_ACCEPT_LANGUAGE_MAX_LEN), nullable=True)
+
+
+
+@dataclass(slots=True)
+class UrlVisitorMetadata:
+    ip: str
+    headers_user_agent: str | None
+    headers_accept_language: str | None
+    headers_referer_domain: str | None
+
+    def __post_init__(self) -> None:
+        # TODO: truncate and cleanup header values?
+        pass
 

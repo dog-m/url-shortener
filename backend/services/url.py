@@ -1,4 +1,5 @@
 import random
+import re
 import string
 from collections.abc import Sequence
 from uuid import UUID
@@ -8,11 +9,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from backend.models.url import URL_ID_MAX_LEN, Url
+from backend.models.click import UrlVisitorMetadata
+from backend.models.url import Url
 from backend.models.user import User
 from backend.schemas.url import UrlCreate
 
 #
+
+URL_ID_MAX_LEN = 10
+URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{URL_ID_MAX_LEN}")
 
 
 _URL_ID_CHARACTERS = string.ascii_letters + string.digits
@@ -98,4 +103,11 @@ async def find_urls_batched(
     # fetch
     rows = await db.execute(stmt)
     return rows.scalars().all()
+
+
+
+async def register_url_visit(db: AsyncSession, url: Url, visitor: UrlVisitorMetadata) -> None:
+    # TODO: log user clicks
+    print(f"[~] Url /u/{url.id} has been visited by {visitor!r}")
+    pass
 

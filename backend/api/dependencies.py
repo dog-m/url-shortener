@@ -31,14 +31,20 @@ def new_html_redirector(target_url: str, *, delay_sec: int = 1) -> Response:
 SESSION_COOKIE_NAME = 'u_session'
 
 
+async def get_current_session_id(
+    u_session: Annotated[str | None, Cookie()] = None,
+) -> str | None:
+    return u_session
+
+
 async def get_current_session(
     db: Annotated[AsyncSession, Depends(get_db_session)],
-    u_session: Annotated[str | None, Cookie()] = None,
+    session_id: Annotated[str | None, Depends(get_current_session_id)] = None,
 ) -> Session | None:
-    if u_session is None:
+    if session_id is None:
         return None
 
-    return await get_active_session_by_id(db, u_session)
+    return await get_active_session_by_id(db, session_id)
 
 
 

@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any
 
@@ -42,6 +43,12 @@ async def init_db() -> None:
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, Any]:
+    async with async_session() as session:
+        yield session
+
+
+@asynccontextmanager
+async def get_db_session_context():
     async with async_session() as session:
         yield session
 

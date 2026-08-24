@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.db.database import get_db_session
+from backend.db.database import get_db_session_context
 from backend.models.user import User
 
 #
@@ -31,7 +31,7 @@ def password_verify(plain_password: str, hashed_password: str) -> bool:
 
 async def upsert_primary_superuser() -> None:
     try:
-        async for session in get_db_session():
+        async with get_db_session_context() as session:
             await create_user(
                 session,
                 email='admin@url-shortener.internal',
