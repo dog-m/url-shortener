@@ -41,6 +41,9 @@ class Settings(BaseSettings):
 
     rate_limits: list[str] = Field(default=['5/second'], description='Application-wide default rate limits')
 
+    # misc
+    periodic_tasks_pool_size: int = Field(default=5, description='Pool size for periodic non-async tasks')
+
 
 
 settings = Settings()

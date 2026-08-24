@@ -32,6 +32,9 @@ async def on_startup(app: FastAPI) -> None:  # noqa: ARG001
     await init_caches()
     #
     await upsert_primary_superuser()
+    #
+    asyncio.create_task(task_event_upload())
+    asyncio.create_task(task_remove_stale_sessions())
 
 
 async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
@@ -41,8 +44,6 @@ async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    asyncio.create_task(task_event_upload())
-    asyncio.create_task(task_remove_stale_sessions())
     await on_startup(app)
     try:
         #logger.info('Startup completed')

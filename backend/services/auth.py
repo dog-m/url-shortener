@@ -90,5 +90,5 @@ async def task_remove_stale_sessions() -> None:
         await db.execute(
             delete(Session).where(datetime.now(UTC) > Session.expires_at)
         )
-        db.commit()
+        await db.commit()
 
