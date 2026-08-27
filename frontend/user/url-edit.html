@@ -49,6 +49,7 @@
         let on_err = (reason) => {
             msg.classList.add('msg-err');
             msg.textContent = `Unable to update the entry.`;
+            console.error('Entry update error', reason);
         };
 
         // collect the data

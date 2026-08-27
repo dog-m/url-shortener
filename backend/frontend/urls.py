@@ -9,7 +9,7 @@ from backend.api.dependencies import require_user
 from backend.db.database import get_db_session
 from backend.frontend.common import frontend_templates
 from backend.models.user import User
-from backend.services.url import find_url_by_id, find_urls_batched
+from backend.services.url import URL_ID_PATTERN, find_url_by_id, find_urls_batched
 
 #
 
@@ -26,7 +26,7 @@ async def url_search(
     query: Annotated[str, Query(alias='q')] = '',
     page: Annotated[str, Query(alias='p')] = '0',
     sort: Annotated[str, Query()] = 'updated',
-    asc: Annotated[Literal['0', '1'], Query(min_length=1, max_length=1, pattern='^(0|1)$')] = '0',
+    asc: Annotated[Literal['0', '1'], Query(pattern='^(0|1)$')] = '0',
     user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format
 ):
     # parameter cleanup
@@ -83,10 +83,10 @@ async def url_new(
 
 
 
-@frontend_urls_router.api_route('/urls/{url_id}', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@frontend_urls_router.api_route('/urls/{url_id}/overview', methods=['GET', 'HEAD'], response_class=HTMLResponse)
 async def url_overview(
     req: Request,
-    url_id: Annotated[str, Path(min_length=1, max_length=32)],
+    url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
 ):
@@ -113,7 +113,7 @@ async def url_overview(
 @frontend_urls_router.api_route('/urls/{url_id}/edit', methods=['GET', 'HEAD'], response_class=HTMLResponse)
 async def url_edit(
     req: Request,
-    url_id: Annotated[str, Path(min_length=1, max_length=32)],
+    url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
 ):

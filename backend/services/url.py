@@ -16,8 +16,13 @@ from backend.schemas.url import UrlCreate, UrlUpdate
 
 #
 
+URL_ID_MIN_LEN = 10
 URL_ID_MAX_LEN = 10
-URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{{{URL_ID_MAX_LEN}}}")
+URL_ID_PATTERN = None
+if URL_ID_MIN_LEN == URL_ID_MAX_LEN:
+    URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{{{URL_ID_MAX_LEN}}}")
+else:
+    URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{{{URL_ID_MIN_LEN}-{URL_ID_MAX_LEN}}}")
 
 
 _URL_ID_CHARACTERS = string.ascii_letters + string.digits
