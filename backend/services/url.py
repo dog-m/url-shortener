@@ -96,7 +96,9 @@ async def find_urls_batched(
             stmt = stmt.where(Url.owner_id == owner)
     text = text.strip()
     if text:
-        stmt = stmt.where(Url.title.icontains(text, autoescape=True) | Url.description.icontains(text, autoescape=True))
+        text = text.replace('%', '\\%')
+        text = '%'.join(text.split())
+        stmt = stmt.where(Url.title.icontains(text) | Url.description.icontains(text))
 
     # ordering/sorting
     criteria = _FIND_URLS__SORTING_CRITERIA.get(sort_criteria.lower(), _FIND_URLS__DEFAULT_SORTING)

@@ -5,6 +5,21 @@
 {% block title %}Your addresses / {{ super() }}{% endblock %}
 
 {%- block head -%}
+<style>
+    .url-container {
+        list-style: none;
+        padding-left: 0px;
+    }
+
+    .url-item {
+        display: block;
+        padding-bottom: 0.5em;
+    }
+
+    .url-item:hover {
+        background-color: #eee;
+    }
+</style>
 <script lang="javascript">
     async function debug_add_url() {
         let something = Math.floor(Math.random() * 1000) % 1000;
@@ -40,20 +55,17 @@
     <input type="search" name="q" placeholder="Let's look for..." value="{{- query | e -}}" />
     <input type="submit" value="Search!" />
 </form>
-<ul>
+<ul class="url-container">
     {%- for url in urls -%}
         <li>
-            <div>
+            <div class="url-item">
                 <div>
-                    <a href="/urls/{{- url.id -}}/overview">
-                        u/{{ url.id }}
-                        <span>{{ url.title | e }}</span>
-                    </a>
-                    [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]
+                    <a href="/urls/{{- url.id -}}/overview">[u/{{ url.id }}] <span>{{ url.title | e }}</span></a>
                     [<a href="/urls/{{- url.id -}}/edit">edit</a>]
+                    [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]
                 </div>
                 <div class="ellipsis-text">
-                    {{- url.description | e -}}
+                    <small>{{- url.description | e -}}</small>
                 </div>
             </div>
         </li>
