@@ -24,7 +24,7 @@ async def user_url_list(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
     query: Annotated[str, Query(alias='q')] = '',
-    page: Annotated[str, Query()] = '0',
+    page: Annotated[str, Query(alias='p')] = '0',
     sort: Annotated[str, Query()] = 'updated',
     asc: Annotated[Literal['0', '1'], Query(min_length=1, max_length=1, pattern='^(0|1)$')] = '0',
     user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format

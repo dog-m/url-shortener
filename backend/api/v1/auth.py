@@ -10,10 +10,11 @@ from backend.api.dependencies import (
     new_html_redirector,
 )
 from backend.core.config import settings
+from backend.core.security import password_verify
 from backend.db.database import get_db_session
 from backend.models.session import Session
 from backend.services.auth import new_session, terminate_session
-from backend.services.user import get_user_by_email, password_verify
+from backend.services.user import get_user_by_email
 
 #
 

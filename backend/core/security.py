@@ -4,6 +4,8 @@ from datetime import UTC, datetime, timedelta
 from urllib.parse import urlparse
 
 import jwt
+from pwdlib.hashers import HasherProtocol
+from pwdlib.hashers.bcrypt import BcryptHasher
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -99,4 +101,16 @@ def get_current_user_id(token: str) -> str:
         return user_id
     else:
         raise jwt.InvalidTokenError('Missing user ID in token')
+
+
+
+_pwd_hasher: HasherProtocol = BcryptHasher()
+
+
+def password_get_hash(password: str, salt: str | None = None) -> str:
+    return _pwd_hasher.hash(password, salt=salt)
+
+
+def password_verify(plain_password: str, hashed_password: str) -> bool:
+    return _pwd_hasher.verify(plain_password, hashed_password)
 

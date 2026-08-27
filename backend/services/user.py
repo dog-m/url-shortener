@@ -2,30 +2,17 @@ import logging
 from collections.abc import Sequence
 from uuid import UUID
 
-from pwdlib.hashers import HasherProtocol
-from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.security import password_get_hash
 from backend.db.database import get_db_session_context
 from backend.models.user import User
 
 #
 
 logger = logging.getLogger()
-
-
-pwd_hasher: HasherProtocol = BcryptHasher()
-pwd_salt = ''#settings.password_salt.encode()
-
-
-def password_get_hash(password: str, salt: str | None = None) -> str:
-    return pwd_hasher.hash(password, salt=salt)
-
-
-def password_verify(plain_password: str, hashed_password: str) -> bool:
-    return pwd_hasher.verify(plain_password, hashed_password)
 
 
 
