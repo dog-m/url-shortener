@@ -19,7 +19,7 @@ frontend_urls_router = APIRouter(tags=['urls'])
 
 
 @frontend_urls_router.api_route('/urls', methods=['GET', 'HEAD'], response_class=HTMLResponse)
-async def user_url_list(
+async def url_search(
     req: Request,
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
@@ -67,7 +67,7 @@ async def user_url_list(
 
 
 @frontend_urls_router.api_route('/urls/new', methods=['GET', 'HEAD'], response_class=HTMLResponse)
-async def user_url_new(
+async def url_new(
     req: Request,
     user: Annotated[User, Depends(require_user)],
 ):
@@ -84,7 +84,34 @@ async def user_url_new(
 
 
 @frontend_urls_router.api_route('/urls/{url_id}', methods=['GET', 'HEAD'], response_class=HTMLResponse)
-async def user_url_edit(
+async def url_overview(
+    req: Request,
+    url_id: Annotated[str, Path(min_length=1, max_length=32)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
+    user: Annotated[User, Depends(require_user)],
+):
+    # parameter validation and access checks
+    url = await find_url_by_id(db, url_id)
+    if url is None or (url.owner_id != user.id and not user.is_superuser):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    # page rendering
+    return frontend_templates.TemplateResponse(
+        request=req,
+        name='user/url-overview.html',
+        media_type='text/html',
+        context={
+            'user': user,
+            'url': url,
+        }
+    )
+
+
+
+@frontend_urls_router.api_route('/urls/{url_id}/edit', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+async def url_edit(
     req: Request,
     url_id: Annotated[str, Path(min_length=1, max_length=32)],
     db: Annotated[AsyncSession, Depends(get_db_session)],

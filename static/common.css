@@ -45,7 +45,7 @@ nav {
     padding-bottom: 0.5em;
 }
 
-form input {
+form input, form textarea {
     padding: 5px 10px;
 }
 

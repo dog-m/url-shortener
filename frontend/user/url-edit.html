@@ -4,12 +4,142 @@
 
 {% block title %}Edit URL / {{ super() }}{% endblock %}
 
+{%- block head -%}
+<style>
+    #msg {
+        display: none;
+        border: 3px solid;
+        border-radius: 10px;
+        padding: 5px;
+    }
+
+    .msg-ok {
+        display: inline-block !important;
+        color: #080;
+        border-color: #8f8;
+        background-color: #cfc;
+    }
+
+    .msg-err {
+        display: inline-block !important;
+        color: #800;
+        border-color: #f88;
+        background-color: #fcc;
+    }
+
+    form input, form textarea {
+        width: 100%;
+    }
+</style>
+<script lang="javascript">
+    function localize_time(utc) {
+        let offset = new Date().getTimezoneOffset() * 1000 * 60;
+        let local = Date.parse(utc) - offset;
+        let value = new Date(local).toLocaleString();
+        document.write(`<time>${value}</time>`);
+    }
+
+    function update_url(e) {
+        // prepare for the upload
+        e.preventDefault();
+        let msg = document.getElementById('msg');
+        msg.classList.remove('msg-ok', 'msg-err');
+        msg.textContent = '';
+
+        let on_err = (reason) => {
+            msg.classList.add('msg-err');
+            msg.textContent = `Unable to update the entry.`;
+        };
+
+        // collect the data
+        let form = new FormData(e.srcElement);
+
+        fetch(
+            '/api/v1/urls', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id:           "{{ url.id }}",
+                    original_url: form.get('original_url'),
+                    title:        form.get('title'),
+                    description:  form.get('description'),
+                }),
+                redirect: 'error',
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5 * 1000),
+            }
+        )
+        .then(async (value) => {
+            if (value.ok) {
+                msg.classList.add('msg-ok');
+                msg.textContent = `Updated successfully!`;
+                setTimeout(() => { msg.classList.remove('msg-ok'); }, 1500);
+            } else {
+                value.text().then(on_err);
+            }
+        })
+        .catch(on_err);
+
+        return false;
+    }
+</script>
+{%- endblock -%}
+
 {%- block page_content -%}
-<p>
-    {{ url.id }}
-    {{ url.title }}
-    {{ url.description }}
-    {{ url.created_at }}
-    {{ url.updated_at }}
-</p>
+<h3>
+    /u/{{ url.id }}
+</h3>
+<form onsubmit="return update_url(event);">
+    <table>
+        <tr>
+            <td>
+                Original URL:
+            </td>
+            <td>
+                <input name="original_url" type="url" value="{{ url.original_url | e }}" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Title:
+            </td>
+            <td>
+                <input name="title" type="text" value="{{ url.title | e }}" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <textarea name="description" placeholder="Description...">
+                    {{- url.description | e -}}
+                </textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="Update" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Last edit:
+            </td>
+            <td>
+                <noscript>{{ url.updated_at }} UTC</noscript>
+                <script lang="javascript"> localize_time("{{ url.updated_at }}"); </script>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Created at:
+            </td>
+            <td>
+                <noscript>{{ url.created_at }} UTC</noscript>
+                <script lang="javascript"> localize_time("{{ url.created_at }}"); </script>
+            </td>
+        </tr>
+    </table>
+    <div id="msg"></div>
+</form>
 {%- endblock -%}

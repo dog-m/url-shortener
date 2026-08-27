@@ -22,3 +22,10 @@ class UrlCreate(BaseModel):
     title: str | None = None
     description: str | None = None
 
+
+class UrlUpdate(BaseModel):
+    id: str
+    original_url: HttpUrl
+    title: str | None
+    description: str | None
+

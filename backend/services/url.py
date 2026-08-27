@@ -4,7 +4,7 @@ import string
 from collections.abc import Sequence
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
@@ -12,12 +12,12 @@ from sqlalchemy.orm import InstrumentedAttribute
 from backend.models.click import UrlVisitorMetadata
 from backend.models.url import Url
 from backend.models.user import User
-from backend.schemas.url import UrlCreate
+from backend.schemas.url import UrlCreate, UrlUpdate
 
 #
 
 URL_ID_MAX_LEN = 10
-URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{URL_ID_MAX_LEN}")
+URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{{{URL_ID_MAX_LEN}}}")
 
 
 _URL_ID_CHARACTERS = string.ascii_letters + string.digits
@@ -48,8 +48,13 @@ async def create_new_url(db: AsyncSession, owner: User, url_info: UrlCreate) -> 
 
 
 
-async def find_url_by_id(db: AsyncSession, url_id: str) -> Url | None:
-    return await db.get(Url, ident=url_id)
+async def find_url_by_id(db: AsyncSession, url_id: str, *, lock: bool = False) -> Url | None:
+    stmt = select(Url).where(Url.id == url_id)
+
+    if lock:
+        stmt = stmt.with_for_update(key_share=True)
+
+    return (await db.execute(stmt)).scalar()
 
 
 
@@ -104,6 +109,13 @@ async def find_urls_batched(
     rows = await db.execute(stmt)
     return rows.scalars().all()
 
+
+
+async def update_url(db: AsyncSession, url_patch: UrlUpdate) -> None:
+    await db.execute(
+        update(Url), [url_patch.model_dump()]
+    )
+    await db.commit()
 
 
 async def register_url_visit(db: AsyncSession, url: Url, visitor: UrlVisitorMetadata) -> None:
