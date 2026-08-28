@@ -46,6 +46,21 @@
             console.warn('Not OK:', reason);
         });
     }
+
+    function replaceHashtags(text, baseUrl) {
+        return text.replace(
+            /(?<!\w)(#[\w-]+)/gu,
+            (match) => `<a href="${baseUrl}?q=${encodeURIComponent(match)}">${match}</a>`,
+        );
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        for (let description of document.getElementsByClassName('url-item-description')) {
+            let source = description.innerHTML;
+            if (source.includes('#'))
+                description.innerHTML = replaceHashtags(source, window.location.pathname);
+        }
+    });
 </script>
 {%- endblock -%}
 
@@ -65,7 +80,7 @@
                     [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]
                 </div>
                 <div class="ellipsis-text">
-                    <small>{{- url.description | e -}}</small>
+                    <small class="url-item-description">{{- url.description | e -}}</small>
                 </div>
             </div>
         </li>
