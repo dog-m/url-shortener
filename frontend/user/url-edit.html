@@ -29,6 +29,11 @@
 
     form input, form textarea {
         width: 100%;
+        min-width: 350px;
+    }
+
+    form textarea {
+        min-height: 140px;
     }
 </style>
 <script lang="javascript">
@@ -54,6 +59,7 @@
 
         // collect the data
         let form = new FormData(e.srcElement);
+        console.log(form);
 
         fetch(
             '/api/v1/urls', {
@@ -62,8 +68,9 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    id:           "{{ url.id }}",
+                    id:           '{{ url.id }}',
                     original_url: form.get('original_url'),
+                    is_active:    form.get('is_active') ?? false,
                     title:        form.get('title'),
                     description:  form.get('description'),
                 }),
@@ -78,7 +85,7 @@
                 msg.textContent = `Updated successfully!`;
                 setTimeout(() => { msg.classList.remove('msg-ok'); }, 1500);
             } else {
-                value.text().then(on_err);
+                on_err(await value.json());
             }
         })
         .catch(on_err);
@@ -99,7 +106,15 @@
                 Original URL:
             </td>
             <td>
-                <input name="original_url" type="url" value="{{ url.original_url | e }}" />
+                <input name="original_url" type="url" value="{{ url.original_url | e }}" required />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Active:
+            </td>
+            <td>
+                <input name="is_active" type="checkbox" {% if url.is_active %}checked{% endif %} />
             </td>
         </tr>
         <tr>
@@ -107,7 +122,7 @@
                 Title:
             </td>
             <td>
-                <input name="title" type="text" value="{{ url.title | e }}" />
+                <input name="title" type="text" value="{{ url.title | e }}" required />
             </td>
         </tr>
         <tr>
@@ -127,8 +142,10 @@
                 Last edit:
             </td>
             <td>
-                <noscript>{{ url.updated_at }} UTC</noscript>
-                <script lang="javascript"> localize_time("{{ url.updated_at }}"); </script>
+                <small>
+                    <noscript>{{ url.updated_at }} UTC</noscript>
+                    <script lang="javascript"> localize_time("{{ url.updated_at }}"); </script>
+                </small>
             </td>
         </tr>
         <tr>
@@ -136,8 +153,10 @@
                 Created at:
             </td>
             <td>
-                <noscript>{{ url.created_at }} UTC</noscript>
-                <script lang="javascript"> localize_time("{{ url.created_at }}"); </script>
+                <small>
+                    <noscript>{{ url.created_at }} UTC</noscript>
+                    <script lang="javascript"> localize_time("{{ url.created_at }}"); </script>
+                </small>
             </td>
         </tr>
     </table>

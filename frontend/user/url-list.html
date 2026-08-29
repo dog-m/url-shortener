@@ -7,8 +7,17 @@
 {%- block head -%}
 <style>
     .url-container {
-        list-style: none;
-        padding-left: 0px;
+        list-style: square;
+        padding-left: 1.5em;
+    }
+
+    .url-container li::marker {
+        color: #f00;
+        font-size: 25pt;
+    }
+
+    .url-container li[active]::marker {
+        color: #0f0;
     }
 
     .url-item {
@@ -72,7 +81,7 @@
 </form>
 <ul class="url-container">
     {%- for url in urls -%}
-        <li>
+        <li {% if url.is_active %}active{% endif %}>
             <div class="url-item">
                 <div>
                     <a href="/urls/{{- url.id -}}/overview">[u/{{ url.id }}] <span>{{ url.title | e }}</span></a>
@@ -80,7 +89,13 @@
                     [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]
                 </div>
                 <div class="ellipsis-text">
-                    <small class="url-item-description">{{- url.description | e -}}</small>
+                    <small class="url-item-description">
+                    {%- if url.description -%}
+                        {{- url.description | e -}}
+                    {%- else -%}
+                        <i>No description.</i>
+                    {%- endif -%}
+                    </small>
                 </div>
             </div>
         </li>

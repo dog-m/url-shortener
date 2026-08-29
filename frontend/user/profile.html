@@ -4,13 +4,25 @@
 
 {% block title %}Profile / {{ super() }}{% endblock %}
 
+{%- block head -%}
+<script lang="javascript">
+    function update_profile(e) {
+        e.preventDefault();
+        let form = new FormData(e.srcElement);
+
+        //...
+        let patch = { id: '{{ user.id }}' };
+        console.log(form);
+
+        return false;
+    }
+</script>
+{%- endblock -%}
+
 {%- block page_content -%}
 <h4>Profile</h4>
 <p>Greetings, {{ user.name | e }}.</p>
-<form method="POST" action="/api/v1/user" enctype="application/x-www-form-urlencoded" autocomplete="off">
-    <input type="hidden" name="id" value="{{- user.id -}}" />
-    <input type="hidden" name="is_active" value="{{- user.is_active -}}" />
-    <input type="hidden" name="is_superuser" value="{{- user.is_superuser -}}" />
+<form onsubmit="return update_profile(event);" autocomplete="off">
     <div>
         <label for="name">New name:</label>
         <input type="text" name="name" placeholder="Your name" />

@@ -1,9 +1,10 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from backend.api.dependencies import require_user
 from backend.models.user import User
+from backend.schemas.api_base import ApiOk
 from backend.schemas.user import UserInfo, UserUpdate
 
 #
@@ -21,14 +22,19 @@ async def user_info(
 
 
 
-@api_user_router.post('/user')
+@api_user_router.patch('/user', response_model=ApiOk)
 async def update_user(
-    new_info: Annotated[UserUpdate, Form()],
+    patch: Annotated[UserUpdate, Body()],
     user: Annotated[User, Depends(require_user)],
 ):
-    if new_info.password and '\n' in new_info.password:  # check placeholder value
-        new_info.password = None
+    # validation and access checks
+    if patch.id != user.id and not user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Changing someone else's profile is not allowed",
+        )
 
-    print('[!!!]', new_info)
+    print('[!!!]', patch)
 
-    return {}
+    return ApiOk()
+
