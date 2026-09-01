@@ -28,6 +28,37 @@
     .url-item:hover {
         background-color: #eee;
     }
+
+    .sort-container input {
+        display: none;
+    }
+
+    .sort-label {
+        display: inline-block;
+        cursor: pointer;
+
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .sort-arrow {
+        width: 16px;
+        height: 16px;
+        background-color: #333;
+        display: block;
+        transition: transform 0.2s ease;
+    }
+
+    .sort-container input:not(:checked) + .sort-label .sort-arrow {
+        clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+    }
+
+    .sort-container input:checked + .sort-label .sort-arrow {
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
 </style>
 <script lang="javascript">
     async function debug_add_url() {
@@ -77,6 +108,23 @@
 <button type="button" onclick="debug_add_url()">[DEBUG] Add a URL</button>
 <form method="get" action="/urls" autocomplete="off">
     <input type="search" name="q" placeholder="Let's look for..." value="{{- query | e -}}" />
+    <select name="sort">
+        {%- macro sort_sel(id, title) -%}
+            <option value="{{ id }}"{{ ' selected' if id == sort else '' }}>{{ title }}</option>
+        {%- endmacro %}
+        {{ sort_sel('id',      'URL ID')           }}
+        {{ sort_sel('created', 'Creation time')    }}
+        {{ sort_sel('updated', 'Last edit time')   }}
+        {{ sort_sel('expires', 'Expiration time')  }}
+        {{ sort_sel('title',   'Title')            }}
+        {{ sort_sel('url',     'Original address') }}
+    </select>
+    <label class="sort-container">
+        <input type="checkbox" name="asc" {{ 'checked' if sort_asc else '' }}>
+        <span class="sort-label">
+            <span class="sort-arrow"></span>
+        </span>
+    </label>
     <input type="submit" value="Search!" />
 </form>
 <ul class="url-container">

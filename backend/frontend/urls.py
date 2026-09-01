@@ -26,7 +26,7 @@ async def url_search(
     query: Annotated[str, Query(alias='q')] = '',
     page: Annotated[str, Query(alias='p')] = '0',
     sort: Annotated[str, Query()] = 'updated',
-    asc: Annotated[Literal['0', '1'], Query(pattern='^(0|1)$')] = '0',
+    asc: Annotated[Literal['off', 'on'], Query(pattern='on|off')] = 'off',
     user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format
 ):
     # parameter cleanup
@@ -34,6 +34,7 @@ async def url_search(
     page_index = max(0, int(page) if page.isnumeric() else 0)
     query      = query[:500].strip()
     sort       = sort.strip().lower()
+    sort_asc   = asc == 'on'
     page_size  = 50
 
     # access checks
@@ -45,7 +46,7 @@ async def url_search(
         text=query,
         owner=owner,
         sort_criteria=sort,
-        sort_asc=asc == '1',
+        sort_asc=sort_asc,
         batch_size=page_size,
         offset_items=page_index * page_size,
     )
@@ -57,11 +58,13 @@ async def url_search(
         media_type='text/html',
         context={
             'user': user,
-            'query': query,
             'page': page_index,
             'page_size': page_size,
             'urls': urls,
             'now': now_UTC().replace(tzinfo=None),
+            'query': query,
+            'sort': sort,
+            'sort_asc': sort_asc,
         }
     )
 
