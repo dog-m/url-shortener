@@ -83,4 +83,3 @@ async def get_all_users_batched(db: AsyncSession, *, offset_items: int = 0, batc
     )
     return res.scalars().all()
 
-

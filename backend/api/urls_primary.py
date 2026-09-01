@@ -24,7 +24,7 @@ _allow_header_forwarded_for = True
 _client_ip_first            = False
 
 
-api_urls_router = APIRouter(prefix='', tags=['api', 'urls'])
+api_urls_router = APIRouter(prefix='', tags=['api', 'primary'])
 
 
 
@@ -89,7 +89,7 @@ async def visit_url(
     )
 
     # log every visit accurately (before allowing the client to proceed)
-    await register_url_visit(db, url, visitor)
+    await register_url_visit(db, url.id, visitor)
 
     # respond
     return RedirectResponse(

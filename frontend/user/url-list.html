@@ -39,9 +39,9 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    original_url: `https://google.com/foo?q=${something}`,
+                    original_url: `https://example.com/foo?q=${something}`,
                     title: `bar+${something}`,
-                    //description: null,
+                    description: '',
                 }),
                 redirect: 'error',
                 credentials: 'same-origin',
@@ -81,10 +81,10 @@
 </form>
 <ul class="url-container">
     {%- for url in urls -%}
-        <li {% if url.is_active %}active{% endif %}>
+        <li {% if url.is_active and (not url.expires_at or now < url.expires_at) %}active{% endif %}>
             <div class="url-item">
                 <div>
-                    <a href="/urls/{{- url.id -}}/overview">[u/{{ url.id }}] <span>{{ url.title | e }}</span></a>
+                    <a href="/urls/{{- url.id -}}/overview"><code>[u/{{ url.id }}]</code> <span>{{ url.title | e }}</span></a>
                     [<a href="/urls/{{- url.id -}}/edit">edit</a>]
                     [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]
                 </div>

@@ -4,7 +4,7 @@ import string
 from collections.abc import Sequence
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
@@ -12,7 +12,7 @@ from sqlalchemy.orm import InstrumentedAttribute
 from backend.models.click import UrlVisitorMetadata
 from backend.models.url import Url
 from backend.models.user import User
-from backend.schemas.url import UrlCreate, UrlUpdate
+from backend.schemas.url import UrlCreate
 
 #
 
@@ -35,31 +35,22 @@ async def create_new_url(db: AsyncSession, owner: User, url_info: UrlCreate) -> 
 
             url = Url(
                 id=url_id,
-                original_url=url_info.original_url.encoded_string(),
-                is_active=False,
-                title=url_info.title,
-                description=url_info.description,
                 owner_id=owner.id,
+                **url_info.model_dump(),
             )
 
             db.add(url)
             await db.commit()
 
             await db.refresh(url)
-            # TODO: cache?
-            return url
+            return url  # TODO: cache?
         except IntegrityError:
             pass
 
 
 
-async def find_url_by_id(db: AsyncSession, url_id: str, *, lock: bool = False) -> Url | None:
-    stmt = select(Url).where(Url.id == url_id)
-
-    if lock:
-        stmt = stmt.with_for_update(key_share=True)
-
-    return (await db.execute(stmt)).scalar()
+async def find_url_by_id(db: AsyncSession, url_id: str) -> Url | None:
+    return await db.get(Url, url_id)
 
 
 
@@ -118,15 +109,8 @@ async def find_urls_batched(
 
 
 
-async def update_url(db: AsyncSession, url_patch: UrlUpdate) -> None:
-    await db.execute(
-        update(Url), [url_patch.model_dump()]
-    )
-    await db.commit()
-
-
-async def register_url_visit(db: AsyncSession, url: Url, visitor: UrlVisitorMetadata) -> None:
+async def register_url_visit(db: AsyncSession, url_id: str, visitor: UrlVisitorMetadata) -> None:
     # TODO: log user clicks
-    print(f"[~] Url /u/{url.id} has been visited by {visitor!r}")
+    print(f"[~] Url /u/{url_id} has been visited by {visitor!r}")
     pass
 

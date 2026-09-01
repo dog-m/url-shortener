@@ -11,8 +11,21 @@
         let form = new FormData(e.srcElement);
 
         //...
-        let patch = { id: '{{ user.id }}' };
-        console.log(form);
+        let patch = {};
+
+        let apply = (fieldName) => {
+            if (value = form.get(fieldName))
+                patch[fieldName] = value;
+        };
+
+        apply('name');
+        apply('email');
+        apply('password');
+
+        Object.keys(patch).length;
+        patch.version = parseInt('{{ user.version }}');
+        let addr = '/user/{{ user.id }}';
+        console.log(form, patch);
 
         return false;
     }

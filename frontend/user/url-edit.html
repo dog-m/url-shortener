@@ -37,12 +37,18 @@
     }
 </style>
 <script lang="javascript">
+    let offset = new Date().getTimezoneOffset() * 1000 * 60;
+
+    function to_local_datetime(utc) {
+        return new Date(utc + 'Z');
+    }
+
     function localize_time(utc) {
-        let offset = new Date().getTimezoneOffset() * 1000 * 60;
-        let local = Date.parse(utc) - offset;
-        let value = new Date(local).toLocaleString();
+        let value = to_local_datetime(utc).toLocaleString();
         document.write(`<time>${value}</time>`);
     }
+
+    var url_version = parseInt('{{ url.version }}');
 
     function update_url(e) {
         // prepare for the upload
@@ -57,23 +63,31 @@
             console.error('Entry update error', reason);
         };
 
+        let extract_datetime = (str) => {
+            if (str == '') return null;
+            let date = new Date(str);
+            return date.toISOString();
+        };
+
         // collect the data
         let form = new FormData(e.srcElement);
         console.log(form);
+        let patch = {
+            original_url: form.get('original_url'),
+            is_active:    form.get('is_active') ?? false,
+            title:        form.get('title'),
+            description:  form.get('description'),
+            expires_at:   extract_datetime(form.get('expires_at')),
+        };
+        console.log(patch);
 
         fetch(
-            '/api/v1/urls', {
+            `/api/v1/urls/{{ url.id }}?v=${url_version}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    id:           '{{ url.id }}',
-                    original_url: form.get('original_url'),
-                    is_active:    form.get('is_active') ?? false,
-                    title:        form.get('title'),
-                    description:  form.get('description'),
-                }),
+                body: JSON.stringify(patch),
                 redirect: 'error',
                 credentials: 'same-origin',
                 signal: AbortSignal.timeout(5 * 1000),
@@ -81,6 +95,9 @@
         )
         .then(async (value) => {
             if (value.ok) {
+                data = await value.json();
+                url_version = data['version'];
+
                 msg.classList.add('msg-ok');
                 msg.textContent = `Updated successfully!`;
                 setTimeout(() => { msg.classList.remove('msg-ok'); }, 1500);
@@ -91,6 +108,33 @@
         .catch(on_err);
 
         return false;
+    }
+
+    function delete_url() {
+        if (!confirm('Do you really want to delete this URL?'))
+            return;
+
+        let on_err = (reason) => {
+            console.error('URL removal failure', reason);
+            alert('Unable to delete the URL.\nCheck browser console for more details.');
+        };
+
+        fetch(
+            '/api/v1/urls/{{ url.id }}', {
+                method: 'DELETE',
+                redirect: 'error',
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5 * 1000),
+            }
+        )
+        .then(async (value) => {
+            if (value.ok) {
+                window.location.pathname = '/urls';
+            } else {
+                on_err(await value.json());
+            }
+        })
+        .catch(on_err);
     }
 </script>
 {%- endblock -%}
@@ -133,6 +177,26 @@
             </td>
         </tr>
         <tr>
+            <td>
+                Expires at:
+            </td>
+            <td>
+                <noscript>{{ url.expires_at }}</noscript>
+                <script lang="javascript">
+                    let timestamp = '{{ url.expires_at if url.expires_at }}';
+                    let value = '';
+                    if (timestamp) {
+                        // https://stackoverflow.com/a/51643788
+                        let t = to_local_datetime(timestamp);
+                        let z = t.getTimezoneOffset() * 60 * 1000;
+                        let tLocal = new Date(t - z);
+                        value = tLocal.toISOString().split('.')[0];
+                    }
+                    document.write(`<input name="expires_at" type="datetime-local" value="${value}" />`);
+                </script>
+            </td>
+        </tr>
+        <tr>
             <td colspan="2">
                 <input type="submit" value="Update" />
             </td>
@@ -162,4 +226,7 @@
     </table>
     <div id="msg"></div>
 </form>
+<div>
+    <input type="button" value="Delete" onclick="delete_url()" />
+</div>
 {%- endblock -%}

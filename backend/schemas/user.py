@@ -1,7 +1,9 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, SecretStr
+
+from backend.validation.name import ValidName
 
 #
 
@@ -18,10 +20,13 @@ class UserInfo(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    id: uuid.UUID
-    email: EmailStr | None    = None
-    name: str | None          = None
-    is_active: bool | None    = None
-    is_superuser: bool | None = None
-    password: str | None      = None
+    email: EmailStr     = None
+    password: SecretStr = None
+    name: ValidName     = None
+
+
+
+class AdminUpdate(UserUpdate):
+    is_active: bool    = None
+    is_superuser: bool = None
 

@@ -1,23 +1,35 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import (
+    APIRouter,
+    Body,
+    Depends,
+    HTTPException,
+    Path,
+    Query,
+    Request,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.exc import StaleDataError
 
 from backend.api.dependencies import require_user
+from backend.core.security import limiter
 from backend.db.database import get_db_session
 from backend.models.user import User
-from backend.schemas.url import UrlCreate, UrlInfo, UrlUpdate
+from backend.schemas.api_base import ApiOk
+from backend.schemas.url import UrlCreate, UrlInfo, UrlUpdate, UrlUpdateResult
 from backend.services.url import (
+    URL_ID_PATTERN,
     create_new_url,
     find_url_by_id,
     find_urls_batched,
-    update_url,
 )
 
 #
 
 
-api_urls_router = APIRouter(prefix='', tags=['api', 'user'])
+api_urls_router = APIRouter(prefix='', tags=['url'])
 
 
 
@@ -40,28 +52,67 @@ async def add_new_url(
 
 
 
-@api_urls_router.patch('/urls')
+@api_urls_router.patch('/urls/{url_id}', response_model=UrlUpdateResult)
+@limiter.limit('1/second')
 async def edit_url(
-    url_patch: Annotated[UrlUpdate, Body()],
+    request: Request,  # noqa: ARG001
+    url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
+    url_version: Annotated[int, Query(alias='v')],
+    patch: Annotated[UrlUpdate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
 ):
-    url = await find_url_by_id(db, url_patch.id, lock=True)
-    if not url:
+    # validation and access checks
+    if (url := await find_url_by_id(db, url_id)) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
         )
-
     if url.owner_id != user.id and not user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
-    # patch
-    url_patch.original_url = str(url_patch.original_url)
+    # concurrency checks
+    if url_version != url.version:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+        )
 
-    await update_url(db, url_patch)
-    return {
-        'status': 'ok',
-    }
+    # apply changes
+    try:
+        # NOTE: no 'mode=json' here because of datetimes
+        for name, value in patch.model_dump(exclude_unset=True).items():
+            setattr(url, name, value)
+
+        await db.commit()
+    except StaleDataError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+        )
+
+    return UrlUpdateResult(version=url_version + 1)  # skipping instance refresh
+
+
+
+@api_urls_router.delete('/urls/{url_id}', response_model=ApiOk)
+async def remove_url(
+    url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
+    user: Annotated[User, Depends(require_user)],
+):
+    # validation and access checks
+    if (url := await find_url_by_id(db, url_id)) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+    if url.owner_id != user.id and not user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    # apply the change
+    await db.delete(url)
+    await db.commit()  # TODO: errors?
+
+    return ApiOk()
 

@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.dependencies import require_user
-from backend.db.database import get_db_session
+from backend.db.database import get_db_session, now_UTC
 from backend.frontend.common import frontend_templates
 from backend.models.user import User
 from backend.services.url import URL_ID_PATTERN, find_url_by_id, find_urls_batched
@@ -61,6 +61,7 @@ async def url_search(
             'page': page_index,
             'page_size': page_size,
             'urls': urls,
+            'now': now_UTC().replace(tzinfo=None),
         }
     )
 

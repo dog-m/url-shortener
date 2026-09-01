@@ -26,7 +26,7 @@ FRONTEND_INDEX     = '/'
 FRONTEND_USER_MAIN = '/profile'
 
 
-api_auth_router = APIRouter(prefix='', tags=['api', 'auth'])
+api_auth_router = APIRouter(prefix='', tags=['auth'])
 
 
 @api_auth_router.post('/login')
