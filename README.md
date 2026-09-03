@@ -6,20 +6,19 @@ This project is currently under active development and serves as an exploration 
 
 ## Features
 
-- **URL Shortening**: Convert long URLs into manageable, short links.
-- **User Authentication**: Secure user accounts and session management.
-- **Analytics**: Track click events and usage statistics.
-- **Rate Limiting**: Protect API endpoints from abuse.
-- **Admin Interface**: Basic controls for managing the system.
+- Convert long URLs into manageable, short links.
+- User accounts (regular + admin) and session management.
+- Track click events and usage statistics.
+- Rate Limiting.
 
 ## Tech Stack
 
-- **Backend**: FastAPI (async)
-- **Database**: SQLAlchemy (async) with SQLite/PostgreSQL
-- **Caching**: FastAPI-Cache/Redis
-- **Frontend**: Jinja2 templates, HTML, JS, CSS
-- **Validation**: Pydantic
-- **Package Management**: uv
+- FastAPI (async)
+- SQLAlchemy (async) with SQLite/PostgreSQL
+- FastAPI-Cache/Redis
+- Jinja2 templates, HTML, JS, CSS
+- Pydantic models
+- uv
 
 ## Getting Started
 
