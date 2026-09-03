@@ -85,10 +85,7 @@
 </form>
 <div id="msg"></div>
 <p>
-    <script lang="javascript">
-        let x = 1;
-    </script>
-    <i>(Last update: {{- user.updated_at -}})</i>
+    <i>Last update: <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script></i>
 </p>
 <form method="post" action="/api/v1/logout">
     <button type="submit">Log-out</button>

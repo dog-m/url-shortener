@@ -37,17 +37,6 @@
     }
 </style>
 <script lang="javascript">
-    let offset = new Date().getTimezoneOffset() * 1000 * 60;
-
-    function to_local_datetime(utc) {
-        return new Date(utc + 'Z');
-    }
-
-    function localize_time(utc) {
-        let value = to_local_datetime(utc).toLocaleString();
-        document.write(`<time>${value}</time>`);
-    }
-
     var patch_version = parseInt('{{ url.version }}');
 
     function update_url(e) {
@@ -186,11 +175,7 @@
                     let timestamp = '{{ url.expires_at if url.expires_at }}';
                     let value = '';
                     if (timestamp) {
-                        // https://stackoverflow.com/a/51643788
-                        let t = to_local_datetime(timestamp);
-                        let z = t.getTimezoneOffset() * 60 * 1000;
-                        let tLocal = new Date(t - z);
-                        value = tLocal.toISOString().split('.')[0];
+                        value = to_local_datetime_ISO(timestamp);
                     }
                     document.write(`<input name="expires_at" type="datetime-local" value="${value}" />`);
                 </script>
