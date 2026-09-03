@@ -1,6 +1,6 @@
 @echo off
 
 cd ..
-uv run ruff check .
+uv run mypy .
 
 pause
