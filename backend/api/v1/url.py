@@ -8,6 +8,7 @@ from fastapi import (
     Path,
     Query,
     Request,
+    Response,
     status,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,12 +56,13 @@ async def add_new_url(
 @api_urls_router.patch('/urls/{url_id}', response_model=UrlUpdateResult)
 @limiter.limit('1/second')
 async def edit_url(
-    request: Request,  # noqa: ARG001
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     url_version: Annotated[int, Query(alias='v')],
     patch: Annotated[UrlUpdate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
+    request: Request,  # noqa: ARG001
+    response: Response,  # noqa: ARG001
 ):
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:

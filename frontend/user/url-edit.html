@@ -48,7 +48,7 @@
         document.write(`<time>${value}</time>`);
     }
 
-    var url_version = parseInt('{{ url.version }}');
+    var patch_version = parseInt('{{ url.version }}');
 
     function update_url(e) {
         // prepare for the upload
@@ -82,7 +82,7 @@
         console.log(patch);
 
         fetch(
-            `/api/v1/urls/{{ url.id }}?v=${url_version}`, {
+            `/api/v1/urls/{{ url.id }}?v=${patch_version}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -96,7 +96,7 @@
         .then(async (value) => {
             if (value.ok) {
                 data = await value.json();
-                url_version = data['version'];
+                patch_version = data['version'];
 
                 msg.classList.add('msg-ok');
                 msg.textContent = `Updated successfully!`;

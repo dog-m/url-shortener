@@ -6,11 +6,23 @@
 
 {%- block head -%}
 <script lang="javascript">
-    function update_profile(e) {
-        e.preventDefault();
-        let form = new FormData(e.srcElement);
+    var patch_version = parseInt('{{ user.version }}');
 
-        //...
+    function update_profile(e) {
+        // prepare for the upload
+        e.preventDefault();
+        let msg = document.getElementById('msg');
+        msg.classList.remove('msg-ok', 'msg-err');
+        msg.textContent = '';
+
+        let on_err = (reason) => {
+            msg.classList.add('msg-err');
+            msg.textContent = `Unable to update the entry.`;
+            console.error('Entry update error', reason);
+        };
+
+        // collect the data
+        let form = new FormData(e.srcElement);
         let patch = {};
 
         let apply = (fieldName) => {
@@ -21,11 +33,32 @@
         apply('name');
         apply('email');
         apply('password');
-
-        Object.keys(patch).length;
-        patch.version = parseInt('{{ user.version }}');
-        let addr = '/user/{{ user.id }}';
         console.log(form, patch);
+
+        // make the request only if there is something to upload, otherwise do nothing
+        if (Object.keys(patch).length !== 0) {
+            fetch(
+                `/api/v1/user/{{ user.id }}?v=${patch_version}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(patch),
+                    redirect: 'error',
+                    credentials: 'same-origin',
+                    signal: AbortSignal.timeout(5 * 1000),
+                }
+            )
+            .then(async (value) => {
+                if (value.ok) {
+                    // regenerate the page
+                    window.location.reload();
+                } else {
+                    on_err(await value.json());
+                }
+            })
+            .catch(on_err);
+        }
 
         return false;
     }
@@ -38,11 +71,11 @@
 <form onsubmit="return update_profile(event);" autocomplete="off">
     <div>
         <label for="name">New name:</label>
-        <input type="text" name="name" placeholder="Your name" />
+        <input type="text" name="name" placeholder="Your new name" />
     </div>
     <div>
         <label for="email">New E-mail:</label>
-        <input type="email" name="email" placeholder="Your email" />
+        <input type="email" name="email" placeholder="Your new email" />
     </div>
     <div>
         <label for="password">New password:</label>
@@ -50,7 +83,11 @@
     </div>
     <input type="submit" value="Update">
 </form>
+<div id="msg"></div>
 <p>
+    <script lang="javascript">
+        let x = 1;
+    </script>
     <i>(Last update: {{- user.updated_at -}})</i>
 </p>
 <form method="post" action="/api/v1/logout">

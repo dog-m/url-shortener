@@ -8,6 +8,7 @@ from fastapi import (
     Path,
     Query,
     Request,
+    Response,
     status,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,12 +39,13 @@ async def get_current_user_profile(
 @api_user_router.patch('/user/{user_id}', response_model=ApiOk)
 @limiter.limit('1/second')
 async def edit_user_profile(
-    request: Request,  # noqa: ARG001
     user_id: Annotated[str, Path()],
     user_version: Annotated[int, Query(alias='v')],
     patch: Annotated[UserUpdate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
+    request: Request,  # noqa: ARG001
+    response: Response,  # noqa: ARG001
 ):
     # access checks
     if user_id != user.id and not user.is_superuser:

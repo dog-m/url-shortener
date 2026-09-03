@@ -21,8 +21,8 @@ class UserInfo(BaseModel):
 
 class UserUpdate(BaseModel):
     email: EmailStr     = None
-    password: SecretStr = None
     name: ValidName     = None
+    password: SecretStr = None
 
 
 
