@@ -12,7 +12,11 @@ from backend.api.dependencies import (
 )
 from backend.db.database import get_db_session
 from backend.models.click import UrlVisitorMetadata
-from backend.services.security import can_url_be_visited_by, is_url_freely_accessible
+from backend.services.security import (
+    can_url_be_visited_by,
+    is_url_active,
+    is_url_freely_accessible,
+)
 from backend.services.url import URL_ID_PATTERN, find_url_by_id, register_url_visit
 
 #
@@ -71,6 +75,11 @@ async def visit_url(
         )
 
     # access checks
+    if not await is_url_active(url):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,  # 410/Gone instead?
+        )
+
     if not await is_url_freely_accessible(url):
         session = await get_current_session(db, session_id)
         user    = await get_current_user(db, session)

@@ -11,11 +11,14 @@ from pydantic import (
 
 #
 
+ValidTitle = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
 
 class UrlInfo(BaseModel):
     id: str
     original_url: str
     is_active: bool
+    is_open_access: bool
     title: str
     description: str
     created_at: datetime
@@ -27,7 +30,8 @@ class UrlInfo(BaseModel):
 class UrlCreate(BaseModel):
     original_url: HttpUrl
     is_active: bool             = True
-    title: str
+    is_open_access: bool        = True
+    title: ValidTitle
     description: str
     expires_at: datetime | None = None
 
@@ -40,7 +44,8 @@ class UrlCreate(BaseModel):
 class UrlUpdate(BaseModel):
     original_url: HttpUrl       = None
     is_active: bool             = None
-    title: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)] = None
+    is_open_access: bool        = None
+    title: ValidTitle           = None
     description: str            = None
     expires_at: datetime | None = None
 

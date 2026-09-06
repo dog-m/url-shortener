@@ -1,15 +1,15 @@
 import random
 import re
 import string
+import uuid
 from collections.abc import Sequence
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from backend.models.click import UrlVisitorMetadata
+from backend.models.click import ClickEvent, UrlVisitorMetadata
 from backend.models.url import Url
 from backend.models.user import User
 from backend.schemas.url import UrlCreate
@@ -54,17 +54,17 @@ async def find_url_by_id(db: AsyncSession, url_id: str) -> Url | None:
 
 
 
-_FIND_URLS__SORTING_CRITERIA: dict[str, InstrumentedAttribute] = {
+URL_SORTING_CRITERIA: dict[str, InstrumentedAttribute] = {
     'id':      Url.id,
     'created': Url.created_at,
     'updated': Url.updated_at,
     'expires': Url.expires_at,
     'title':   Url.title,
     'url':     Url.original_url,
-    # others make little to no sense (to me) or require using join
+    # others make little to no sense (to me) or require using join(s)
 }
 
-_FIND_URLS__DEFAULT_SORTING = Url.updated_at
+URL_SORTING_CRITERIA_DEFAULT = Url.updated_at
 
 
 async def find_urls_batched(
@@ -72,7 +72,7 @@ async def find_urls_batched(
     *,
     offset_items: int = 0,
     batch_size: int = 50,
-    owner: User | UUID | None = None,
+    owner: User | uuid.UUID | None = None,
     text: str = '',
     sort_criteria: str = 'updated',
     sort_asc: bool = False,
@@ -92,7 +92,7 @@ async def find_urls_batched(
         stmt = stmt.where(Url.title.icontains(text) | Url.description.icontains(text))
 
     # ordering/sorting
-    criteria = _FIND_URLS__SORTING_CRITERIA.get(sort_criteria.lower(), _FIND_URLS__DEFAULT_SORTING)
+    criteria = URL_SORTING_CRITERIA.get(sort_criteria.lower(), URL_SORTING_CRITERIA_DEFAULT)
     if not sort_asc:
         criteria = criteria.desc()
     stmt = stmt.order_by(criteria)
@@ -110,7 +110,15 @@ async def find_urls_batched(
 
 
 async def register_url_visit(db: AsyncSession, url_id: str, visitor: UrlVisitorMetadata) -> None:
-    # TODO: log user clicks
-    print(f"[~] Url /u/{url_id} has been visited by {visitor!r}")
-    pass
+    click = ClickEvent(
+        id=uuid.uuid1(),  # FIXME: use UUID7 on later Python versions
+        url_id=url_id,
+        user_addr=visitor.ip,
+        headers_user_agent=visitor.headers_user_agent,
+        headers_referer_domain=visitor.headers_referer_domain,
+        headers_accept_language=visitor.headers_accept_language,
+    )
+    db.add(click)
+    await db.commit()
+    # TODO: batch insertion?
 

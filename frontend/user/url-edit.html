@@ -62,11 +62,12 @@
         let form = new FormData(e.srcElement);
         console.log(form);
         let patch = {
-            original_url: form.get('original_url'),
-            is_active:    form.get('is_active') ?? false,
-            title:        form.get('title'),
-            description:  form.get('description'),
-            expires_at:   extract_datetime(form.get('expires_at')),
+            original_url:   form.get('original_url'),
+            is_active:      form.get('is_active') ?? false,
+            is_open_access: form.get('is_open_access') ?? false,
+            title:          form.get('title'),
+            description:    form.get('description'),
+            expires_at:     extract_datetime(form.get('expires_at')),
         };
         console.log(patch);
 
@@ -148,6 +149,14 @@
             </td>
             <td>
                 <input name="is_active" type="checkbox" {% if url.is_active %}checked{% endif %} />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Openly accessible:
+            </td>
+            <td>
+                <input name="is_open_access" type="checkbox" {% if url.is_open_access %}checked{% endif %} />
             </td>
         </tr>
         <tr>

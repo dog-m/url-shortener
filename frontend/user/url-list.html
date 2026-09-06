@@ -110,8 +110,9 @@
     <input type="search" name="q" placeholder="Let's look for..." value="{{- query | e -}}" />
     <select name="sort">
         {%- macro sort_sel(id, title) -%}
-            <option value="{{ id }}"{{ ' selected' if id == sort else '' }}>{{ title }}</option>
+        <option value="{{ id }}"{{ ' selected' if id == sort else '' }}>{{ title }}</option>
         {%- endmacro %}
+        {#- How can we use this with URL_SORTING_CRITERIA ? -#}
         {{ sort_sel('id',      'URL ID')           }}
         {{ sort_sel('created', 'Creation time')    }}
         {{ sort_sel('updated', 'Last edit time')   }}
@@ -129,9 +130,10 @@
 </form>
 <ul class="url-container">
     {%- for url in urls -%}
-        <li {% if url.is_active and (not url.expires_at or now < url.expires_at) %}active{% endif %}>
+        <li {% if url.is_active and (not url.expires_at or now_UTC < url.expires_at) %}active{% endif %}>
             <div class="url-item">
                 <div>
+                    {{- '🔓' if url.is_open_access else '🔒' -}}
                     <a href="/urls/{{- url.id -}}/overview"><code>[u/{{ url.id }}]</code> <span>{{ url.title | e }}</span></a>
                     [<a href="/urls/{{- url.id -}}/edit">edit</a>]
                     [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]

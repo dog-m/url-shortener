@@ -17,7 +17,8 @@ class Url(BaseDbModel):
 
     id: Mapped[str]                     = mapped_column(String(100), primary_key=True, index=True)
     original_url: Mapped[str]           = mapped_column(String(2048), nullable=False)
-    is_active: Mapped[bool]             = mapped_column(Boolean, default=True)
+    is_active: Mapped[bool]             = mapped_column(Boolean, default=True, nullable=False)
+    is_open_access: Mapped[bool]        = mapped_column(Boolean, default=True, nullable=False)
     title: Mapped[str]                  = mapped_column(String(URL_TITLE_MAX_LEN), nullable=False)
     description: Mapped[str]            = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime]        = mapped_column(DateTime(timezone=True), default=now_UTC, nullable=False)
