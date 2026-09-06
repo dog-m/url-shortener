@@ -10,6 +10,7 @@ This project is currently under active development and serves as an exploration 
 - User accounts (regular + admin) and session management.
 - Track click events and usage statistics.
 - Rate Limiting.
+- Basic asyncio-based background jobs.
 
 ## Tech Stack
 
