@@ -4,15 +4,57 @@
 
 {% block title %}Users / {{ super() }}{% endblock %}
 
+{% block head %}
+<style>
+    .user-list {
+        column-count: 1;
+        gap: 2.5em;
+    }
+
+    @media (min-width: 27em) {
+        .user-list {
+            column-count: 2;
+        }
+    }
+
+    @media (min-width: 37em) {
+        .user-list {
+            column-count: 3;
+        }
+    }
+
+    @media (min-width: 47em) {
+        .user-list {
+            column-count: 4;
+        }
+    }
+
+    @media (min-width: 57em) {
+        .user-list {
+            column-count: 5;
+        }
+    }
+
+    .user-list li {
+        padding-bottom: 0.7em;
+    }
+</style>
+{% endblock %}
+
 {%- block page_content -%}
-<ul>
-    {%- for user in users -%}
+<div>
+    <h3>All users</h3>
+</div>
+<div>
+    <ul class="user-list">
+        {%- for user in users -%}
         <li>
-            <div>
+            <div class="ellipsis-text">
                 <a href="/user/{{- user.id -}}/profile">{{- user.name | e -}}</a>
             </div>
         </li>
-    {%- endfor -%}
-</ul>
-<p>Page: #{{ page + 1 }} @ {{ page_size }} links per page.</p>
+        {%- endfor -%}
+    </ul>
+    <p>Page: #{{ page + 1 }} @ {{ page_size }} links per page.</p>
+</div>
 {%- endblock -%}

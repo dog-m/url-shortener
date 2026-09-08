@@ -4,15 +4,42 @@
 
 {% block title %}URL Overview / {{ super() }}{% endblock %}
 
+{%- block head -%}
+<style>
+    td {
+        vertical-align: top;
+    }
+</style>
+{% endblock %}
+
 {%- block page_content -%}
+<div>
+    <h3>
+        Overview:
+        <a href="/urls/{{- url.id -}}/edit"><input type="button" value="Edit"></a>
+        <a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer"><input type="button" value="Visit"></a>
+    </h3>
+</div>
+<div>
+    <table>
+        <tr>
+            <td>ID:</td>
+            <td>{{ url.id }}</td>
+        </tr>
+        <tr>
+            <td>Title:</td>
+            <td>{{ url.title | e }}</td>
+        </tr>
+        <tr>
+            <td>Description:</td>
+            <td><small>{{ url.description | e }}</small></td>
+        </tr>
+    </table>
+</div>
 <h3>
-    Overview:
+    Statistics:
 </h3>
-<p>
-    {{ url.id }}
-    {{ url.title }}
-    {{ url.description }}
-    {{ url.created_at }}
-    {{ url.updated_at }}
-</p>
+<div>
+    <p>TODO</p>
+</div>
 {%- endblock -%}

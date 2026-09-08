@@ -44,8 +44,7 @@ async def edit_user_profile(
     patch: Annotated[UserUpdate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-    request: Request,  # noqa: ARG001
-    response: Response,  # noqa: ARG001
+    request: Request, response: Response,  # noqa: ARG001 - rate limiting
 ):
     # access checks
     if user_id != user.id and not user.is_superuser:

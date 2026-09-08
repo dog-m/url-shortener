@@ -13,11 +13,14 @@
 
     .url-container li::marker {
         color: #f00;
-        font-size: 25pt;
+        font-size: 15pt;
+        font-weight: 600;
+        content: 'off ';
     }
 
     .url-container li[active]::marker {
-        color: #0f0;
+        color: #0d0;
+        content: 'on ';
     }
 
     .url-item {
@@ -58,6 +61,11 @@
 
     .sort-container input:checked + .sort-label .sort-arrow {
         clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
+
+    a.ellipsis-text {
+        display: inline-block;
+        max-width: 50%;
     }
 </style>
 <script lang="javascript">
@@ -105,38 +113,43 @@
 {%- endblock -%}
 
 {%- block page_content -%}
-<button type="button" onclick="debug_add_url()">[DEBUG] Add a URL</button>
-<form method="get" action="/urls" autocomplete="off">
-    <input type="search" name="q" placeholder="Let's look for..." value="{{- query | e -}}" />
-    <select name="sort">
-        {%- macro sort_sel(id, title) -%}
-        <option value="{{ id }}"{{ ' selected' if id == sort else '' }}>{{ title }}</option>
-        {%- endmacro %}
-        {#- How can we use this with URL_SORTING_CRITERIA ? -#}
-        {{ sort_sel('id',      'URL ID')           }}
-        {{ sort_sel('created', 'Creation time')    }}
-        {{ sort_sel('updated', 'Last edit time')   }}
-        {{ sort_sel('expires', 'Expiration time')  }}
-        {{ sort_sel('title',   'Title')            }}
-        {{ sort_sel('url',     'Original address') }}
-    </select>
-    <label class="sort-container">
-        <input type="checkbox" name="asc" {{ 'checked' if sort_asc else '' }}>
-        <span class="sort-label">
-            <span class="sort-arrow"></span>
-        </span>
-    </label>
-    <input type="submit" value="Search!" />
-</form>
+<div>
+    <h3>
+        All links
+        <input type="button" onclick="debug_add_url()" value="[DEBUG] Add a URL">
+    </h3>
+</div>
+<div>
+    <form method="get" action="/urls" autocomplete="off">
+        <input type="search" name="q" placeholder="Let's look for..." value="{{- query | e -}}" />
+        <select name="sort">
+            {%- macro sort_sel(id, title) -%}
+            <option value="{{ id }}"{{ ' selected' if id == sort else '' }}>{{ title }}</option>
+            {%- endmacro %}
+            {#- How can we use this with URL_SORTING_CRITERIA ? -#}
+            {{ sort_sel('id',      'URL ID')           }}
+            {{ sort_sel('created', 'Creation time')    }}
+            {{ sort_sel('updated', 'Last edit time')   }}
+            {{ sort_sel('expires', 'Expiration time')  }}
+            {{ sort_sel('title',   'Title')            }}
+            {{ sort_sel('url',     'Original address') }}
+        </select>
+        <label class="sort-container">
+            <input type="checkbox" name="asc" {{ 'checked' if sort_asc else '' }}>
+            <span class="sort-label">
+                <span class="sort-arrow"></span>
+            </span>
+        </label>
+        <input type="submit" value="Search!" />
+    </form>
+</div>
 <ul class="url-container">
     {%- for url in urls -%}
         <li {% if url.is_active and (not url.expires_at or now_UTC < url.expires_at) %}active{% endif %}>
             <div class="url-item">
-                <div>
-                    {{- '🔓' if url.is_open_access else '🔒' -}}
+                <div class="ellipsis-text">
+                    {{- '🌍' if url.is_open_access else '🔒' -}}
                     <a href="/urls/{{- url.id -}}/overview"><code>[u/{{ url.id }}]</code> <span>{{ url.title | e }}</span></a>
-                    [<a href="/urls/{{- url.id -}}/edit">edit</a>]
-                    [<a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer">visit</a>]
                 </div>
                 <div class="ellipsis-text">
                     <small class="url-item-description">
@@ -153,5 +166,10 @@
         <p>No addresses found.</p>
     {%- endfor -%}
 </ul>
-<p>Page: #{{ page + 1 }} @ {{ page_size }} links per page.</p>
+<p>
+    {% set search_suffix = ('&sort=' + sort if sort else '') + ('&asc=on' if sort_asc else '') + ('&q=' + query | e if query else '') %}
+    <a class="{{ 'hidden' if page == 0 else '' }}" href="/urls?p={{ page - 1 }}{{ search_suffix }}">&lArr; Prev</a>
+    Page #{{ page + 1 }}.
+    <a class="{{ 'hidden' if urls | length < page_size else '' }}" href="/urls?p={{ page + 1 }}{{ search_suffix }}">Next &rArr;</a>
+</p>
 {%- endblock -%}

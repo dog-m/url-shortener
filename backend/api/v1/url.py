@@ -61,8 +61,7 @@ async def edit_url(
     patch: Annotated[UrlUpdate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-    request: Request,  # noqa: ARG001
-    response: Response,  # noqa: ARG001
+    request: Request, response: Response,  # noqa: ARG001 - rate limiting
 ):
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:

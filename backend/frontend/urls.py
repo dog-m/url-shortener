@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
@@ -31,7 +31,7 @@ async def url_search(
     query: Annotated[str, Query(alias='q')] = '',
     page: Annotated[str, Query(alias='p')] = '0',
     sort: Annotated[str, Query()] = 'updated',
-    asc: Annotated[Literal['off', 'on'], Query(pattern='on|off')] = 'off',
+    asc: Annotated[str, Query()] = 'off',
     user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format
 ):
     # parameter cleanup
@@ -40,7 +40,7 @@ async def url_search(
     query      = query[:500].strip()
     sort       = sort.strip().lower()
     sort_asc   = asc == 'on'
-    page_size  = 50
+    page_size  = 20
 
     # access checks
     owner = user_id if user_id and user.is_superuser else user

@@ -5,6 +5,12 @@
 {% block title %}Profile / {{ super() }}{% endblock %}
 
 {%- block head -%}
+<style>
+    table {
+        border: 1px solid #000;
+        padding: 15px;
+    }
+</style>
 <script lang="javascript">
     var patch_version = parseInt('{{ user.version }}');
 
@@ -66,26 +72,39 @@
 {%- endblock -%}
 
 {%- block page_content -%}
-<h4>Profile</h4>
-<p>Greetings, {{ user.name | e }}.</p>
-<form onsubmit="return update_profile(event);" autocomplete="off">
-    <div>
-        <label for="name">New name:</label>
-        <input type="text" name="name" placeholder="Your new name" />
-    </div>
-    <div>
-        <label for="email">New E-mail:</label>
-        <input type="email" name="email" placeholder="Your new email" />
-    </div>
-    <div>
-        <label for="password">New password:</label>
-        <input type="password" name="password" placeholder="Your new password" />
-    </div>
-    <input type="submit" value="Update">
-</form>
-<div id="msg"></div>
+<div>
+    <h3>Profile</h3>
+</div>
+<div>
+    <p>Greetings, {{ user.name | e }}.</p>
+    <form onsubmit="return update_profile(event);" autocomplete="off">
+        <table>
+            <tr>
+                <td>New name:</td>
+                <td><input type="text" name="name" placeholder="Your new name" /></td>
+            </tr>
+            <tr>
+                <td>New E-mail:</td>
+                <td><input type="email" name="email" placeholder="Your new email" /></td>
+            </tr>
+            <tr>
+                <td>New password:</td>
+                <td><input type="password" name="password" placeholder="Your new password" /></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="height: 15px;"></td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="submit" value="Update" style="width: 100%;"></td>
+            </tr>
+        </table>
+    </form>
+    <div id="msg"></div>
+</div>
 <p>
-    <i>Last update: <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script></i>
+    <small>
+        <i>Last updated: <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script></i>
+    </small>
 </p>
 <form method="post" action="/api/v1/logout">
     <button type="submit">Log-out</button>
