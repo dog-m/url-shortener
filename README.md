@@ -21,6 +21,7 @@ This project is currently under active development and serves as an exploration 
 - Pydantic models
 - uv
 - Playwright
+- pytest
 
 ## Getting Started
 
@@ -64,8 +65,11 @@ uv run fastapi dev
 
 ## Development
 
-This project uses strict typing and linting to maintain code quality.
+This project uses semi-strict typing and linting to maintain code quality.
 
 - Linting: `uv run ruff check .`
 - Type checking: `uv run mypy .`
 - Run frontend tests: `npx playwright test`
+- Run backend tests: `uv run pytest`
+
+*One may find `scripts` folder helpful if using Windows.*
