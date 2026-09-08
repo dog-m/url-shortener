@@ -20,6 +20,7 @@ This project is currently under active development and serves as an exploration 
 - Jinja2 templates, HTML, JS, CSS
 - Pydantic models
 - uv
+- Playwright
 
 ## Getting Started
 
@@ -27,6 +28,7 @@ This project is currently under active development and serves as an exploration 
 
 - Python 3.12+
 - uv
+- npm
 
 ### Installation
 
@@ -37,10 +39,11 @@ This project is currently under active development and serves as an exploration 
    cd url-shortener
    ```
 
-1. Install dependencies using `uv`:
+1. Install dependencies using `uv` and `npm`:
 
    ```bash
    uv sync
+   npm ci
    ```
 
 1. Set up environment variables:
@@ -63,7 +66,6 @@ uv run fastapi dev
 
 This project uses strict typing and linting to maintain code quality.
 
-- **Linting**: `uv run ruff check .`
-<!--
-- **Type Checking**: `uv run mypy .`
--->
+- Linting: `uv run ruff check .`
+- Type checking: `uv run mypy .`
+- Run frontend tests: `npx playwright test`
