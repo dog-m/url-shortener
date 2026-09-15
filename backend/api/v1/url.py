@@ -16,10 +16,15 @@ from sqlalchemy.orm.exc import StaleDataError
 
 from backend.api.dependencies import require_user
 from backend.core.security import limiter
-from backend.db.database import get_db_session
+from backend.db.database import get_db_session, now_UTC
 from backend.models.user import User
 from backend.schemas.api_base import ApiOk
+from backend.schemas.clicks import ClickActivityStats
 from backend.schemas.url import UrlCreate, UrlInfo, UrlUpdate, UrlUpdateResult
+from backend.services.clicks import (
+    get_click_activity_by_date,
+    get_click_activity_by_weekday,
+)
 from backend.services.url import (
     URL_ID_PATTERN,
     create_new_url,
@@ -116,4 +121,30 @@ async def remove_url(
     await db.commit()  # TODO: errors?
 
     return ApiOk()
+
+
+
+@api_urls_router.get('/urls/{url_id}/stats', response_model=ClickActivityStats)
+async def get_url_stats(
+    url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
+    db: Annotated[AsyncSession, Depends(get_db_session)],
+    user: Annotated[User, Depends(require_user)],
+):
+    # validation and access checks
+    if (url := await find_url_by_id(db, url_id)) is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+    if url.owner_id != user.id and not user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    # fetch and return
+    now = now_UTC()  # TODO: make both configurable?
+    day_count = 30
+    return ClickActivityStats(
+        dates=await get_click_activity_by_date(db, now, days=day_count),
+        weekdays=await get_click_activity_by_weekday(db, now, days=day_count),
+    )
 

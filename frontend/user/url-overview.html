@@ -9,7 +9,90 @@
     td {
         vertical-align: top;
     }
+
+    .dot {
+        width: 0.85em;
+        height: 0.85em;
+        border: 1.5px solid #ccc;
+        border-radius: 33%;
+        background: #fff;
+    }
+
+    .dot.LX {
+        background: #f00;
+    }
+
+    .dot.L1 {
+        background: #dfd;
+    }
+
+    .dot.L2 {
+        background: #bfb;
+    }
+
+    .dot.L3 {
+        background: #8d8;
+    }
+
+    .dot.L4 {
+        background: #4b4;
+    }
 </style>
+<script lang="javascript">
+    let index2name = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    let isWeekend = (i) => i === 0 || i === 6 || i === 'sun' || i === 'sat';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        let data;
+        try {
+            let res = await fetch(
+                '/api/v1/urls/{{ url.id }}/stats', {
+                    method: 'GET',
+                }
+            );
+            data = await res.json();
+        } catch {
+            console.error('Something went wrong');
+            return;
+        }
+
+        let code = '';
+
+        // stats on each date
+        let dates = data['dates'];
+        let weekdays = data['weekdays'];
+        while (dates.length % 7 !== 0)  // 35 = 7 * 5
+            dates = [{'count': 0}, ...dates];
+
+        // preprocess
+        let maxCount = 1;
+        for (let entry of dates) {
+            maxCount = Math.max(maxCount, entry['count']);
+        }
+
+        for (let weekday = 0; weekday < 7; weekday++) {
+            code += `<tr>`;
+
+            for (let n = 0; n < 5; n++) {
+                let entry = dates[dates.length - (n * 7 + weekday)];
+                if (entry && entry.date) {
+                    let lvl = Math.round(4.0 * entry.count / maxCount);
+                    let caption = `${entry.count} clicks on ${entry.date}`;
+                    code += `<td><div class="dot L${lvl}" title="${caption}"></div></td>`;
+                } else {
+                    code += '<td><div class="dot LX" title="?"></div></td>';
+                }
+            }
+
+            code += `<td>${index2name[weekday]}</td>`;
+
+            code += `</tr>`;
+        }
+
+        // finalize and render
+        document.getElementById('stats-container').innerHTML = `<table>${code}</table>`;
+    });
+</script>
 {% endblock %}
 
 {%- block page_content -%}
@@ -39,7 +122,6 @@
 <h3>
     Statistics:
 </h3>
-<div>
-    <p>TODO</p>
+<div id="stats-container">
 </div>
 {%- endblock -%}
