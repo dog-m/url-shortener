@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 
-async def get_click_activity_by_date(db: AsyncSession, now: datetime, *, days: int = 30) -> list[ClickActivityDaily]:
+async def get_click_activity_by_date(db: AsyncSession, url_id: str, now: datetime, *, days: int = 30) -> list[ClickActivityDaily]:
     assert days > 0
 
     # fetch the data
@@ -28,6 +28,7 @@ async def get_click_activity_by_date(db: AsyncSession, now: datetime, *, days: i
             day_column,
             func.count(ClickEvent.id).label('count')
         )
+        .where(ClickEvent.url_id == url_id)
         .where(ClickEvent.timestamp >= (now - timedelta(days=days)))
         .group_by(day_column)
         .order_by(day_column)
@@ -54,7 +55,7 @@ async def get_click_activity_by_date(db: AsyncSession, now: datetime, *, days: i
 
 
 
-async def get_click_activity_by_weekday(db: AsyncSession, now: datetime, *, days: int = 30) -> ClickActivityWeekly:
+async def get_click_activity_by_weekday(db: AsyncSession, url_id: str, now: datetime, *, days: int = 30) -> ClickActivityWeekly:
     assert days > 0
 
     # fetch the data
@@ -64,6 +65,7 @@ async def get_click_activity_by_weekday(db: AsyncSession, now: datetime, *, days
             weekday_expr,
             func.count(ClickEvent.id).label('count')
         )
+        .where(ClickEvent.url_id == url_id)
         .where(ClickEvent.timestamp >= (now - timedelta(days=days)))
         .group_by(weekday_expr)
         .order_by(weekday_expr)

@@ -33,4 +33,3 @@ WEEKDAY_INDEX_TO_ATTR_NAME = {
 
 class ClickActivityStats(BaseModel):
     dates: list[ClickActivityDaily]
-    weekdays: ClickActivityWeekly

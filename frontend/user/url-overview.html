@@ -18,29 +18,41 @@
         background: #fff;
     }
 
-    .dot.LX {
-        background: #f00;
+    .dot.LF, .dot.LX {
+        /* future and non-existing previous days */
+        visibility: hidden;
     }
 
-    .dot.L1 {
-        background: #dfd;
+    .dot.L1 { background: hsl(120, 99%, 90%); }
+    .dot.L2 { background: hsl(115, 80%, 80%); }
+    .dot.L3 { background: hsl(110, 60%, 70%); }
+    .dot.L4 { background: hsl(105, 40%, 50%); }
+
+    .day-weekend {
+        color: #f00;
     }
 
-    .dot.L2 {
-        background: #bfb;
+    .weekday-column {
+        min-width: 7vw;
     }
 
-    .dot.L3 {
-        background: #8d8;
+    .weekday-bar {
+        background: hsl(120, 75%, 75%);
+        border: 1px solid hsl(120, 50%, 45%);
+        height: 0.8em;
     }
 
-    .dot.L4 {
-        background: #4b4;
+    .stats {
+        border: 1px solid #000;
+        padding: 5px;
     }
 </style>
 <script lang="javascript">
-    let index2name = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    let index2name = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     let isWeekend = (i) => i === 0 || i === 6 || i === 'sun' || i === 'sat';
+
+    const WEEKS        = 2 * 4;  // last two months
+    const DAYS_IN_WEEK = 7;
 
     document.addEventListener('DOMContentLoaded', async () => {
         let data;
@@ -60,37 +72,63 @@
 
         // stats on each date
         let dates = data['dates'];
-        let weekdays = data['weekdays'];
-        while (dates.length % 7 !== 0)  // 35 = 7 * 5
-            dates = [{'count': 0}, ...dates];
+        for (let i = DAYS_IN_WEEK - new Date().getUTCDay() - 1; i > 0; i--) {
+            dates = [{'count': 0, 'future': 1}, ...dates];
+        }
+        let getStats = (week, day) => dates[WEEKS * DAYS_IN_WEEK - (week * DAYS_IN_WEEK + day) - 1];
 
         // preprocess
         let maxCount = 1;
         for (let entry of dates) {
             maxCount = Math.max(maxCount, entry['count']);
         }
+        let weekdays = [0, 0, 0, 0, 0, 0, 0];
+        for (let day = 0; day < DAYS_IN_WEEK; day++) {
+            for (let week = 0; week < WEEKS; week++) {
+                let stats = getStats(week, day);
+                if (stats)
+                    weekdays[day] += stats.count;
+            }
+        }
+        let weekdayMax = Math.max(1, ...weekdays);
 
-        for (let weekday = 0; weekday < 7; weekday++) {
-            code += `<tr>`;
+        // assemble the grid
+        for (let day = 0; day < DAYS_IN_WEEK; day++) {
+            code += '<tr>';
 
-            for (let n = 0; n < 5; n++) {
-                let entry = dates[dates.length - (n * 7 + weekday)];
-                if (entry && entry.date) {
-                    let lvl = Math.round(4.0 * entry.count / maxCount);
-                    let caption = `${entry.count} clicks on ${entry.date}`;
-                    code += `<td><div class="dot L${lvl}" title="${caption}"></div></td>`;
+            code += `<td class="weekday-label ${isWeekend(day) ? 'day-weekend' : 'day-work'}">${index2name[day]}</td>`;
+
+            for (let week = 0; week < WEEKS; week++) {
+                code += '<td>';
+
+                let stats = getStats(week, day);
+                if (stats) {
+                    if (stats.future) {
+                        code += '<div class="dot LF"></div>';
+                    } else {
+                        let lvl = Math.round(4.0 * stats.count / maxCount);
+                        if (stats.count > 0 && lvl === 0) lvl = 1;  // guarantee highlighting visited days
+
+                        let date = new Date(`${stats.date} UTC`).toLocaleDateString();
+                        let caption = `${stats.count} click(s) on ${date}`;
+
+                        code += `<div class="dot L${lvl}" title="${caption}"></div>`;
+                    }
                 } else {
-                    code += '<td><div class="dot LX" title="?"></div></td>';
+                    code += '<div class="dot LX"></div>';
                 }
+
+                code += '</td>';
             }
 
-            code += `<td>${index2name[weekday]}</td>`;
+            let percent = 100.0 * weekdays[day] / weekdayMax;
+            code += `<td class="weekday-column"><div class="weekday-bar" style="width: ${percent}%;"></div></td>`;
 
-            code += `</tr>`;
+            code += '</tr>';
         }
 
         // finalize and render
-        document.getElementById('stats-container').innerHTML = `<table>${code}</table>`;
+        document.getElementById('stats-container').innerHTML = `<table class="stats">${code}</table>`;
     });
 </script>
 {% endblock %}

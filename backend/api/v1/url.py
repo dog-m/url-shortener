@@ -21,10 +21,7 @@ from backend.models.user import User
 from backend.schemas.api_base import ApiOk
 from backend.schemas.clicks import ClickActivityStats
 from backend.schemas.url import UrlCreate, UrlInfo, UrlUpdate, UrlUpdateResult
-from backend.services.clicks import (
-    get_click_activity_by_date,
-    get_click_activity_by_weekday,
-)
+from backend.services.clicks import get_click_activity_by_date
 from backend.services.url import (
     URL_ID_PATTERN,
     create_new_url,
@@ -140,11 +137,13 @@ async def get_url_stats(
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
+    # prepare selection criteria
+    now = now_UTC()  # TODO: make configurable?
+    week_count = 2 * 4  # last two months
+    day_count = week_count * 7 - (7 - 1 - now.weekday()) + 1
+
     # fetch and return
-    now = now_UTC()  # TODO: make both configurable?
-    day_count = 30
     return ClickActivityStats(
-        dates=await get_click_activity_by_date(db, now, days=day_count),
-        weekdays=await get_click_activity_by_weekday(db, now, days=day_count),
+        dates=await get_click_activity_by_date(db, url.id, now, days=day_count),
     )
 
