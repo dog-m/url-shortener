@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import (
@@ -121,9 +122,10 @@ async def remove_url(
 
 
 
-@api_urls_router.get('/urls/{url_id}/stats', response_model=ClickActivityStats)
-async def get_url_stats(
+@api_urls_router.get('/urls/{url_id}/stats/last-activity', response_model=ClickActivityStats)
+async def get_url_stats_last_activity(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
+    up_to: Annotated[datetime, Query(default_factory=now_UTC)],  # TODO: possible issues with timezones?
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
 ):
@@ -138,12 +140,11 @@ async def get_url_stats(
         )
 
     # prepare selection criteria
-    now = now_UTC()  # TODO: make configurable?
     week_count = 2 * 4  # last two months
-    day_count = week_count * 7 - (7 - 1 - now.weekday()) + 1
+    day_count  = 7 * week_count - (7 - (up_to.weekday() + 1)) + 1
 
     # fetch and return
     return ClickActivityStats(
-        dates=await get_click_activity_by_date(db, url.id, now, days=day_count),
+        dates=await get_click_activity_by_date(db, url.id, up_to, days=day_count),
     )
 

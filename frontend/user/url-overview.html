@@ -8,14 +8,19 @@
 <style>
     td {
         vertical-align: top;
+        max-width: 800px;
+    }
+
+    .stats td {
+        vertical-align: bottom;
     }
 
     .dot {
         width: 0.85em;
         height: 0.85em;
-        border: 1.5px solid #ccc;
+        border: 1.5px solid #bbb;
         border-radius: 33%;
-        background: #fff;
+        background: #eee;
     }
 
     .dot.LF, .dot.LX {
@@ -28,7 +33,7 @@
     .dot.L3 { background: hsl(110, 60%, 70%); }
     .dot.L4 { background: hsl(105, 40%, 50%); }
 
-    .day-weekend {
+    .weekday-label.weekend {
         color: #f00;
     }
 
@@ -46,6 +51,16 @@
         border: 1px solid #000;
         padding: 5px;
     }
+
+    .stats-msg {
+        color: #bbb;
+        font-style: italic;
+        font-size: 12pt;
+    }
+
+    .stats-msg.err {
+        color: #f00;
+    }
 </style>
 <script lang="javascript">
     let index2name = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -55,16 +70,22 @@
     const DAYS_IN_WEEK = 7;
 
     document.addEventListener('DOMContentLoaded', async () => {
+        let statsContainer = document.getElementById('stats-container');
+
         let data;
         try {
             let res = await fetch(
-                '/api/v1/urls/{{ url.id }}/stats', {
+                `/api/v1/urls/{{ url.id }}/stats/last-activity?up-to=${new Date().toISOString()}`, {
                     method: 'GET',
+                    redirect: 'error',
+                    credentials: 'same-origin',
+                    signal: AbortSignal.timeout(5 * 1000),
                 }
             );
             data = await res.json();
-        } catch {
-            console.error('Something went wrong');
+        } catch(e) {
+            console.error('Failed to load click stats:', e);
+            statsContainer.innerHTML = '<p class="stats-msg err">An error occurred while fetching statistics.</p>';
             return;
         }
 
@@ -73,9 +94,9 @@
         // stats on each date
         let dates = data['dates'];
         for (let i = DAYS_IN_WEEK - new Date().getUTCDay() - 1; i > 0; i--) {
-            dates = [{'count': 0, 'future': 1}, ...dates];
+            dates = [...dates, {'count': 0, 'future': 1}];
         }
-        let getStats = (week, day) => dates[WEEKS * DAYS_IN_WEEK - (week * DAYS_IN_WEEK + day) - 1];
+        let getStats = (week, day) => dates[week * DAYS_IN_WEEK + day];
 
         // preprocess
         let maxCount = 1;
@@ -96,8 +117,10 @@
         for (let day = 0; day < DAYS_IN_WEEK; day++) {
             code += '<tr>';
 
-            code += `<td class="weekday-label ${isWeekend(day) ? 'day-weekend' : 'day-work'}">${index2name[day]}</td>`;
+            // row title (day of the week)
+            code += `<td class="weekday-label ${isWeekend(day) ? 'weekend' : 'workday'}">${index2name[day]}</td>`;
 
+            // cells
             for (let week = 0; week < WEEKS; week++) {
                 code += '<td>';
 
@@ -106,8 +129,13 @@
                     if (stats.future) {
                         code += '<div class="dot LF"></div>';
                     } else {
-                        let lvl = Math.round(4.0 * stats.count / maxCount);
-                        if (stats.count > 0 && lvl === 0) lvl = 1;  // guarantee highlighting visited days
+                        let lvl;
+                        if (stats.count === 0) {
+                            lvl = 0;
+                        } else {
+                            // guarantee highlighting visited days
+                            lvl = 1 + Math.round((4.0 - 1) * stats.count / maxCount);
+                        }
 
                         let date = new Date(`${stats.date} UTC`).toLocaleDateString();
                         let caption = `${stats.count} click(s) on ${date}`;
@@ -121,15 +149,38 @@
                 code += '</td>';
             }
 
+            // per-weekday stats
             let percent = 100.0 * weekdays[day] / weekdayMax;
             code += `<td class="weekday-column"><div class="weekday-bar" style="width: ${percent}%;"></div></td>`;
 
+            // row end
             code += '</tr>';
         }
 
         // finalize and render
-        document.getElementById('stats-container').innerHTML = `<table class="stats">${code}</table>`;
+        statsContainer.innerHTML = `<table class="stats">${code}</table>`;
     });
+
+    async function copyAddress(btnId, url) {
+        let clipBrd = navigator.clipboard;
+        if (clipBrd) {
+            await clipBrd.writeText(url);
+        } else {
+            alert(`Please copy this text:\n\n${url}`);
+        }
+
+        let btn = document.getElementById(btnId);
+        btn.style.width = btn.offsetWidth + 'px';
+        let oldText = btn.innerText;
+        btn.innerText = '✔️';
+        btn.inert = true;
+
+        setTimeout(() => {
+            btn.style.width = '';
+            btn.innerText = oldText;
+            btn.inert = false;
+        }, 1000);
+    }
 </script>
 {% endblock %}
 
@@ -138,22 +189,59 @@
     <h3>
         Overview:
         <a href="/urls/{{- url.id -}}/edit"><input type="button" value="Edit"></a>
-        <a href="/u/{{- url.id -}}" target="_blank" rel="noreferrer"><input type="button" value="Visit"></a>
     </h3>
 </div>
 <div>
     <table>
         <tr>
             <td>ID:</td>
-            <td>{{ url.id }}</td>
+            <td>
+                <span>{{ url.id }}</span>
+                <button id="copy-short-link" onclick="copyAddress('copy-short-link', `${window.location.origin}/u/{{ url.id }}`)">
+                    Copy short link
+                </button>
+            </td>
         </tr>
         <tr>
             <td>Title:</td>
             <td>{{ url.title | e }}</td>
         </tr>
         <tr>
+            <td>Address:</td>
+            <td class="ellipsis-text">
+                <button id="copy-long-addr" onclick="copyAddress('copy-long-addr', document.getElementById('addr').innerText)">
+                    Copy
+                </button>
+                <span id="addr">{{- url.original_url | e -}}</span>
+            </td>
+        </tr>
+        <tr>
+            <td>Status:</td>
+            <td>
+                {{- '🌍 [open]' if url.is_open_access else '🔒 [private]' -}}
+                {{- ', ' -}}
+                {%- if url.is_active -%}
+                    {%- if url.expires_at and url.expires_at <= now_UTC -%}
+                        🟡 [expired]
+                    {%- else -%}
+                        🟢 [active]
+                    {%- endif -%}
+                {%- else -%}
+                        🔴 [inactive]
+                {%- endif -%}
+            </td>
+        </tr>
+        <tr>
             <td>Description:</td>
-            <td><small>{{ url.description | e }}</small></td>
+            <td>
+                <small>
+                    {%- if url.description -%}
+                        {{- url.description | e -}}
+                    {%- else -%}
+                        <i>None.</i>
+                    {%- endif -%}
+                </small>
+            </td>
         </tr>
     </table>
 </div>
@@ -161,5 +249,6 @@
     Statistics:
 </h3>
 <div id="stats-container">
+    <p class="stats-msg">Loading, please wait...</p>
 </div>
 {%- endblock -%}

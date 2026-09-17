@@ -115,6 +115,7 @@ async def url_overview(
         context={
             'user': user,
             'url': url,
+            'now_UTC': now_UTC().replace(tzinfo=None),
         }
     )
 

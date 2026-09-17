@@ -22,16 +22,15 @@ async def get_click_activity_by_date(db: AsyncSession, url_id: str, now: datetim
     assert days > 0
 
     # fetch the data
-    day_column = func.date(ClickEvent.timestamp).label('day')
+    day_col = func.date(ClickEvent.timestamp).label('day')
     stmt = (
         select(
-            day_column,
+            day_col,
             func.count(ClickEvent.id).label('count')
         )
         .where(ClickEvent.url_id == url_id)
         .where(ClickEvent.timestamp >= (now - timedelta(days=days)))
-        .group_by(day_column)
-        .order_by(day_column)
+        .group_by(day_col)
     )
 
     rows = await db.execute(stmt)
@@ -41,7 +40,7 @@ async def get_click_activity_by_date(db: AsyncSession, url_id: str, now: datetim
     }
 
     # fill-in the gaps (days without clicks)
-    result = []
+    result: list[ClickActivityDaily] = []
     for i in range(days):
         day = (now - timedelta(days=i)).date()
         day_str = day.isoformat()  # possible format mismatch issue here?
@@ -51,6 +50,9 @@ async def get_click_activity_by_date(db: AsyncSession, url_id: str, now: datetim
         )
         result.append(entry)
 
+    # order things manually lowering strain on the DB
+    result.sort(key=lambda x: x.date)
+
     return result
 
 
@@ -59,20 +61,19 @@ async def get_click_activity_by_weekday(db: AsyncSession, url_id: str, now: date
     assert days > 0
 
     # fetch the data
-    weekday_expr = UniversalWeekday(ClickEvent.timestamp).label('weekday_num')
+    weekday_col = UniversalWeekday(ClickEvent.timestamp).label('weekday_num')
     stmt = (
         select(
-            weekday_expr,
+            weekday_col,
             func.count(ClickEvent.id).label('count')
         )
         .where(ClickEvent.url_id == url_id)
         .where(ClickEvent.timestamp >= (now - timedelta(days=days)))
-        .group_by(weekday_expr)
-        .order_by(weekday_expr)
+        .group_by(weekday_col)
     )
     rows = await db.execute(stmt)
 
-    # fill-in the gaps (days without clicks)
+    # fill-in the days
     result = ClickActivityWeekly()
     for row in rows.all():
         day_name = WEEKDAY_INDEX_TO_ATTR_NAME[int(row.weekday_num)]
