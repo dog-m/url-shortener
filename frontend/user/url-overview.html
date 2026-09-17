@@ -112,6 +112,7 @@
             }
         }
         let weekdayMax = Math.max(1, ...weekdays);
+        let weekdaySum = Math.max(1, weekdays.reduce((acc, x) => acc + x, 0));
 
         // assemble the grid
         for (let day = 0; day < DAYS_IN_WEEK; day++) {
@@ -150,8 +151,11 @@
             }
 
             // per-weekday stats
-            let percent = 100.0 * weekdays[day] / weekdayMax;
-            code += `<td class="weekday-column"><div class="weekday-bar" style="width: ${percent}%;"></div></td>`;
+            let percent      = (100.0 * weekdays[day] / weekdayMax).toFixed(2);
+            let totalPercent = (100.0 * weekdays[day] / weekdaySum).toFixed(2);
+            code += `<td class="weekday-column" title="${totalPercent} %">`;
+            code += `<div class="weekday-bar" style="width: ${percent}%;"></div>`;
+            code += '</td>';
 
             // row end
             code += '</tr>';
@@ -188,7 +192,7 @@
 <div>
     <h3>
         Overview:
-        <a href="/urls/{{- url.id -}}/edit"><input type="button" value="Edit"></a>
+        <a href="/urls/{{- url.id -}}/edit"><button>Edit</button></a>
     </h3>
 </div>
 <div>

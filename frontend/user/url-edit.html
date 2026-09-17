@@ -48,15 +48,11 @@
 
         let on_err = (reason) => {
             msg.classList.add('msg-err');
-            msg.textContent = `Unable to update the entry.`;
+            msg.textContent = 'Unable to update the entry.';
             console.error('Entry update error', reason);
         };
 
-        let extract_datetime = (str) => {
-            if (str == '') return null;
-            let date = new Date(str);
-            return date.toISOString();
-        };
+        let extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
 
         // collect the data
         let form = new FormData(e.srcElement);
@@ -86,10 +82,10 @@
         .then(async (value) => {
             if (value.ok) {
                 data = await value.json();
-                patch_version = data['version'];
+                patch_version = data.version;
 
                 msg.classList.add('msg-ok');
-                msg.textContent = `Updated successfully!`;
+                msg.textContent = 'Updated successfully!';
                 setTimeout(() => { msg.classList.remove('msg-ok'); }, 1500);
             } else {
                 on_err(await value.json());
@@ -182,17 +178,14 @@
                 <noscript>{{ url.expires_at }}</noscript>
                 <script lang="javascript">
                     let timestamp = '{{ url.expires_at if url.expires_at }}';
-                    let value = '';
-                    if (timestamp) {
-                        value = to_local_datetime_ISO(timestamp);
-                    }
+                    let value = timestamp ? to_local_datetime_ISO(timestamp) : '';
                     document.write(`<input name="expires_at" type="datetime-local" value="${value}" />`);
                 </script>
             </td>
         </tr>
         <tr>
             <td colspan="2">
-                <input type="submit" value="Update" />
+                <button type="submit">Update</button>
             </td>
         </tr>
         <tr>
@@ -221,6 +214,6 @@
     <div id="msg"></div>
 </form>
 <div>
-    <input type="button" value="Delete" onclick="delete_url()" />
+    <button class="danger" onclick="delete_url()">Delete</button>
 </div>
 {%- endblock -%}

@@ -92,10 +92,10 @@
                 <td><input type="password" name="password" placeholder="Your new password" /></td>
             </tr>
             <tr>
-                <td colspan="2" style="height: 15px;"></td>
+                <td colspan="2" style="height: 15px;"><!--[empty space]--></td>
             </tr>
             <tr>
-                <td colspan="2"><input type="submit" value="Update" style="width: 100%;"></td>
+                <td colspan="2"><button type="submit" style="width: 100%;">Update</button></td>
             </tr>
         </table>
     </form>
@@ -107,6 +107,6 @@
     </small>
 </p>
 <form method="post" action="/api/v1/logout">
-    <button type="submit">Log-out</button>
+    <button type="submit" class="danger">Log-out</button>
 </form>
 {%- endblock -%}
