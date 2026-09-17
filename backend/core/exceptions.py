@@ -1,6 +1,5 @@
 from fastapi import Request, Response, status
 from fastapi.responses import HTMLResponse
-from slowapi.errors import RateLimitExceeded
 
 #
 
@@ -15,7 +14,7 @@ RATE_LIMITER_DEFAULT_RESPONSE = '''
 '''
 
 
-def rate_limit_exceeded_handler(request: Request, _: RateLimitExceeded) -> Response:
+def rate_limit_exceeded_handler(request: Request, _: Exception) -> Response:
     response = HTMLResponse(
         content=RATE_LIMITER_DEFAULT_RESPONSE,
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -23,5 +22,5 @@ def rate_limit_exceeded_handler(request: Request, _: RateLimitExceeded) -> Respo
     response = request.app.state.limiter._inject_headers(
         response, request.state.view_rate_limit
     )
-    return response
+    return response  # type: ignore
 

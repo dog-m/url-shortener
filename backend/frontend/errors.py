@@ -25,7 +25,7 @@ ERROR_MESSAGES = {
 ERROR_MESSAGE_LANGS = set(ERROR_MESSAGES['value_error.email'].keys())
 
 
-async def validation_exception_handler(request: Request, e: RequestValidationError):
+async def validation_exception_handler(request: Request, e: RequestValidationError) -> Response:
     # 2. Determine the user's language (usually from the 'Accept-Language' header)
     lang = request.headers.get('accept-language', 'en').split(',')[0][:2]
     if lang not in ERROR_MESSAGE_LANGS:

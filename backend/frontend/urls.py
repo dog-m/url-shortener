@@ -1,7 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Path,
+    Query,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,7 +42,7 @@ async def url_search(
     sort: Annotated[str, Query()] = 'updated',
     asc: Annotated[str, Query()] = 'off',
     user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format
-):
+) -> Response:
     # parameter cleanup
     page       = page.strip()
     page_index = max(0, int(page) if page.isnumeric() else 0)
@@ -80,7 +89,7 @@ async def url_search(
 async def url_new(
     req: Request,
     user: Annotated[User, Depends(require_user)],
-):
+) -> Response:
     # just page rendering, there is nothing sensitive
     return frontend_templates.TemplateResponse(
         request=req,
@@ -99,7 +108,7 @@ async def url_overview(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-):
+) -> Response:
     # parameter validation and access checks
     url = await find_url_by_id(db, url_id)
     if url is None or (url.owner_id != user.id and not user.is_superuser):
@@ -127,7 +136,7 @@ async def url_edit(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-):
+) -> Response:
     # parameter validation and access checks
     url = await find_url_by_id(db, url_id)
     if url is None or (url.owner_id != user.id and not user.is_superuser):

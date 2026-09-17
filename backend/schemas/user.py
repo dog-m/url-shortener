@@ -20,13 +20,13 @@ class UserInfo(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    email: EmailStr     = None
-    name: ValidName     = None
-    password: SecretStr = None
+    email: EmailStr     = None  # type: ignore  # if present it should be valid
+    name: ValidName     = None  # type: ignore
+    password: SecretStr = None  # type: ignore
 
 
 
 class AdminUpdate(UserUpdate):
-    is_active: bool    = None
-    is_superuser: bool = None
+    is_active: bool    = None  # type: ignore  # if present it should be valid
+    is_superuser: bool = None  # type: ignore
 

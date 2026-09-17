@@ -31,7 +31,7 @@ api_user_router = APIRouter(prefix='', tags=['user'])
 @api_user_router.get('/me', response_model=UserInfo)
 async def get_current_user_profile(
     user: Annotated[User, Depends(require_user)],
-):
+) -> object:
     return user
 
 
@@ -45,7 +45,7 @@ async def edit_user_profile(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
     request: Request, response: Response,  # noqa: ARG001 - rate limiting
-):
+) -> object:
     # access checks
     if user_id != user.id and not user.is_superuser:
         raise HTTPException(

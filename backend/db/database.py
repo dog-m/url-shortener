@@ -48,7 +48,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, Any]:
 
 
 @asynccontextmanager
-async def get_db_session_context():
+async def get_db_session_context() -> AsyncGenerator[AsyncSession, Any]:
     async with async_session() as session:
         yield session
 

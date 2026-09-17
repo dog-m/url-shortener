@@ -35,7 +35,7 @@ async def get_click_activity_by_date(db: AsyncSession, url_id: str, now: datetim
 
     rows = await db.execute(stmt)
     click_map = {
-        row.day: int(row.count)  # possible format mismatch issue here?
+        row.day: int(row.count)  # type: ignore  # possible format mismatch issue here?
         for row in rows.all()
     }
 

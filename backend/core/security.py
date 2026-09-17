@@ -16,7 +16,7 @@ from backend.core.config import settings
 
 limiter = Limiter(
     key_func=get_remote_address,
-    default_limits=settings.rate_limits,
+    default_limits=settings.rate_limits,  # type: ignore  # no idea why it doesn't coalesce
     key_style='endpoint',
     strategy='sliding-window-counter',
     storage_uri=settings.redis_url,
@@ -41,7 +41,7 @@ def sanitize_html(text: str) -> str:
 
 
 
-def create_access_token(data: dict) -> str:
+def create_access_token(data: dict[str, object]) -> str:
     data = data.copy()
 
     expire = datetime.now(UTC) + timedelta(
@@ -98,7 +98,7 @@ def verify_token(token: str) -> dict[str, object]:
 
 def get_current_user_id(token: str) -> str:
     if (user_id := verify_token(token).get('sub')) is not None:
-        return user_id
+        return user_id  # type: ignore
     else:
         raise jwt.InvalidTokenError('Missing user ID in token')
 
@@ -107,7 +107,7 @@ def get_current_user_id(token: str) -> str:
 _pwd_hasher: HasherProtocol = BcryptHasher()
 
 
-def password_get_hash(password: str, salt: str | None = None) -> str:
+def password_get_hash(password: str, salt: bytes | None = None) -> str:
     return _pwd_hasher.hash(password, salt=salt)
 
 

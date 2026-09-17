@@ -41,7 +41,7 @@ api_urls_router = APIRouter(prefix='', tags=['url'])
 async def list_urls(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-):
+) -> object:
     return await find_urls_batched(db, owner=user)
 
 
@@ -51,7 +51,7 @@ async def add_new_url(
     new_url: Annotated[UrlCreate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-):
+) -> object:
     return await create_new_url(db, user, new_url)
 
 
@@ -65,7 +65,7 @@ async def edit_url(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
     request: Request, response: Response,  # noqa: ARG001 - rate limiting
-):
+) -> object:
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:
         raise HTTPException(
@@ -103,7 +103,7 @@ async def remove_url(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-):
+) -> object:
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:
         raise HTTPException(
@@ -128,7 +128,7 @@ async def get_url_stats_last_activity(
     up_to: Annotated[datetime, Query(default_factory=now_UTC)],  # TODO: possible issues with timezones?
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
-):
+) -> object:
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:
         raise HTTPException(

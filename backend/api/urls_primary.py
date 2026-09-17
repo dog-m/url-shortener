@@ -1,7 +1,7 @@
 from typing import Annotated
 from urllib.parse import urlencode, urlsplit
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,7 +17,7 @@ from backend.services.security import (
     is_url_active,
     is_url_freely_accessible,
 )
-from backend.services.url import URL_ID_PATTERN, find_url_by_id, register_url_visit
+from backend.services.url import URL_ID_PATTERN_RE, find_url_by_id, register_url_visit
 
 #
 
@@ -33,10 +33,10 @@ api_urls_router = APIRouter(prefix='', tags=['api', 'primary'])
 
 
 async def _get_client_ip(req: Request) -> str:
-    if real_ip := req.headers.get('X-Real-IP') and _allow_header_real_ip:
+    if (real_ip := req.headers.get('X-Real-IP')) and _allow_header_real_ip:
         return real_ip
 
-    elif forwarded_for := req.headers.get('X-Forwarded-For') and _allow_header_forwarded_for:
+    elif (forwarded_for := req.headers.get('X-Forwarded-For')) and _allow_header_forwarded_for:
         # https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
         # https://habr.com/ru/companies/k2tech/articles/1045012/
         index = 0 if _client_ip_first else -1
@@ -67,9 +67,9 @@ async def visit_url(
     url_id: Annotated[str, Path()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     session_id: Annotated[str | None, Depends(get_current_session_id)] = None,
-):
+) -> Response:
     # parameter validation
-    if URL_ID_PATTERN.fullmatch(url_id) is None or (url := await find_url_by_id(db, url_id)) is None:
+    if URL_ID_PATTERN_RE.fullmatch(url_id) is None or (url := await find_url_by_id(db, url_id)) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
         )

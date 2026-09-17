@@ -36,21 +36,21 @@ class UrlCreate(BaseModel):
     expires_at: datetime | None = None
 
     @field_serializer('original_url')
-    def ser_url(self, value, info: FieldSerializationInfo):
+    def ser_url(self, value: HttpUrl, info: FieldSerializationInfo) -> str:
         return str(value)
 
 
 
 class UrlUpdate(BaseModel):
-    original_url: HttpUrl       = None
-    is_active: bool             = None
-    is_open_access: bool        = None
-    title: ValidTitle           = None
-    description: str            = None
+    original_url: HttpUrl       = None  # type: ignore  # if present it should be valid
+    is_active: bool             = None  # type: ignore
+    is_open_access: bool        = None  # type: ignore
+    title: ValidTitle           = None  # type: ignore
+    description: str            = None  # type: ignore
     expires_at: datetime | None = None
 
     @field_serializer('original_url')
-    def ser_url(self, value, info: FieldSerializationInfo):
+    def ser_url(self, value: HttpUrl, info: FieldSerializationInfo) -> str:
         return str(value)
 
 

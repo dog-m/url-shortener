@@ -1,7 +1,16 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Path,
+    Query,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,7 +33,7 @@ async def admin_user_list(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_admin)],
     page: Annotated[str, Query()] = '0',
-):
+) -> Response:
     # parameter cleanup
     page       = page.strip()
     page_index = max(0, int(page) if page.isnumeric() else 0)
@@ -58,7 +67,7 @@ async def admin_user_profile(
     user_id: Annotated[UUID, Path()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_admin)],
-):
+) -> Response:
     # validation
     profile = await get_user_by_id(db, user_id)
     if profile is None:

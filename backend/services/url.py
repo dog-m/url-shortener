@@ -18,11 +18,11 @@ from backend.schemas.url import UrlCreate
 
 URL_ID_MIN_LEN = 10
 URL_ID_MAX_LEN = 10
-URL_ID_PATTERN = None
 if URL_ID_MIN_LEN == URL_ID_MAX_LEN:
-    URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{{{URL_ID_MAX_LEN}}}")
+    URL_ID_PATTERN = f"[a-zA-Z0-9]{{{URL_ID_MAX_LEN}}}"
 else:
-    URL_ID_PATTERN = re.compile(f"[a-zA-Z0-9]{{{URL_ID_MIN_LEN}-{URL_ID_MAX_LEN}}}")
+    URL_ID_PATTERN = f"[a-zA-Z0-9]{{{URL_ID_MIN_LEN}-{URL_ID_MAX_LEN}}}"
+URL_ID_PATTERN_RE = re.compile(URL_ID_PATTERN)
 
 
 _URL_ID_CHARACTERS = string.ascii_letters + string.digits
@@ -54,7 +54,7 @@ async def find_url_by_id(db: AsyncSession, url_id: str) -> Url | None:
 
 
 
-URL_SORTING_CRITERIA: dict[str, InstrumentedAttribute] = {
+URL_SORTING_CRITERIA: dict[str, InstrumentedAttribute[object]] = {
     'id':      Url.id,
     'created': Url.created_at,
     'updated': Url.updated_at,
@@ -94,7 +94,7 @@ async def find_urls_batched(
     # ordering/sorting
     criteria = URL_SORTING_CRITERIA.get(sort_criteria.lower(), URL_SORTING_CRITERIA_DEFAULT)
     if not sort_asc:
-        criteria = criteria.desc()
+        criteria = criteria.desc()  # type: ignore  # no idea what type to use for dict values
     stmt = stmt.order_by(criteria)
 
     if criteria is not Url.id:

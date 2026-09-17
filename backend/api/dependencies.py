@@ -55,8 +55,7 @@ async def get_current_user(
     if session is None:
         return None
 
-    user = await get_user_by_session(db, session)
-    if not user.is_active:
+    if not (user := await get_user_by_session(db, session)) or not user.is_active:
         return None
 
     return user

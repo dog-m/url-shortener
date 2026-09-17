@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Query, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -35,14 +35,14 @@ async def login(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     redirect: Annotated[str, Query()] = FRONTEND_USER_MAIN,
     id: Annotated[str | None, Cookie()] = None,
-):
+) -> Response:
     print('[!!!]', id)  # TODO: log-in idempotency
 
     if not redirect.startswith('/'):  # only allow endpoints on this site
         redirect = FRONTEND_USER_MAIN
 
     user = await get_user_by_email(db, form_data.username)
-    if not user or not password_verify(form_data.password, user.hashed_password):  # FIXME: user registration!
+    if not user or not password_verify(form_data.password, user.hashed_password):  # type: ignore # FIXME: user registration!
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -60,7 +60,7 @@ async def login(
 async def logout(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     session: Annotated[Session | None, Depends(get_current_session)] = None,
-):
+) -> Response:
     if session is not None:
         await terminate_session(db, session)
 

@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from fastapi.responses import HTMLResponse
 
 from backend.api.dependencies import require_user
@@ -18,7 +18,7 @@ frontend_user_router = APIRouter(tags=['user'])
 async def user_profile(
     req: Request,
     user: Annotated[User, Depends(require_user)],
-):
+) -> Response:
     # page rendering (access checks had passed)
     return frontend_templates.TemplateResponse(
         request=req,

@@ -1,5 +1,7 @@
 import asyncio
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, status
 from fastapi.middleware.gzip import GZipMiddleware
@@ -43,7 +45,7 @@ async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any]:
     await on_startup(app)
     try:
         #logger.info('Startup completed')
@@ -62,7 +64,7 @@ app.state.limiter = limiter
 
 # container-related handler
 @app.get('/health')
-async def health_check():
+async def health_check() -> object:
     return {
         'status': 'healthy',
     }

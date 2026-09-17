@@ -36,7 +36,7 @@ def validate_name(name: str) -> str:
 
 class ValidName(str):
     @classmethod
-    def __get_pydantic_core_schema__(cls, source_type, handler):
+    def __get_pydantic_core_schema__(cls, source_type, handler):  # type: ignore
         return core_schema.no_info_after_validator_function(
             validate_name,
             core_schema.str_schema(min_length=1, max_length=_MAX_NAME_LENGTH),
