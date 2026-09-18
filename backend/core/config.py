@@ -10,12 +10,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 @final
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file='.env', env_file_encoding='utf-8', case_sensitive=False, extra='ignore',
+        env_file='.env',
+        env_file_encoding='utf-8',
+        case_sensitive=False,
+        extra='ignore',
     )
 
-    # common info
-    debug: bool    = Field(default=False, description='Debug mode')
-    log_level: str = Field(default='INFO', description='Logging level')
+    # development
+    debug: bool           = Field(default=False, description='Debug mode')
+    log_level: str        = Field(default='INFO', description='Logging level')
+    playwright_test: bool = Field(default=False, description='Running Playwright tests')
 
     # db info
     database_url: str = Field(

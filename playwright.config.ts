@@ -77,9 +77,27 @@ export default defineConfig({
   ],
 
   /* Run local dev server before starting the tests */
-  webServer: {
-    command: 'uv run uvicorn backend.main:app --host 127.0.0.1 --port 8000 --lifespan=on',
-    url: 'http://localhost:8000',
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      name: 'Backend',
+      command: 'uv run uvicorn backend.main:app --host 127.0.0.1 --port 8000 --lifespan=on',
+      gracefulShutdown: {
+        signal: 'SIGTERM',
+        timeout: 0.5 * 1000,
+      },
+      reuseExistingServer: !process.env.CI,
+      timeout: 5 * 1000,
+      url: 'http://localhost:8000/health',
+      env: {
+        DEBUG: 1,
+
+        // using separate but persistent DB for easier debugging
+        DATABASE_URL: 'sqlite+aiosqlite:///./url_shortener.playwright.db',
+
+        // Playwright defaults
+        PLAYWRIGHT_TEST: 1,
+        ...process.env,
+      }
+    },
+  ],
 });

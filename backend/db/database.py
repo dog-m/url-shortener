@@ -34,6 +34,10 @@ class BaseDbModel(AsyncAttrs, DeclarativeBase):
 # https://stackoverflow.com/a/74000761
 async def init_db() -> None:
     async with engine.begin() as conn:
+        if settings.playwright_test:
+            # running clean setup when testing
+            await conn.run_sync(BaseDbModel.metadata.drop_all)
+
         await conn.run_sync(BaseDbModel.metadata.create_all)
 
 
