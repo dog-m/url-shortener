@@ -69,32 +69,6 @@
     }
 </style>
 <script lang="javascript">
-    async function debug_add_url() {
-        let something = Math.floor(Math.random() * 1000) % 1000;
-        await fetch(
-            '/api/v1/urls', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    original_url: `https://example.com/foo?q=${something}`,
-                    title: `bar+${something}`,
-                    description: '',
-                }),
-                redirect: 'error',
-                credentials: 'same-origin',
-                signal: AbortSignal.timeout(5 * 1000),
-            }
-        )
-        .then(async (value) => {
-            window.location.reload();
-        })
-        .catch((reason) => {
-            console.warn('Not OK:', reason);
-        });
-    }
-
     function replaceHashtags(text, baseUrl) {
         return text.replace(
             /(?<!\w)(#[\w-]+)/gu,
@@ -102,7 +76,7 @@
         );
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener('DOMContentLoaded', () => {
         for (let description of document.getElementsByClassName('url-item-description')) {
             let source = description.innerHTML;
             if (source.includes('#'))
@@ -116,7 +90,7 @@
 <div>
     <h3>
         All links
-        <button onclick="debug_add_url()">[DEBUG] Add a URL</button>
+        <a href="/urls/new"><button class="create">Add new URL</button></a>
     </h3>
 </div>
 <div>

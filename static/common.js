@@ -15,3 +15,16 @@ function localize_time(utc) {
     document.write(`<time>${value}</time>`);
 }
 
+
+// fix button-link behavior for styling
+// inspired by https://stackoverflow.com/questions/33309632
+document.addEventListener('DOMContentLoaded', () => {
+    for (let link of document.querySelectorAll('a:has(button)')) {
+        link.classList.add('no-drag');
+        link.setAttribute('draggable', 'false');
+        link.ondragstart = () => false;
+        link.onmousedown = (e) => e.preventDefault();
+        link.onmouseup   = (e) => e.preventDefault();
+    }
+});
+
