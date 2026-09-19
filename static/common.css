@@ -46,7 +46,7 @@ nav {
 }
 
 input, button, textarea, select {
-    padding: 5px 10px;
+    padding: 7px 10px;
     border-radius: 5px;
     border: 2px solid #888;
 }
@@ -111,23 +111,31 @@ button, select {
     cursor: pointer;
     font-weight: 600;
     background: #eee;
-    box-shadow: 0px 3px 2px #bbb;
+    box-shadow: 0px 3px 2px #0003, inset 0px 1px 2px #fffa, inset 0px -1px 2px #0005;
     margin-bottom: 3px;
 }
 
 button:active {
-    background: #888;
-    box-shadow: none;
+    background: #bbb;
+    box-shadow: inset 0px 3px 2px #000a;
 }
 
 button.danger {
     color: #fff;
-    background-color: #e44;
+    background: #e44;
     border-color: #b33;
-    box-shadow: 0px 3px 2px #c44;
 }
 
 button.danger:active {
     background: #a00;
-    box-shadow: none;
+}
+
+button.create {
+    color: #fff;
+    background: #6c6;
+    border-color: #3b3;
+}
+
+button.create:active {
+    background: #0a0;
 }
