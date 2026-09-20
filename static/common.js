@@ -28,3 +28,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+// https://stackoverflow.com/a/75988895
+function debounce(callback, wait) {
+    let timeoutId = null;
+    return (...args) => {
+        window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+            callback(...args);
+        }, wait);
+    };
+}
+

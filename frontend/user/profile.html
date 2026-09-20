@@ -17,6 +17,7 @@
     function update_profile(e) {
         // prepare for the upload
         e.preventDefault();
+
         let msg = document.getElementById('msg');
         msg.classList.remove('msg-ok', 'msg-err');
         msg.textContent = '';
@@ -81,15 +82,15 @@
         <table>
             <tr>
                 <td>New name:</td>
-                <td><input type="text" name="name" placeholder="Your new name" /></td>
+                <td><input type="text" name="name" placeholder="🤵 Your new name" autocomplete="new-name" /></td>
             </tr>
             <tr>
                 <td>New E-mail:</td>
-                <td><input type="email" name="email" placeholder="Your new email" /></td>
+                <td><input type="email" name="email" placeholder="💌 Your new email" autocomplete="new-email" /></td>
             </tr>
             <tr>
                 <td>New password:</td>
-                <td><input type="password" name="password" placeholder="Your new password" /></td>
+                <td><input type="password" name="password" placeholder="🔑 Your new password" autocomplete="new-password" /></td>
             </tr>
             <tr>
                 <td colspan="2" style="height: 15px;"><!--[empty space]--></td>
