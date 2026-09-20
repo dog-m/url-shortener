@@ -59,3 +59,9 @@ ignore = [
     "W191",  # indentation contains tabs
     "B904",  # Allow raising exceptions without from e, for HTTPException
 ]
+
+[tool.pytest]
+testpaths = ["tests/backend"]
+filterwarnings = [
+    "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",  # starlette's testclient warning
+]

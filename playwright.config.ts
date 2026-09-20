@@ -91,8 +91,8 @@ export default defineConfig({
       env: {
         DEBUG: 1,
 
-        // using separate but persistent DB for easier debugging
-        DATABASE_URL: 'sqlite+aiosqlite:///./url_shortener.playwright.db',
+        // using separate temporary clean DB for running tests
+        DATABASE_URL: 'sqlite+aiosqlite:///:memory:',
 
         // Playwright defaults
         PLAYWRIGHT_TEST: 1,

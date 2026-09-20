@@ -15,14 +15,20 @@ from backend.core.config import settings
 
 #
 
-engine = create_async_engine(
-    settings.database_url,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20,
-    pool_recycle=3600,
-    echo=settings.debug,
-)
+try:
+    engine = create_async_engine(
+        settings.database_url,
+        pool_pre_ping=True,
+        pool_size=10,
+        max_overflow=20,
+        pool_recycle=3600,
+        echo=settings.debug,
+    )
+except TypeError:
+    engine = create_async_engine(
+        settings.database_url,
+        echo=settings.debug,
+    )
 
 
 
@@ -34,10 +40,6 @@ class BaseDbModel(AsyncAttrs, DeclarativeBase):
 # https://stackoverflow.com/a/74000761
 async def init_db() -> None:
     async with engine.begin() as conn:
-        if settings.playwright_test:
-            # running clean setup when testing
-            await conn.run_sync(BaseDbModel.metadata.drop_all)
-
         await conn.run_sync(BaseDbModel.metadata.create_all)
 
 
