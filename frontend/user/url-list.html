@@ -9,6 +9,10 @@
     .url-container {
         list-style: square;
         padding-left: 1.5em;
+        border-top: 2px double #0004;
+        padding-top: 0.5em;
+        border-bottom: 2px solid #0004;
+        padding-bottom: 0.5em;
     }
 
     .url-container li::marker {
@@ -69,6 +73,16 @@
         display: inline-block;
         max-width: 50%;
     }
+
+    .pagination-panel {
+        text-align: center;
+    }
+
+    .page-number {
+        border: 3px solid #0004;
+        border-radius: 20%;
+        padding: 5px 10px;
+    }
 </style>
 <script lang="javascript">
     function replaceHashtags(text, baseUrl) {
@@ -92,7 +106,7 @@
 <div>
     <h3>
         All links
-        <a href="/urls/new"><button class="create">Add new URL</button></a>
+        <a href="/urls/new" style="position: absolute;right: 25px;"><button class="create">Add new URL</button></a>
     </h3>
 </div>
 <div>
@@ -116,7 +130,7 @@
                 <span class="sort-arrow"></span>
             </span>
         </label>
-        <button type="submit">Search!</button>
+        <button type="submit">Show!</button>
     </form>
 </div>
 <ul class="url-container">
@@ -139,13 +153,21 @@
             </div>
         </li>
     {%- else -%}
-        <p>No addresses found.</p>
+        <p>No results<br><small>Try adjusting your search filters.</small></p>
     {%- endfor -%}
 </ul>
-<p>
-    {% set search_suffix = ('&sort=' + sort if sort else '') + ('&asc=on' if sort_asc else '') + ('&q=' + query | e if query else '') %}
-    <a class="{{ 'hidden' if page == 0 else '' }}" href="/urls?p={{ page - 1 }}{{ search_suffix }}">&lArr; Prev</a>
-    Page #{{ page + 1 }}.
-    <a class="{{ 'hidden' if urls | length < page_size else '' }}" href="/urls?p={{ page + 1 }}{{ search_suffix }}">Next &rArr;</a>
-</p>
+<div class="pagination-panel">
+    {% set search_suffix %}
+        {{- ('&sort=' + sort)   if sort     -}}
+        {{- '&asc=on'           if sort_asc -}}
+        {{- '&q=' + (query | e) if query    -}}
+    {% endset %}
+    <span>
+        <a class="{{ 'hidden' if page == 1 else '' }}" href="/urls?p={{ page - 1 }}{{ search_suffix }}">&lt; Previous</a>
+    </span>
+    <span class="page-number">{{- page -}}</span>
+    <span>
+        <a class="{{ 'hidden' if (urls | length) < page_size else '' }}" href="/urls?p={{ page + 1 }}{{ search_suffix }}">Next &gt;</a>
+    </span>
+</div>
 {%- endblock -%}

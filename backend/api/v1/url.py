@@ -50,9 +50,9 @@ async def list_urls(
 async def add_new_url(
     new_url: Annotated[UrlCreate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-    user: Annotated[User, Depends(require_user)],
+    owner: Annotated[User, Depends(require_user)],
 ) -> object:
-    return await create_new_url(db, user, new_url)
+    return await create_new_url(db, owner, new_url)
 
 
 

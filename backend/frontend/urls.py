@@ -38,14 +38,14 @@ async def url_search(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
     query: Annotated[str, Query(alias='q')] = '',
-    page: Annotated[str, Query(alias='p')] = '0',
+    page: Annotated[str, Query(alias='p')] = '1',  # using "natural" numbers instead of zero-based indexing
     sort: Annotated[str, Query()] = 'updated',
     asc: Annotated[str, Query()] = 'off',
     user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format
 ) -> Response:
     # parameter cleanup
     page       = page.strip()
-    page_index = max(0, int(page) if page.isnumeric() else 0)
+    page_index = int(page) if page.isnumeric() else 0
     query      = query[:500].strip()
     sort       = sort.strip().lower()
     sort_asc   = asc == 'on'
@@ -55,15 +55,18 @@ async def url_search(
     owner = user_id if user_id and user.is_superuser else user
 
     # fetch
-    urls = await find_urls_batched(
-        db,
-        text=query,
-        owner=owner,
-        sort_criteria=sort,
-        sort_asc=sort_asc,
-        batch_size=page_size,
-        offset_items=page_index * page_size,
-    )
+    if page_index >= 1:
+        urls = await find_urls_batched(
+            db,
+            text=query,
+            owner=owner,
+            sort_criteria=sort,
+            sort_asc=sort_asc,
+            batch_size=page_size,
+            offset_items=(page_index - 1) * page_size,
+        )
+    else:
+        urls = []
 
     # page rendering
     return frontend_templates.TemplateResponse(
