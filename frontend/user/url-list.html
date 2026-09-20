@@ -2,7 +2,7 @@
 
 {% set PAGE = 'urls' %}
 
-{% block title %}Your addresses / {{ super() }}{% endblock %}
+{% block title %}Links / {{ super() }}{% endblock %}
 
 {%- block head -%}
 <style>
@@ -39,6 +39,8 @@
     .sort-label {
         display: inline-block;
         cursor: pointer;
+        margin-top: 0px;
+        margin-bottom: auto;
 
         -webkit-user-select: none;
         -moz-user-select: none;
@@ -48,9 +50,9 @@
     }
 
     .sort-arrow {
-        width: 16px;
-        height: 16px;
-        background-color: #333;
+        width: 1em;
+        height: 1em;
+        background: #888;
         display: block;
         transition: transform 0.2s ease;
     }

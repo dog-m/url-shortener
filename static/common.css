@@ -47,8 +47,10 @@ nav {
 
 input, button, textarea, select {
     padding: 7px 10px;
-    border-radius: 5px;
     border: 2px solid #888;
+    border-radius: 5px;
+    box-shadow: inset 0px 1px 2px #0004;
+    background: #fff;
 }
 
 /* handles for tabs/pages */
@@ -107,7 +109,7 @@ input, button, textarea, select {
   text-overflow: ellipsis;  /* Adds the "..." at the end */
 }
 
-button, select {
+button {
     cursor: pointer;
     font-weight: 600;
     background: #eee;
