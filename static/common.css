@@ -138,6 +138,25 @@ a {
     position: absolute;
 }
 
+/* labels */
+
+.category-label {
+    color: #000;
+    border: 2px solid #0008;
+    border-radius: 2em;
+    background: #0002;
+    font-size: 0.8em;
+    padding: 0.2em 0.5em;
+    margin-right: 5px;
+    display: inline-block;
+}
+
+.label-open     { background: #08b3; border-color: #08b9; }
+.label-private  { background: #b083; border-color: #b089; }
+.label-active   { background: #0b03; border-color: #0b09; }
+.label-expired  { background: #b803; border-color: #b809; }
+.label-disabled { background: #b003; border-color: #b009; }
+
 /* utilities and shortcuts */
 
 .round-corners {

@@ -227,16 +227,22 @@
         <tr>
             <td>Status:</td>
             <td>
-                {{- '🌍 [open]' if url.is_open_access else '🔒 [private]' -}}
-                {{- ', ' -}}
+                {%- macro label(type, text) -%}
+                    <span class="category-label label-{{ type }}">{{ text }}</span>
+                {%- endmacro -%}
+                {%- if url.is_open_access -%}
+                    {{ label('open', 'open') }}
+                {%- else -%}
+                    {{ label('private', 'private') }}
+                {%- endif -%}
                 {%- if url.is_active -%}
                     {%- if url.expires_at and url.expires_at <= now_UTC -%}
-                        🟡 [expired]
+                        {{ label('expired', 'expired') }}
                     {%- else -%}
-                        🟢 [active]
+                        {{ label('active', 'active') }}
                     {%- endif -%}
                 {%- else -%}
-                        🔴 [inactive]
+                        {{ label('disabled', 'disabled') }}
                 {%- endif -%}
             </td>
         </tr>
