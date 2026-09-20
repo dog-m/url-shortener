@@ -4,10 +4,9 @@ import string
 import uuid
 from collections.abc import Sequence
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import InstrumentedAttribute
 
 from backend.models.click import ClickEvent, UrlVisitorMetadata
 from backend.models.url import Url
@@ -54,12 +53,12 @@ async def find_url_by_id(db: AsyncSession, url_id: str) -> Url | None:
 
 
 
-URL_SORTING_CRITERIA: dict[str, InstrumentedAttribute[object]] = {
-    'id':      Url.id,
+URL_SORTING_CRITERIA: dict[str, object] = {
+    'id':      func.lower(Url.id),
     'created': Url.created_at,
     'updated': Url.updated_at,
     'expires': Url.expires_at,
-    'title':   Url.title,
+    'title':   func.lower(Url.title),
     'url':     Url.original_url,
     # others make little to no sense (to me) or require using join(s)
 }
@@ -95,7 +94,7 @@ async def find_urls_batched(
     criteria = URL_SORTING_CRITERIA.get(sort_criteria.lower(), URL_SORTING_CRITERIA_DEFAULT)
     if not sort_asc:
         criteria = criteria.desc()  # type: ignore  # no idea what type to use for dict values
-    stmt = stmt.order_by(criteria)
+    stmt = stmt.order_by(criteria)  # type: ignore
 
     if criteria is not Url.id:
         stmt = stmt.order_by(Url.id)
