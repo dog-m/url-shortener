@@ -9,8 +9,8 @@
 @media (prefers-color-scheme:dark) {
     :root {
         --bgColor: #111;
-        --bgHighlight: #333;
-        --bgHover: #555;
+        --bgHighlight: #444;
+        --bgHover: #665;
 
         --fgColor: #fff;
     }
@@ -109,7 +109,6 @@ button.create:active {
 
 a {
     color: var(--fgColor);
-    text-decoration: none;
 }
 
 /* handles for tabs/pages */
@@ -119,6 +118,11 @@ a {
     margin-left: 1em;
     padding-bottom: 0;
     padding-left: 12%;
+    font-weight: 600;
+}
+
+.tabs a {
+    text-decoration: none;
 }
 
 .tabs ul {
@@ -140,12 +144,12 @@ a {
     padding-top: 0.25em;
 }
 
-.tab.active {
-    background: #888;
+.tab.active, .tab.active:hover {
+    background: var(--bgColor);
     display: block;
 }
 
-.tab:hover, .tab.active:hover {
+.tab:hover {
     background: var(--bgHover);
 }
 
@@ -183,6 +187,7 @@ option:hover {
     padding: 0.2em 0.5em;
     margin-right: 5px;
     display: inline-block;
+    font-weight: normal;
 }
 
 .label-open     { background: #08b3; border-color: #08b9; }

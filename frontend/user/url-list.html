@@ -20,6 +20,11 @@
         padding: 0.5em 0.25em;
     }
 
+    .url-item .title a {
+        text-decoration: none;
+        font-weight: 600;
+    }
+
     .url-item:hover {
         background-color: var(--bgHover);
     }
@@ -88,7 +93,7 @@
 <ul class="url-container">
     {%- for url in urls -%}
         <li class="url-item">
-            <div class="ellipsis-text">
+            <div class="ellipsis-text title">
                 {%- macro label(type, text) -%}
                     <a href="/urls?tag={{ type }}"><span class="category-label label-{{ type }}">{{ text }}</span></a>
                 {%- endmacro -%}
