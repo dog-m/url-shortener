@@ -1,6 +1,25 @@
+:root {
+    --bgColor: #fff;
+    --bgHighlight: #ccc;
+    --bgHover: #ddd;
+
+    --fgColor: #000;
+}
+
+@media (prefers-color-scheme:dark) {
+    :root {
+        --bgColor: #111;
+        --bgHighlight: #333;
+        --bgHover: #555;
+
+        --fgColor: #fff;
+    }
+}
+
 body {
-    font: 1.2em Arial, sans-serif;
-    background-color: #fff;
+    font: 14pt Arial, sans-serif;
+    background-color: var(--bgColor);
+    color: var(--fgColor);
     margin: 0;
 }
 
@@ -13,7 +32,7 @@ body {
 
 .centered-center {
     box-shadow: 0 0 1em 1px #888;
-    background-color: #fff;
+    background-color: var(--fgColor);
     padding: 20px;
     width: 250px;
 }
@@ -27,13 +46,13 @@ header, footer {
 
 header {
     top: 0;
-    background-color: #ccc;
+    background-color: var(--bgHighlight);
 }
 
 footer {
     position: absolute;
     bottom: 0;
-    background-color: #eee;
+    background-color: var(--bgHighlight);
 }
 
 nav {
@@ -50,12 +69,14 @@ input, button, textarea, select {
     border: 2px solid #888;
     border-radius: 5px;
     box-shadow: inset 0px 1px 2px #0004;
-    background: #fff;
+    background: var(--bgColor);
+    color: var(--fgColor);
 }
 
 button {
     cursor: pointer;
     font-weight: 600;
+    color: #000;
     background: #eee;
     box-shadow: 0px 3px 2px #0003, inset 0px 1px 2px #fffa, inset 0px -1px 2px #0005;
     margin-bottom: 3px;
@@ -87,6 +108,7 @@ button.create:active {
 }
 
 a {
+    color: var(--fgColor);
     text-decoration: none;
 }
 
@@ -118,19 +140,23 @@ a {
     padding-top: 0.25em;
 }
 
-.tab.active, .tab.active:hover {
-    background: #fff;
+.tab.active {
+    background: #888;
     display: block;
 }
 
-.tab:hover {
-    background: #fff8;
+.tab:hover, .tab.active:hover {
+    background: var(--bgHover);
+}
+
+option:hover {
+    background-color: var(--bgHover);
 }
 
 .page {
     /* inspired by https://stackoverflow.com/a/72465193 */
-    background: linear-gradient(#fff,#fff) padding-box, linear-gradient(#0001, #0008, #0001) border-box;
-    border: 2px dashed #fff;
+    background: linear-gradient(var(--bgColor), var(--bgColor)) padding-box, linear-gradient(#0001, #0008, #0001) border-box;
+    border: 2px dashed var(--bgColor);
     border-top: none;
     border-bottom: none;
     margin: 1em;
@@ -140,10 +166,16 @@ a {
     position: absolute;
 }
 
+@media (prefers-color-scheme:dark) {
+    .page {
+        background: linear-gradient(var(--bgColor), var(--bgColor)) padding-box, linear-gradient(#fff1, #fff8, #fff1) border-box;
+    }
+}
+
 /* labels */
 
 .category-label {
-    color: #000;
+    color: var(--fgColor);
     border: 2px solid #0008;
     border-radius: 2em;
     background: #0002;
