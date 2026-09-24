@@ -63,6 +63,11 @@ To start the development server:
 uv run fastapi dev
 ```
 
+> [!WARNING]
+>
+> Default **superuser** credentials: `admin@url-shortener.internal` and `admin`.
+> Use for **testing/debugging ONLY**!
+
 ## Development
 
 This project uses semi-strict typing and linting to maintain code quality.
