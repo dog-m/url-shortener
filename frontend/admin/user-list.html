@@ -8,39 +8,21 @@
 <style>
     .user-list {
         column-count: 1;
-        gap: 2.5em;
+        gap: 2.5rem;
+        padding-left: 30px;
     }
 
     .user-list li::marker {
         content: '🤵 ';
     }
 
-    @media (min-width: 27em) {
-        .user-list {
-            column-count: 2;
-        }
-    }
-
-    @media (min-width: 37em) {
-        .user-list {
-            column-count: 3;
-        }
-    }
-
-    @media (min-width: 47em) {
-        .user-list {
-            column-count: 4;
-        }
-    }
-
-    @media (min-width: 57em) {
-        .user-list {
-            column-count: 5;
-        }
-    }
+    @media (min-width: calc((30px + 250px) * 2)) { .user-list { column-count: 2; } }
+    @media (min-width: calc((30px + 250px) * 3)) { .user-list { column-count: 3; } }
+    @media (min-width: calc((30px + 250px) * 4)) { .user-list { column-count: 4; } }
+    @media (min-width: calc((30px + 250px) * 5)) { .user-list { column-count: 5; } }
 
     .user-list li {
-        padding-bottom: 0.7em;
+        padding-bottom: 0.7rem;
     }
 </style>
 {% endblock %}
@@ -59,6 +41,19 @@
         </li>
         {%- endfor -%}
     </ul>
-    <p>Page: #{{ page + 1 }} @ {{ page_size }} links per page.</p>
+</div>
+{% set search_suffix %}
+    {{- '' -}}
+{% endset %}
+<div class="pagination-panel">
+    <span class="pagination-group">
+        <span class="page-direction">
+            <a class="{{ 'hidden' if page == 1 else '' }}" rel="prev" href="/users?p={{ page - 1 }}{{ search_suffix }}">&lt; Prev</a>
+        </span>
+        <span class="page-number">{{- page -}}</span>
+        <span class="page-direction">
+            <a class="{{ 'hidden' if (users | length) < page_size else '' }}" rel="next" href="/users?p={{ page + 1 }}{{ search_suffix }}">Next &gt;</a>
+        </span>
+    </span>
 </div>
 {%- endblock -%}

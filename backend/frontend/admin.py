@@ -32,18 +32,18 @@ async def admin_user_list(
     req: Request,
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_admin)],
-    page: Annotated[str, Query()] = '0',
+    page: Annotated[str, Query()] = '1',
 ) -> Response:
     # parameter cleanup
     page       = page.strip()
-    page_index = max(0, int(page) if page.isnumeric() else 0)
+    page_index = int(page) if page.isnumeric() else 1
     page_size  = 50
 
     # fetch
     users = await get_all_users_batched(
         db,
         batch_size=page_size,
-        offset_items=page_index * page_size,
+        offset_items=(page_index - 1) * page_size,
     )
 
     # page rendering
