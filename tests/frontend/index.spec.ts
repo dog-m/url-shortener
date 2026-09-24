@@ -1,21 +1,47 @@
-import { test, expect } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
+import { IndexPage } from './models/IndexPage';
 
 
-test('has title', async ({ page }) => {
-    await page.goto('');  // main page
+// inspired by: https://playwright.dev/docs/test-fixtures
 
-    await expect(page).toHaveTitle('URL Shortener service');
+const test = base.extend<{ indexPage: IndexPage }>({
+
+    indexPage: async ({ page }, use) => {
+        const indexPage = new IndexPage(page);
+        await indexPage.goto();
+        await use(indexPage);
+    },
+
 });
 
 
+test.describe('main webpage [unauthenticated]', () => {
+    test.use({
+        storageState: undefined,
+        locale: 'en-US',  // todo: unused
+    });
 
-test('login form is accessible', async ({ page }) => {
-    await page.goto('');  // main page
+    test('has title', async ({ indexPage }) => {
+        await expect(indexPage.page).toHaveTitle('URL Shortener service', { timeout: 100 });
+    });
 
-    let loginForm = page.getByRole('form', { name: 'login form' });
 
-    await expect(loginForm.locator('input[name="username"]')).toBeVisible();
-    await expect(loginForm.locator('input[name="password"]')).toBeVisible();
-    await expect(loginForm.locator('button[type="submit"]')).toBeVisible();
+    test('login form is accessible', async ({ indexPage }) => {
+        await expect(indexPage.username).toBeVisible();
+        await expect(indexPage.password).toBeVisible();
+        await expect(indexPage.loginBtn).toBeVisible();
+    });
+});
+
+
+test.describe('main webpage [sign-in]', () => {
+    test.use({
+        storageState: undefined
+    });
+
+    test('as admin', async ({ indexPage }) => {
+        await indexPage.singInAsAdmin();
+        await expect(indexPage.page).toHaveTitle('Profile / URL Shortener service', { timeout: 100 });
+    });
 });
 

@@ -40,6 +40,9 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // Setup project
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
@@ -86,7 +89,7 @@ export default defineConfig({
         timeout: 0.5 * 1000,
       },
       reuseExistingServer: !process.env.CI,
-      timeout: 5 * 1000,
+      timeout: 10 * 1000,
       url: 'http://localhost:8000/health',
       env: {
         DEBUG: 1,
