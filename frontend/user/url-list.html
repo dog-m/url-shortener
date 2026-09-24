@@ -47,6 +47,14 @@
         border-radius: 600em;
         padding: 5px 10px;
     }
+
+    .two-lines {
+        white-space: initial;
+        line-clamp: 2;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
 </style>
 <script lang="javascript">
     function replaceHashtags(text, baseUrl) {
@@ -100,7 +108,7 @@
             <div class="ellipsis-text title">
                 <a href="/urls/{{- url.id -}}/overview">[<code>u/{{ url.id }}</code>] <span>{{ url.title | e }}</span></a>
             </div>
-            <div class="ellipsis-text">
+            <div class="ellipsis-text two-lines">
                 {%- macro label(type, text) -%}
                     <a href="/urls?type={{ type }}"><span class="category-label label-{{ type }}">{{ text }}</span></a>
                 {%- endmacro -%}
