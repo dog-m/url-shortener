@@ -1,5 +1,6 @@
 :root {
     --bgColor: #fff;
+    --bgPage: #f8f8f8;
     --bgHighlight: #ccc;
     --bgHover: #ddd;
 
@@ -9,6 +10,7 @@
 @media (prefers-color-scheme:dark) {
     :root {
         --bgColor: #111;
+        --bgPage: #181818;
         --bgHighlight: #444;
         --bgHover: #656565;
 
@@ -32,7 +34,7 @@ body {
 
 .centered-center {
     box-shadow: 0 0 1em 1px #888;
-    background-color: var(--fgColor);
+    background-color: var(--bgColor);
     padding: 20px;
     width: 250px;
 }
@@ -163,21 +165,36 @@ option:hover {
 
 .page {
     /* inspired by https://stackoverflow.com/a/72465193 */
-    background: linear-gradient(var(--bgColor), var(--bgColor)) padding-box, linear-gradient(#0001, #0008, #0001) border-box;
+    background: linear-gradient(var(--bgPage), var(--bgPage)) padding-box, linear-gradient(#0001, #0008, #0001) border-box;
     border: 2px dashed var(--bgColor);
     border-top: none;
     border-bottom: none;
     margin: 1em;
     padding: 0 20px;
+    padding-bottom: 1em;
     left: 10%;
     right: 10%;
     position: absolute;
+    border-radius: 0 0 1em 1em;
 }
 
 @media (prefers-color-scheme:dark) {
     .page {
-        background: linear-gradient(var(--bgColor), var(--bgColor)) padding-box, linear-gradient(#fff1, #fff8, #fff1) border-box;
+        background: linear-gradient(var(--bgPage), var(--bgPage)) padding-box, linear-gradient(#fff1, #fff8, #fff1) border-box;
     }
+}
+
+/* pagination */
+
+.pagination-panel {
+    text-align: center;
+    margin-bottom: -1.8rem;
+}
+
+.pagination-group {
+    background: var(--bgPage);
+    border-radius: 100em;
+    padding: 5px 10px;
 }
 
 /* labels */
