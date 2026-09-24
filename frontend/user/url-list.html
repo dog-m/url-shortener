@@ -83,7 +83,7 @@
 </div>
 <div>
     <form method="get" action="/urls" autocomplete="off">
-        <input type="search" name="q" placeholder="🔎 Let's look for..." value="{{- query | e -}}" />
+        <input type="search" name="q" placeholder="🔎 Let's look for..." spellcheck="true" value="{{- query | e -}}" />
         <select name="sort">
             {%- macro sort_sel(id, title) -%}
             <option value="{{ id }}"{{ ' selected' if id == sort else '' }}>{{ title }}</option>

@@ -136,7 +136,7 @@
                 <label for="original_url">Original URL:</label>
             </td>
             <td>
-                <input name="original_url" id="original_url" type="url" value="{{ url.original_url | e }}" required />
+                <input name="original_url" id="original_url" type="url" value="{{ url.original_url | e }}" spellcheck="true" required />
             </td>
         </tr>
         <tr>
@@ -160,12 +160,12 @@
                 <label for="title">Title:</label>
             </td>
             <td>
-                <input name="title" id="title" type="text" value="{{ url.title | e }}" required />
+                <input name="title" id="title" type="text" value="{{ url.title | e }}" spellcheck="true" required />
             </td>
         </tr>
         <tr>
             <td colspan="2">
-                <textarea name="description" placeholder="Description...">
+                <textarea name="description" placeholder="Description..." spellcheck="true">
                     {{- url.description | e -}}
                 </textarea>
             </td>
