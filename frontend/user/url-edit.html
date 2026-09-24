@@ -27,7 +27,7 @@
         background-color: #fcc;
     }
 
-    form input, form textarea {
+    form input:not([type=checkbox]), form textarea {
         width: 100%;
         min-width: 350px;
     }
@@ -133,34 +133,34 @@
     <table>
         <tr>
             <td>
-                Original URL:
+                <label for="original_url">Original URL:</label>
             </td>
             <td>
-                <input name="original_url" type="url" value="{{ url.original_url | e }}" required />
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Active:
-            </td>
-            <td>
-                <input name="is_active" type="checkbox" {% if url.is_active %}checked{% endif %} />
+                <input name="original_url" id="original_url" type="url" value="{{ url.original_url | e }}" required />
             </td>
         </tr>
         <tr>
             <td>
-                Openly accessible:
+                Status:
             </td>
             <td>
-                <input name="is_open_access" type="checkbox" {% if url.is_open_access %}checked{% endif %} />
+                <span>
+                    <input name="is_active" id="is_active" type="checkbox" {% if url.is_active %}checked{% endif %} />
+                    <label for="is_active">Active</label>
+                </span>
+                <br>
+                <span>
+                    <input name="is_open_access" id="is_open_access" type="checkbox" {% if url.is_open_access %}checked{% endif %} />
+                    <label for="is_open_access">Openly accessible</label>
+                </span>
             </td>
         </tr>
         <tr>
             <td>
-                Title:
+                <label for="title">Title:</label>
             </td>
             <td>
-                <input name="title" type="text" value="{{ url.title | e }}" required />
+                <input name="title" id="title" type="text" value="{{ url.title | e }}" required />
             </td>
         </tr>
         <tr>
@@ -172,14 +172,14 @@
         </tr>
         <tr>
             <td>
-                Expires at:
+                <label for="expires_at">Expires at:</label>
             </td>
             <td>
                 <noscript>{{ url.expires_at }}</noscript>
                 <script lang="javascript">
                     let timestamp = '{{ url.expires_at if url.expires_at }}';
                     let value = timestamp ? to_local_datetime_ISO(timestamp) : '';
-                    document.write(`<input name="expires_at" type="datetime-local" value="${value}" />`);
+                    document.write(`<input name="expires_at" id="expires_at" type="datetime-local" value="${value}" />`);
                 </script>
             </td>
         </tr>

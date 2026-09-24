@@ -22,11 +22,15 @@
 
     .url-item .title a {
         text-decoration: none;
-        font-weight: 600;
+        font-weight: bold;
     }
 
     .url-item:hover {
         background-color: var(--bgHover);
+    }
+
+    .url-item-description a {
+        text-decoration: underline solid var(--fgColor) 2px;
     }
 
     a.ellipsis-text {
@@ -38,9 +42,9 @@
         text-align: center;
     }
 
-    .page-number {
+    .pagination-group {
         border: 3px solid #0004;
-        border-radius: 20%;
+        border-radius: 600em;
         padding: 5px 10px;
     }
 </style>
@@ -48,7 +52,7 @@
     function replaceHashtags(text, baseUrl) {
         return text.replace(
             /(?<!\w)(#[\w-]+)/gu,
-            (match) => `<a href="${baseUrl}?q=${encodeURIComponent(match)}">${match}</a>`,
+            (match) => `<a href="${baseUrl}?q=${encodeURIComponent(match)}">${match}&nbsp;🔎</a>`,
         );
     }
 
@@ -84,8 +88,8 @@
             {{ sort_sel('created', 'Creation time')    }}
         </select>
         <select name="asc">
-            <option value="on"  {{ 'selected' if sort_asc == True  else '' }}>Order: ascending</option>
-            <option value="off" {{ 'selected' if sort_asc == False else '' }}>Order: descending</option>
+            <option value="on"  {{ 'selected' if sort_asc == True  else '' }}>Order: A-Z</option>
+            <option value="off" {{ 'selected' if sort_asc == False else '' }}>Order: Z-A</option>
         </select>
         <button type="submit">Show!</button>
     </form>
@@ -94,8 +98,11 @@
     {%- for url in urls -%}
         <li class="url-item">
             <div class="ellipsis-text title">
+                <a href="/urls/{{- url.id -}}/overview">[<code>u/{{ url.id }}</code>] <span>{{ url.title | e }}</span></a>
+            </div>
+            <div class="ellipsis-text">
                 {%- macro label(type, text) -%}
-                    <a href="/urls?tag={{ type }}"><span class="category-label label-{{ type }}">{{ text }}</span></a>
+                    <a href="/urls?type={{ type }}"><span class="category-label label-{{ type }}">{{ text }}</span></a>
                 {%- endmacro -%}
                 {%- if url.is_open_access -%}
                     {{ label('open', 'open') }}
@@ -111,9 +118,6 @@
                 {%- else -%}
                         {{ label('disabled', 'disabled') }}
                 {%- endif -%}
-                <a href="/urls/{{- url.id -}}/overview">[<code>u/{{ url.id }}</code>] <span>{{ url.title | e }}</span></a>
-            </div>
-            <div class="ellipsis-text">
                 <small class="url-item-description">
                 {%- if url.description -%}
                     {{- url.description | e -}}
@@ -133,12 +137,14 @@
     {{- '&q=' + (query | e) if query    -}}
 {% endset %}
 <div class="pagination-panel">
-    <span class="page-direction">
-        <a class="{{ 'hidden' if page == 1 else '' }}" rel="prev" href="/urls?p={{ page - 1 }}{{ search_suffix }}">&lt; Previous</a>
-    </span>
-    <span class="page-number">{{- page -}}</span>
-    <span class="page-direction">
-        <a class="{{ 'hidden' if (urls | length) < page_size else '' }}" rel="next" href="/urls?p={{ page + 1 }}{{ search_suffix }}">Next &gt;</a>
+    <span class="pagination-group">
+        <span class="page-direction">
+            <a class="{{ 'hidden' if page == 1 else '' }}" rel="prev" href="/urls?p={{ page - 1 }}{{ search_suffix }}">&lt; Prev</a>
+        </span>
+        <span class="page-number">{{- page -}}</span>
+        <span class="page-direction">
+            <a class="{{ 'hidden' if (urls | length) < page_size else '' }}" rel="next" href="/urls?p={{ page + 1 }}{{ search_suffix }}">Next &gt;</a>
+        </span>
     </span>
 </div>
 {%- endblock -%}

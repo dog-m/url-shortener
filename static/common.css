@@ -10,7 +10,7 @@
     :root {
         --bgColor: #111;
         --bgHighlight: #444;
-        --bgHover: #665;
+        --bgHover: #656565;
 
         --fgColor: #fff;
     }
@@ -71,6 +71,10 @@ input, button, textarea, select {
     box-shadow: inset 0px 1px 2px #0004;
     background: var(--bgColor);
     color: var(--fgColor);
+}
+
+*:required:invalid {
+    border-color: #f00;
 }
 
 button {
@@ -180,21 +184,21 @@ option:hover {
 
 .category-label {
     color: var(--fgColor);
-    border: 2px solid #0008;
-    border-radius: 2em;
-    background: #0002;
-    font-size: 0.8em;
-    padding: 0.2em 0.5em;
+    border: 3px solid #0008;
+    border-radius: 2rem;
+    background: var(--bgColor);
+    font-size: 0.8rem;
+    padding: 0.1rem 0.35rem;
     margin-right: 5px;
     display: inline-block;
     font-weight: normal;
 }
 
-.label-open     { background: #08b3; border-color: #08b9; }
-.label-private  { background: #b083; border-color: #b089; }
-.label-active   { background: #0b03; border-color: #0b09; }
-.label-expired  { background: #b803; border-color: #b809; }
-.label-disabled { background: #b003; border-color: #b009; }
+.label-open     { border-color: #48b; }
+.label-private  { border-color: #b48; }
+.label-active   { border-color: #4b4; }
+.label-expired  { border-color: #b84; }
+.label-disabled { border-color: #b44; }
 
 /* utilities and shortcuts */
 
