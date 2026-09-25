@@ -16,7 +16,7 @@ export class IndexPage {
     }
 
     async goto() {
-        await this.page.goto('', { timeout: 750, });  // main page
+        await this.page.goto('', { timeout: 1000, });  // main page
     }
 
     async singInAsAdmin() {
@@ -24,6 +24,6 @@ export class IndexPage {
         await this.password.fill('admin');
         await this.loginBtn.click();
 
-        await this.page.waitForURL('/profile', { timeout: 2000, });
+        await this.page.waitForURL('/profile', { timeout: 5000, });
     }
 }

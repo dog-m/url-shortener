@@ -17,6 +17,7 @@ from backend.core.config import settings
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=settings.rate_limits,  # type: ignore  # no idea why it doesn't coalesce
+    enabled=not settings.no_rate_limit,
     key_style='endpoint',
     strategy='sliding-window-counter',
     storage_uri=settings.redis_url,

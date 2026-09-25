@@ -11,6 +11,7 @@ from fastapi import (
     Response,
     status,
 )
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.exc import StaleDataError
 
@@ -70,7 +71,7 @@ async def edit_user_profile(
             setattr(user, name, value)
 
         await db.commit()
-    except StaleDataError:
+    except StaleDataError: #(StaleDataError, IntegrityError):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
         )

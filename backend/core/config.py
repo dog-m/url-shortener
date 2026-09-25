@@ -43,6 +43,8 @@ class Settings(BaseSettings):
 
     user_session_expire_days: int        = Field(default=7, description='User session expiration')
 
+    # request rate limiting
+    no_rate_limit: bool    = Field(default=False, description='Disable request rate limiting')
     rate_limits: list[str] = Field(default=['5/second'], description='Application-wide default rate limits')
 
     # misc

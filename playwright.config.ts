@@ -88,11 +88,13 @@ export default defineConfig({
         signal: 'SIGTERM',
         timeout: 0.5 * 1000,
       },
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 10 * 1000,
       url: 'http://localhost:8000/health',
       env: {
         DEBUG: 1,
+        NO_RATE_LIMIT: 1,
+        RATE_LIMITS: '["500/second"]',
 
         // using separate temporary clean DB for running tests
         DATABASE_URL: 'sqlite+aiosqlite:///:memory:',

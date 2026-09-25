@@ -13,6 +13,7 @@ from backend.api.urls_primary import api_urls_router
 from backend.api.v1 import api_router
 from backend.core.caching import clear_caches, init_caches
 from backend.core.exceptions import rate_limit_exceeded_handler
+from backend.core.logging_config import logger
 from backend.core.security import limiter
 from backend.db.database import init_db
 from backend.frontend import frontend_router
@@ -48,7 +49,7 @@ async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
 async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any]:
     await on_startup(app)
     try:
-        #logger.info('Startup completed')
+        logger.info('Startup completed')
         yield
     finally:
         await on_shutdown(app)
