@@ -29,10 +29,6 @@
         background-color: var(--bgHover);
     }
 
-    .url-item-description a {
-        text-decoration: underline solid var(--fgColor) 2px;
-    }
-
     a.ellipsis-text {
         display: inline-block;
         max-width: 50%;
@@ -47,19 +43,8 @@
     }
 </style>
 <script lang="javascript">
-    function replaceHashtags(text, baseUrl) {
-        return text.replace(
-            /(?<!\w)(#[\w-]+)/gu,
-            (match) => `<a href="${baseUrl}?q=${encodeURIComponent(match)}">${match}&nbsp;🔎</a>`,
-        );
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
-        for (let description of document.getElementsByClassName('url-item-description')) {
-            let source = description.innerHTML;
-            if (source.includes('#'))
-                description.innerHTML = replaceHashtags(source, window.location.pathname);
-        }
+        replaceHashtagsIn(document, '/urls');
     });
 </script>
 {%- endblock -%}
@@ -116,7 +101,7 @@
                 {%- else -%}
                         {{ label('disabled', 'disabled') }}
                 {%- endif -%}
-                <small class="url-item-description">
+                <small class="contains-hashtags">
                 {%- if url.description -%}
                     {{- url.description | e -}}
                 {%- else -%}

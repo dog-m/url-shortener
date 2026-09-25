@@ -40,3 +40,19 @@ function debounce(callback, wait) {
     };
 }
 
+
+function replaceHashtags(text, baseUrl) {
+    return text.replace(
+        /(?<!\w)#([\w-]+)/gu,
+        (match, tag) => `<a href="${baseUrl}?q=${encodeURIComponent(match)}" class="hashtag">&num;${tag}&nbsp;🔎</a>`,
+    );
+}
+
+function replaceHashtagsIn(element, baseUrl) {
+    for (let description of element.getElementsByClassName('contains-hashtags')) {
+        let source = description.innerHTML;
+        if (source.includes('#'))
+            description.innerHTML = replaceHashtags(source, baseUrl);
+    }
+}
+

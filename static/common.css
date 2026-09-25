@@ -195,6 +195,7 @@ option:hover {
     background: var(--bgPage);
     border-radius: 100em;
     padding: 5px 10px;
+    user-select: none;
 }
 
 /* labels */
@@ -216,6 +217,12 @@ option:hover {
 .label-active   { border-color: #4b4; }
 .label-expired  { border-color: #b84; }
 .label-disabled { border-color: #b44; }
+
+/* search keywords/hashtags */
+
+.hashtag {
+    text-decoration: underline solid var(--fgColor) 2px;
+}
 
 /* utilities and shortcuts */
 

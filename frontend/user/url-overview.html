@@ -68,6 +68,10 @@
     }
 </style>
 <script lang="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        replaceHashtagsIn(document, '/urls');
+    });
+
     let index2name = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     let isWeekend = (i) => i === 0 || i === 6 || i === 'sun' || i === 'sat';
 
@@ -249,7 +253,7 @@
         <tr>
             <td>Description:</td>
             <td>
-                <small>
+                <small class="contains-hashtags">
                     {%- if url.description -%}
                         {{- url.description | e -}}
                     {%- else -%}
