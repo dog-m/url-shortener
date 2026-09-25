@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 
 
 export interface UserInfoPatch {
@@ -27,12 +27,17 @@ export class UserProfilePage {
         this.updateBtn = page.getByRole('button', { name: 'Update' });
         this.logoutBtn = page.getByRole('button', { name: 'Log-out' });
         this.errorMsg  = page.locator('#msg');
-
-        this.greeting = page.getByText(/greetings, [\w]*/i);
+        this.greeting  = page.getByText(/greetings, [\w]*/i);
     }
 
     async goto() {
-        await this.page.goto('/profile');
+        let canary = (await this.page.goto('/profile'))?.ok();
+        expect(canary).toBeTruthy();
+    }
+
+    async preventRefresh() {
+        // catch page refresh
+        await this.page.route('/profile', async (route) => await route.abort());
     }
 
     async updateProfile(patch: UserInfoPatch) {
@@ -40,6 +45,6 @@ export class UserProfilePage {
         if (patch.email)    await this.email.fill(patch.email);
         if (patch.password) await this.password.fill(patch.password);
 
-        await this.updateBtn.click();
+        await this.updateBtn.click({ timeout: 0 });
     }
 }

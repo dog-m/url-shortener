@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.core.config import settings
 from backend.core.security import password_get_hash
 from backend.db.database import get_db_session_context
 from backend.models.user import User
@@ -16,18 +17,28 @@ logger = logging.getLogger()
 
 
 
-async def upsert_primary_superuser() -> None:
-    try:
-        async with get_db_session_context() as session:
+async def upsert_default_users() -> None:
+    async with get_db_session_context() as db:
+        try:
             await create_user(
-                session,
+                db,
                 email='admin@url-shortener.internal',
                 name='admin',
                 pwd='admin',
                 is_privileged=True,
             )
-    except IntegrityError:
-        logger.info('Primary superuser already present, skipping.')
+        except IntegrityError:
+            logger.info('Primary superuser already present, skipping.')
+
+        # adding regular user
+        if settings.playwright_test:
+            await create_user(
+                db,
+                email='user@url-shortener.internal',
+                name='user',
+                pwd='user',
+                is_privileged=False,
+            )
 
 
 

@@ -7,9 +7,9 @@ import { IndexPage } from '../models/IndexPage';
 const test = base.extend<{ indexPage: IndexPage }>({
 
     indexPage: async ({ page }, use) => {
-        const indexPage = new IndexPage(page);
-        await indexPage.goto();
-        await use(indexPage);
+        const pom = new IndexPage(page);
+        await pom.goto();
+        await use(pom);
     },
 
 });

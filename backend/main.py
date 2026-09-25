@@ -13,7 +13,8 @@ from backend.api.urls_primary import api_urls_router
 from backend.api.v1 import api_router
 from backend.core.caching import clear_caches, init_caches
 from backend.core.exceptions import rate_limit_exceeded_handler
-from backend.core.logging_config import logger
+
+#from backend.core.logging_config import logger
 from backend.core.security import limiter
 from backend.db.database import init_db
 from backend.frontend import frontend_router
@@ -23,7 +24,7 @@ from backend.models.url import Url
 from backend.models.user import User
 from backend.services.audit import task_event_upload
 from backend.services.auth import task_remove_stale_sessions
-from backend.services.user import upsert_primary_superuser
+from backend.services.user import upsert_default_users
 
 #
 
@@ -34,7 +35,7 @@ async def on_startup(app: FastAPI) -> None:  # noqa: ARG001
     await init_db()
     await init_caches()
     #
-    await upsert_primary_superuser()
+    await upsert_default_users()
     #
     asyncio.create_task(task_event_upload())
     asyncio.create_task(task_remove_stale_sessions())
@@ -49,7 +50,7 @@ async def on_shutdown(app: FastAPI) -> None:  # noqa: ARG001
 async def lifespan(app: FastAPI) -> AsyncGenerator[Any, Any]:
     await on_startup(app)
     try:
-        logger.info('Startup completed')
+        #logger.info('Startup completed')
         yield
     finally:
         await on_shutdown(app)

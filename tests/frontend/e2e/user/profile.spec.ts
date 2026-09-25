@@ -1,15 +1,15 @@
 import { test as base, expect } from '@playwright/test';
 import { UserProfilePage } from '../../models/UserProfilePage';
-import { SESSION_STATE_ADMIN } from '../../misc/states';
+import { SESSION_STATE_USER } from '../../misc/states';
 import { randomUUID } from 'crypto';
 
 
 const test = base.extend<{ profilePage: UserProfilePage }>({
 
     profilePage: async ({ page }, use) => {
-        const profilePage = new UserProfilePage(page);
-        await profilePage.goto();
-        await use(profilePage);
+        const pom = new UserProfilePage(page);
+        await pom.goto();
+        await use(pom);
     },
 
 });
@@ -17,23 +17,34 @@ const test = base.extend<{ profilePage: UserProfilePage }>({
 
 test.describe('user profile', () => {
     test.use({
-        storageState: SESSION_STATE_ADMIN,
+        storageState: SESSION_STATE_USER,
     });
 
 
-    test('should send the correct JSON payload when updating profile', async ({ page, profilePage }) => {
+    test('update JSON payload', async ({ page, profilePage }) => {
+        const apiEndpoint        = '/api/v1/user/';
+        const apiEndpointPattern = `${apiEndpoint}**`;
         const testName  = 'John Doe';
         const testEmail = `john+${randomUUID()}@example.com`;
         const testPwd   = 'qwerty$:123';
 
+        // setup interception
+        await page.route(apiEndpointPattern, async (route, request) => {
+            if (request.method() === 'PATCH')
+                await route.fulfill({ json: { status: 'ok', } });
+            else
+                await route.continue();
+        });
+
         // set up a listener for the specific request
-        const requestPromise = page.waitForRequest(
-            req => req.url().includes('/api/v1/user/') && req.method() === 'PATCH', {
-                timeout: 5000,
+        const requestPromise = page.waitForRequest(req =>
+            req.url().includes(apiEndpoint) && req.method() === 'PATCH', {
+                timeout: 1000,
             }
         );
 
         // act
+        await profilePage.preventRefresh();
         await profilePage.updateProfile({
             name: testName,
             email: testEmail,
@@ -41,10 +52,9 @@ test.describe('user profile', () => {
         });
 
         // wait for the request to be intercepted
-        const request = await requestPromise;
+        let payload = (await requestPromise).postDataJSON();
 
         // verify
-        const payload = request.postDataJSON();
         expect(payload).toEqual({
             name: testName,
             email: testEmail,

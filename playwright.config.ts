@@ -40,22 +40,29 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    // Setup project
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    // project lifecycle
+    {
+      name: 'setup',
+      testMatch: '**/*.setup.ts',
+      teardown: 'teardown',
+    },
 
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
 
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
     },
 
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
     },
 
     /* Test against mobile viewports. */
@@ -77,6 +84,8 @@ export default defineConfig({
     //   name: 'Google Chrome',
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
+
+    { name: 'teardown', testMatch: '**/*.teardown.ts' },
   ],
 
   /* Run local dev server before starting the tests */
@@ -92,15 +101,15 @@ export default defineConfig({
       timeout: 10 * 1000,
       url: 'http://localhost:8000/health',
       env: {
-        DEBUG: 1,
-        NO_RATE_LIMIT: 1,
+        DEBUG: '1',
+        NO_RATE_LIMIT: '1',
         RATE_LIMITS: '["500/second"]',
 
         // using separate temporary clean DB for running tests
         DATABASE_URL: 'sqlite+aiosqlite:///:memory:',
 
         // Playwright defaults
-        PLAYWRIGHT_TEST: 1,
+        PLAYWRIGHT_TEST: '1',
         ...process.env,
       }
     },

@@ -24,6 +24,6 @@ export class IndexPage {
         await this.password.fill('admin');
         await this.loginBtn.click();
 
-        await this.page.waitForURL('/profile', { timeout: 5000, });
+        await this.page.waitForURL('/profile', { timeout: 3000, });
     }
 }
