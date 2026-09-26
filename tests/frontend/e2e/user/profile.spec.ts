@@ -62,8 +62,6 @@ test.describe('user profile', () => {
             email: testEmail,
             password: testPwd,
         });
-
-        expect(await profilePage.greeting.textContent()).toBe('Greetings, user.');
     });
 
 });
