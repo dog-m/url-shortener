@@ -1,4 +1,5 @@
 import { type Page, type Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
 
 export interface UserInfoPatch {
@@ -8,8 +9,7 @@ export interface UserInfoPatch {
 }
 
 
-export class UserProfilePage {
-    readonly page: Page;
+export class UserProfilePage extends BasePage {
     readonly name: Locator;
     readonly email: Locator;
     readonly password: Locator;
@@ -19,7 +19,7 @@ export class UserProfilePage {
     readonly greeting: Locator;
 
     constructor(page: Page) {
-        this.page = page;
+        super(page);
 
         this.name      = page.locator('#name');
         this.email     = page.locator('#email');
@@ -31,13 +31,7 @@ export class UserProfilePage {
     }
 
     async goto() {
-        let canary = (await this.page.goto('/profile'))?.ok();
-        expect(canary).toBeTruthy();
-    }
-
-    async preventRefresh() {
-        // catch page refresh
-        await this.page.route('/profile', async (route) => await route.abort());
+        await this.gotoSafe('/profile');
     }
 
     async updateProfile(patch: UserInfoPatch) {

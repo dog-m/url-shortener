@@ -31,7 +31,10 @@ test.describe('user profile', () => {
         // setup interception
         await page.route(apiEndpointPattern, async (route, request) => {
             if (request.method() === 'PATCH')
-                await route.fulfill({ json: { status: 'ok', } });
+                await route.fulfill({
+                    status: 200,
+                    json: { status: 'ok', }
+                });
             else
                 await route.continue();
         });
@@ -44,7 +47,6 @@ test.describe('user profile', () => {
         );
 
         // act
-        await profilePage.preventRefresh();
         await profilePage.updateProfile({
             name: testName,
             email: testEmail,
@@ -60,6 +62,8 @@ test.describe('user profile', () => {
             email: testEmail,
             password: testPwd,
         });
+
+        expect(await profilePage.greeting.textContent()).toBe('Greetings, user.');
     });
 
 });
