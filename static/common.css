@@ -1,6 +1,6 @@
 :root {
     --bgColor: #fff;
-    --bgPage: #f8f8f8;
+    --bgPage: #f6f6f6;
     --bgHighlight: #ccc;
     --bgHover: #ddd;
 
@@ -10,7 +10,7 @@
 @media (prefers-color-scheme:dark) {
     :root {
         --bgColor: #111;
-        --bgPage: #181818;
+        --bgPage: #222;
         --bgHighlight: #444;
         --bgHover: #656565;
 
