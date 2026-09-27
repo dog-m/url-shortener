@@ -22,7 +22,12 @@
         msg.classList.remove('msg-ok', 'msg-err');
         msg.textContent = '';
 
-        let on_err = (reason) => {
+        const on_success = () => {
+            // regenerate the page by just reloading it
+            window.location.reload();
+        };
+
+        const on_err = (reason) => {
             msg.classList.add('msg-err');
             msg.textContent = `Unable to update the entry.`;
             console.error('Entry update error', reason);
@@ -53,13 +58,12 @@
                     body: JSON.stringify(patch),
                     redirect: 'error',
                     credentials: 'same-origin',
-                    signal: AbortSignal.timeout(5 * 1000),
+                    signal: AbortSignal.timeout(5 * 1000),  // TODO: abort on page unload
                 }
             )
             .then(async (value) => {
                 if (value.ok) {
-                    // regenerate the page
-                    window.location.reload();
+                    on_success();
                 } else {
                     on_err(await value.json());
                 }
@@ -78,7 +82,7 @@
 </div>
 <div>
     <p>Greetings, {{ user.name | e }}.</p>
-    <form onsubmit="return update_profile(event);" autocomplete="off">
+    <form id="main-form" onsubmit="return update_profile(event);" autocomplete="off">
         <table>
             <tr>
                 <td><label for="name">New name:</label></td>
@@ -107,7 +111,7 @@
         <i>Last updated: <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script></i>
     </small>
 </p>
-<form method="post" action="/api/v1/logout">
+<form method="post" action="/api/v1/auth/logout">
     <button type="submit" class="danger">Log-out</button>
 </form>
 {%- endblock -%}

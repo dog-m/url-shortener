@@ -15,7 +15,7 @@ const test = base.extend<{ profilePage: UserProfilePage }>({
 });
 
 
-test.describe('user profile', () => {
+test.describe('profile', () => {
     test.use({
         storageState: SESSION_STATE_USER,
     });

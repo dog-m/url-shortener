@@ -28,11 +28,11 @@ from backend.services.url import (
 #
 
 
-frontend_urls_router = APIRouter(tags=['urls'])
+router = APIRouter(prefix='/urls', tags=['urls'])
 
 
 
-@frontend_urls_router.api_route('/urls', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@router.get('', response_class=HTMLResponse)
 async def url_search(
     req: Request,
     db: Annotated[AsyncSession, Depends(get_db_session)],
@@ -88,7 +88,7 @@ async def url_search(
 
 
 
-@frontend_urls_router.api_route('/urls/new', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@router.get('/new', response_class=HTMLResponse)
 async def url_new(
     req: Request,
     user: Annotated[User, Depends(require_user)],
@@ -105,7 +105,7 @@ async def url_new(
 
 
 
-@frontend_urls_router.api_route('/urls/{url_id}/overview', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@router.get('/{url_id}/overview', response_class=HTMLResponse)
 async def url_overview(
     req: Request,
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
@@ -133,7 +133,7 @@ async def url_overview(
 
 
 
-@frontend_urls_router.api_route('/urls/{url_id}/edit', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@router.get('/{url_id}/edit', response_class=HTMLResponse)
 async def url_edit(
     req: Request,
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],

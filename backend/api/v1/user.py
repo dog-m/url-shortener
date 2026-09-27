@@ -25,11 +25,11 @@ from backend.schemas.user import UserInfo, UserUpdate
 #
 
 
-api_user_router = APIRouter(prefix='', tags=['user'])
+router = APIRouter(prefix='', tags=['user'])
 
 
 
-@api_user_router.get('/me', response_model=UserInfo)
+@router.get('/me', response_model=UserInfo)
 async def get_current_user_profile(
     user: Annotated[User, Depends(require_user)],
 ) -> object:
@@ -37,7 +37,7 @@ async def get_current_user_profile(
 
 
 
-@api_user_router.patch('/user/{user_id}', response_model=ApiOk)
+@router.patch('/user/{user_id}', response_model=ApiOk)
 @limiter.limit('1/second')
 async def edit_user_profile(
     user_id: Annotated[str, Path()],
@@ -71,7 +71,7 @@ async def edit_user_profile(
             setattr(user, name, value)
 
         await db.commit()
-    except StaleDataError: #(StaleDataError, IntegrityError):
+    except (StaleDataError, IntegrityError):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
         )

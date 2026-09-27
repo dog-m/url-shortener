@@ -9,13 +9,13 @@ from backend.frontend.common import frontend_files
 
 
 async def not_found_error_handler(request: Request, e: Exception) -> Response:  # noqa: ARG001
-    res = await frontend_files.get_response('404.html', request.scope)
+    res = await frontend_files.get_response('errors/404.html', request.scope)
     res.status_code = status.HTTP_404_NOT_FOUND
     return res
 
 
 
-
+# TODO: error message translation?
 ERROR_MESSAGES = {
     'value_error.email': {
         'en': 'Invalid email format',

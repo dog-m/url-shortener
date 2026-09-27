@@ -28,7 +28,7 @@ _allow_header_forwarded_for = True
 _client_ip_first            = False
 
 
-api_urls_router = APIRouter(prefix='', tags=['api', 'primary'])
+primary_endpoint = APIRouter(prefix='', tags=['api', 'primary'])
 
 
 
@@ -61,7 +61,7 @@ async def _get_client_referer(req: Request) -> str | None:
 FRONTEND_LOGIN_PAGE = '/login'
 
 
-@api_urls_router.get('/u/{url_id}')
+@primary_endpoint.get('/u/{url_id}')
 async def visit_url(
     req: Request,
     url_id: Annotated[str, Path()],

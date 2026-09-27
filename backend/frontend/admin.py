@@ -23,11 +23,11 @@ from backend.services.user import get_all_users_batched, get_user_by_id
 #
 
 
-frontend_admin_router = APIRouter(tags=['admin'])
+router = APIRouter(tags=['admin'])
 
 
 
-@frontend_admin_router.api_route('/users', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@router.get('/users', response_class=HTMLResponse)
 async def admin_user_list(
     req: Request,
     db: Annotated[AsyncSession, Depends(get_db_session)],
@@ -61,7 +61,7 @@ async def admin_user_list(
 
 
 
-@frontend_admin_router.api_route('/user/{user_id}/profile', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@router.get('/user/{user_id}/profile', response_class=HTMLResponse)
 async def admin_user_profile(
     req: Request,
     user_id: Annotated[UUID, Path()],

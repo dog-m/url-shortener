@@ -1,0 +1,182 @@
+{% extends 'user/base.html' %}
+
+{% set PAGE = 'url-new' %}
+
+{% block title %}Create new short URL / {{ super() }}{% endblock %}
+
+{%- block head -%}
+<style>
+    #msg {
+        display: none;
+        border: 3px solid;
+        border-radius: 10px;
+        padding: 5px;
+    }
+
+    .msg-ok {
+        display: inline-block !important;
+        color: #080;
+        border-color: #8f8;
+        background-color: #cfc;
+    }
+
+    .msg-err {
+        display: inline-block !important;
+        color: #800;
+        border-color: #f88;
+        background-color: #fcc;
+    }
+
+    form input:not([type=checkbox]), form textarea {
+        width: 100%;
+        min-width: 350px;
+    }
+
+    form textarea {
+        min-height: 140px;
+    }
+
+    .error-highlight {
+        border-color: #f00;
+    }
+</style>
+<script lang="javascript">
+    const CLS_MSG_OK    = 'msg-ok';
+    const CLS_MSG_ERROR = 'msg-err';
+
+    function createUrl(form) {
+        // prepare the data
+        let extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
+        console.debug(form);
+        let data = {
+            original_url:   form.get('original_url'),
+            is_active:      !!form.get('is_active'),
+            is_open_access: !!form.get('is_open_access'),
+            title:          form.get('title'),
+            description:    form.get('description'),
+            expires_at:     extract_datetime(form.get('expires_at')),
+        };
+        console.debug(data);
+
+        const msgElement = document.getElementById('msg');
+        msgElement.classList.remove(CLS_MSG_OK, CLS_MSG_ERROR);
+
+        const on_success = (info) => {
+            // disable form editing and prevent further attempts at creating an URL
+            document.getElementById('main-form').inert = true;
+
+            // show a happy message and then redirect
+            msgElement.innerText = 'Success!';
+            msgElement.classList.add(CLS_MSG_OK);
+            setTimeout(() => {
+                window.location.pathname = `/urls/${info.id}/overview`;
+            }, 750);
+        };
+
+        const on_error = (reason, fieldId) => {
+            reason = reason ?? 'something went wrong';
+            if (fieldId) {
+                const field = document.getElementById(fieldId);
+                field.classList.add('error-highlight');
+                field.oninput = () => field.classList.remove('error-highlight');
+            }
+
+            msgElement.innerText = `Error: ${reason}.`;
+            msgElement.classList.add(CLS_MSG_ERROR);
+            setTimeout(() => {
+                msgElement.classList.remove(CLS_MSG_ERROR);
+            }, 2500);
+        };
+
+        fetch(
+            '/api/v1/urls', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+                redirect: 'error',
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5 * 1000),  // TODO: abort on page unload
+            }
+        ).then((res) => {
+            if (res.ok) {
+                res.json().then(on_success).catch(on_error);
+            } else {
+                res.json()
+                .then(err => on_error('unacceptable input', err.detail[0].loc[1]))  // TODO: better Pydantic parsing?
+                .catch(e => on_error());
+            }
+        }).catch(e => on_error());
+    }
+
+    const createUrlDebounced = debounce(createUrl, 750);
+
+    function formHandler(e) {
+        e.preventDefault();
+        createUrlDebounced(new FormData(e.srcElement));
+        return false;
+    }
+</script>
+{%- endblock -%}
+
+{%- block page_content -%}
+<h3>
+    New URL
+</h3>
+<form id="main-form" onsubmit="return formHandler(event);" autocomplete="off">
+    <table>
+        <tr>
+            <td>
+                <label for="original_url">Original URL:</label>
+            </td>
+            <td>
+                <input name="original_url" id="original_url" type="url" placeholder="🌍 https://..." spellcheck="true" required />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Status:
+            </td>
+            <td>
+                <span>
+                    <input name="is_active" id="is_active" type="checkbox" checked />
+                    <label for="is_active">Active</label>
+                </span>
+                <br>
+                <span>
+                    <input name="is_open_access" id="is_open_access" type="checkbox" />
+                    <label for="is_open_access">Openly accessible</label>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="title">Title:</label>
+            </td>
+            <td>
+                <input name="title" id="title" type="text" placeholder="..." spellcheck="true" required />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <textarea name="description" id="description" placeholder="Description..." spellcheck="true"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="expires_at">Expires at:</label>
+            </td>
+            <td>
+                <input name="expires_at" id="expires_at" type="datetime-local" />
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button type="submit" class="create">Create!</button>
+                <span id="msg"></span>
+            </td>
+        </tr>
+    </table>
+</form>
+{%- endblock -%}

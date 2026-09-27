@@ -147,11 +147,12 @@ a {
 }
 
 .tab {
-    padding-top: 0.25em;
+    border-radius: 5px 5px 0px 0px;
+    padding-top: calc(0.25em + 5px / 2);
 }
 
 .tab.active, .tab.active:hover {
-    background: var(--bgColor);
+    background: linear-gradient(var(--bgColor), var(--bgPage));
     display: block;
 }
 
@@ -169,7 +170,7 @@ option:hover {
     border: 2px dashed var(--bgColor);
     border-top: none;
     border-bottom: none;
-    margin: 1em;
+    margin: 0 1em;
     padding: 0 20px;
     padding-bottom: 1em;
     left: 10%;
@@ -233,6 +234,10 @@ option:hover {
 
 .hidden {
     display: none;
+}
+
+.invisible {
+    visibility: hidden;
 }
 
 .ellipsis-text {

@@ -121,12 +121,12 @@
 {% endset %}
 <div class="pagination-panel">
     <span class="pagination-group">
-        <span class="page-direction">
-            <a class="{{ 'hidden' if page == 1 else '' }}" rel="prev" href="/urls?p={{ page - 1 }}{{ search_suffix }}">&lt; Prev</a>
+        <span class="page-direction {{ 'invisible' if page == 1 }}">
+            <a rel="prev" href="/urls?p={{ page - 1 }}{{ search_suffix }}">&lt; Prev</a>
         </span>
         <span class="page-number">{{- page -}}</span>
-        <span class="page-direction">
-            <a class="{{ 'hidden' if (urls | length) < page_size else '' }}" rel="next" href="/urls?p={{ page + 1 }}{{ search_suffix }}">Next &gt;</a>
+        <span class="page-direction {{ 'invisible' if (urls | length) < page_size }}">
+            <a rel="next" href="/urls?p={{ page + 1 }}{{ search_suffix }}">Next &gt;</a>
         </span>
     </span>
 </div>

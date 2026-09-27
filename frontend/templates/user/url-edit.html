@@ -52,20 +52,19 @@
             console.error('Entry update error', reason);
         };
 
-        let extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
-
         // collect the data
         let form = new FormData(e.srcElement);
-        console.log(form);
+        let extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
+        console.debug(form);
         let patch = {
             original_url:   form.get('original_url'),
-            is_active:      form.get('is_active') ?? false,
-            is_open_access: form.get('is_open_access') ?? false,
+            is_active:      !!form.get('is_active'),
+            is_open_access: !!form.get('is_open_access'),
             title:          form.get('title'),
             description:    form.get('description'),
             expires_at:     extract_datetime(form.get('expires_at')),
         };
-        console.log(patch);
+        console.debug(patch);
 
         fetch(
             `/api/v1/urls/{{ url.id }}?v=${patch_version}`, {
@@ -76,13 +75,15 @@
                 body: JSON.stringify(patch),
                 redirect: 'error',
                 credentials: 'same-origin',
-                signal: AbortSignal.timeout(5 * 1000),
+                signal: AbortSignal.timeout(5 * 1000),  // TODO: abort on page unload
             }
         )
         .then(async (value) => {
             if (value.ok) {
                 data = await value.json();
                 patch_version = data.version;
+
+                document.getElementById('last-update-timestamp').innerText = new Date().toLocaleString();
 
                 msg.classList.add('msg-ok');
                 msg.textContent = 'Updated successfully!';
@@ -129,7 +130,7 @@
 <h3>
     /u/{{ url.id }}
 </h3>
-<form onsubmit="return update_url(event);">
+<form id="main-form" onsubmit="return update_url(event);">
     <table>
         <tr>
             <td>
@@ -193,7 +194,7 @@
                 Last edit:
             </td>
             <td>
-                <small>
+                <small id="last-update-timestamp">
                     <noscript>{{ url.updated_at }} UTC</noscript>
                     <script lang="javascript"> localize_time("{{ url.updated_at }}"); </script>
                 </small>

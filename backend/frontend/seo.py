@@ -6,10 +6,10 @@ from backend.frontend.common import frontend_files
 #
 
 
-frontend_seo_router = APIRouter(tags=['frontend', 'SEO'])
+router = APIRouter(tags=['frontend', 'SEO'])
 
 
-@frontend_seo_router.api_route('/robots.txt', methods=['GET', 'HEAD'], response_class=FileResponse)
+@router.api_route('/robots.txt', methods=['GET', 'HEAD'], response_class=FileResponse)
 async def robots(req: Request) -> Response:
     return await frontend_files.get_response(
         path=req.url.path[1:],
@@ -17,7 +17,7 @@ async def robots(req: Request) -> Response:
     )
 
 
-@frontend_seo_router.api_route('/sitemap.xml', methods=['GET', 'HEAD'], response_class=FileResponse)
+@router.api_route('/sitemap.xml', methods=['GET', 'HEAD'], response_class=FileResponse)
 async def sitemap(req: Request) -> Response:
     return await frontend_files.get_response(
         path=req.url.path[1:],

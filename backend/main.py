@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-from backend.api.urls_primary import api_urls_router
+from backend.api.urls_primary import primary_endpoint
 from backend.api.v1 import api_router
 from backend.core.caching import clear_caches, init_caches
 from backend.core.exceptions import rate_limit_exceeded_handler
@@ -75,13 +75,13 @@ async def health_check() -> object:
 
 # frontend
 app.include_router(frontend_router)
+app.include_router(primary_endpoint)
 
 # api routes
-app.include_router(api_urls_router)
 app.include_router(api_router)
 
 # misc routes
-app.mount('/static', StaticFiles(directory='static'), name='static')
+app.mount('/static', StaticFiles(directory='frontend/static'), name='static')
 
 # errors
 app.add_exception_handler(status.HTTP_404_NOT_FOUND, not_found_error_handler)

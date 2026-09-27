@@ -26,23 +26,23 @@ FRONTEND_INDEX     = '/'
 FRONTEND_USER_MAIN = '/profile'
 
 
-api_auth_router = APIRouter(prefix='', tags=['auth'])
+router = APIRouter(prefix='/auth', tags=['auth'])
 
 
-@api_auth_router.post('/login')
+@router.post('/login')
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     redirect: Annotated[str, Query()] = FRONTEND_USER_MAIN,
     id: Annotated[str | None, Cookie()] = None,
 ) -> Response:
-    print('[!!!]', id)  # TODO: log-in idempotency
+    print('[!!!]', id)  # TODO: log-in idempotency?
 
     if not redirect.startswith('/'):  # only allow endpoints on this site
         redirect = FRONTEND_USER_MAIN
 
     user = await get_user_by_email(db, form_data.username)
-    if not user or not password_verify(form_data.password, user.hashed_password):  # type: ignore # FIXME: user registration!
+    if not user or not user.hashed_password or not password_verify(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -56,7 +56,7 @@ async def login(
 
 
 
-@api_auth_router.post('/logout')
+@router.post('/logout')
 async def logout(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     session: Annotated[Session | None, Depends(get_current_session)] = None,
@@ -66,6 +66,5 @@ async def logout(
 
     res = html_redirect(FRONTEND_INDEX)
     res.delete_cookie(SESSION_COOKIE_NAME)
-    res.set_cookie('id', '987654321', httponly=True)  # TODO: log-in idempotency
     return res
 

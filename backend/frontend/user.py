@@ -10,11 +10,11 @@ from backend.models.user import User
 #
 
 
-frontend_user_router = APIRouter(tags=['user'])
+router = APIRouter(tags=['user'])
 
 
 
-@frontend_user_router.api_route('/profile', methods=['GET', 'HEAD'], response_class=HTMLResponse)
+@router.get('/profile', response_class=HTMLResponse)
 async def user_profile(
     req: Request,
     user: Annotated[User, Depends(require_user)],

@@ -1,7 +1,7 @@
 import { type Page, expect } from '@playwright/test';
 
 export class BasePage {
-    constructor(protected readonly page: Page) {}
+    constructor(readonly page: Page) {}
 
     /**
      * Navigates to a path and verifies the server responded

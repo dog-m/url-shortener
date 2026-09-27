@@ -33,11 +33,11 @@ from backend.services.url import (
 #
 
 
-api_urls_router = APIRouter(prefix='', tags=['url'])
+router = APIRouter(prefix='/urls', tags=['url'])
 
 
 
-@api_urls_router.get('/urls', response_model=list[UrlInfo])
+@router.get('', response_model=list[UrlInfo])
 async def list_urls(
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
@@ -46,7 +46,7 @@ async def list_urls(
 
 
 
-@api_urls_router.post('/urls', response_model=UrlInfo)
+@router.post('', response_model=UrlInfo)
 async def add_new_url(
     new_url: Annotated[UrlCreate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
@@ -56,7 +56,7 @@ async def add_new_url(
 
 
 
-@api_urls_router.patch('/urls/{url_id}', response_model=UrlUpdateResult)
+@router.patch('/{url_id}', response_model=UrlUpdateResult)
 @limiter.limit('1/second')
 async def edit_url(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
@@ -98,7 +98,7 @@ async def edit_url(
 
 
 
-@api_urls_router.delete('/urls/{url_id}', response_model=ApiOk)
+@router.delete('/{url_id}', response_model=ApiOk)
 async def remove_url(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
@@ -122,7 +122,7 @@ async def remove_url(
 
 
 
-@api_urls_router.get('/urls/{url_id}/stats/last-activity', response_model=ClickActivityStats)
+@router.get('/{url_id}/stats/last-activity', response_model=ClickActivityStats)
 async def get_url_stats_last_activity(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     up_to: Annotated[datetime, Query(default_factory=now_UTC)],  # TODO: possible issues with timezones?
