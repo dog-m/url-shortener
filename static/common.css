@@ -221,6 +221,7 @@ option:hover {
 /* search keywords/hashtags */
 
 .hashtag {
+    color: var(--fgColor);
     text-decoration: underline solid var(--fgColor) 2px;
 }
 

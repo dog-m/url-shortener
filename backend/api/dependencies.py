@@ -1,3 +1,4 @@
+from html import escape
 from typing import Annotated
 
 from fastapi import Cookie, Depends, HTTPException, Response, status
@@ -12,7 +13,7 @@ from backend.services.auth import get_active_session_by_id, get_user_by_session
 #
 
 
-def new_html_redirector(target_url: str, *, delay_sec: int = 1) -> Response:
+def html_redirect(target_url: str, *, delay_sec: int = 1) -> Response:
     assert delay_sec >= 0
 
     return HTMLResponse(
@@ -20,7 +21,13 @@ def new_html_redirector(target_url: str, *, delay_sec: int = 1) -> Response:
         <html>
             <head>
                 <title>...</title>
-                <meta http-equiv="refresh" content="{delay_sec};url={target_url}" />
+                <meta http-equiv="refresh" content="{delay_sec};url={escape(target_url)}" />
+                <style>
+                    body {{ background: #fff; }}
+                    @media (prefers-color-scheme:dark) {{
+                        body {{ background: #000; }}
+                    }}
+                </style>
             </head>
             <body></body>
         </html>''',

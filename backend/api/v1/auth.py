@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.api.dependencies import (
     SESSION_COOKIE_NAME,
     get_current_session,
-    new_html_redirector,
+    html_redirect,
 )
 from backend.core.config import settings
 from backend.core.security import password_verify
@@ -50,7 +50,7 @@ async def login(
 
     session = await new_session(db, user)
 
-    res = new_html_redirector(redirect)
+    res = html_redirect(redirect)
     res.set_cookie(SESSION_COOKIE_NAME, session.id, httponly=True, expires=settings.user_session_expire_days * 24 * 3600)
     return res
 
@@ -64,7 +64,7 @@ async def logout(
     if session is not None:
         await terminate_session(db, session)
 
-    res = new_html_redirector(FRONTEND_INDEX)
+    res = html_redirect(FRONTEND_INDEX)
     res.delete_cookie(SESSION_COOKIE_NAME)
     res.set_cookie('id', '987654321', httponly=True)  # TODO: log-in idempotency
     return res
