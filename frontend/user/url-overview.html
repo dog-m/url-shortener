@@ -18,9 +18,9 @@
     .dot {
         width: 0.85em;
         height: 0.85em;
-        border: 1.5px solid #bbb;
+        border: 1.5px solid #bbb3;
         border-radius: 33%;
-        background: #eee;
+        background: #8883;
     }
 
     .dot.LF, .dot.LX {
@@ -32,6 +32,13 @@
     .dot.L2 { background: hsl(115, 80%, 80%); }
     .dot.L3 { background: hsl(110, 60%, 70%); }
     .dot.L4 { background: hsl(105, 40%, 50%); }
+
+    @media (prefers-color-scheme:dark) {
+        .dot.L1 { background: hsl(105, 40%, 20%); }
+        .dot.L2 { background: hsl(110, 60%, 30%); }
+        .dot.L3 { background: hsl(115, 80%, 50%); }
+        .dot.L4 { background: hsl(120, 99%, 70%); }
+    }
 
     .dot:hover, .weekday-bar:hover {
         outline: 3px solid #f00;
@@ -47,24 +54,31 @@
     }
 
     .weekday-bar {
-        background: hsl(120, 75%, 75%);
-        border: 1px solid hsl(120, 50%, 45%);
         height: 0.8em;
+        background:       hsl(120, 75%, 75%);
+        border: 1px solid hsl(120, 50%, 45%);
+    }
+
+    @media (prefers-color-scheme:dark) {
+        .weekday-bar {
+            background-color: hsl(120, 75%, 35%);
+            border-color:     hsl(120, 50%, 65%);
+        }
     }
 
     .stats {
-        border: 1px solid #000;
+        border: 1px solid var(--fgColor);
         padding: 5px;
     }
 
     .stats-msg {
-        color: #bbb;
+        color: #bbb8;
         font-style: italic;
         font-size: 12pt;
     }
 
     .stats-msg.err {
-        color: #f00;
+        color: #f008;
     }
 </style>
 <script lang="javascript">
