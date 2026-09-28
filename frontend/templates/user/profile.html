@@ -109,10 +109,10 @@
 
 {%- block page_content -%}
 <div>
-    <h3>Profile</h3>
+    <h3>Greetings, {{ user.name | e }}.</h3>
 </div>
 <div>
-    <p>Greetings, {{ user.name | e }}.</p>
+    <p>Do you want to update something?</p>
     <form id="main-form" onsubmit="return formHandler(event);" autocomplete="off">
         <table>
             <tr>
@@ -135,15 +135,18 @@
                     <button type="submit" style="width: 100%;">Update</button>
                     <br>
                     <span id="msg"></span>
+                    <hr>
+                    <div style="font-size: 0.9rem; font-style: italic; width: 100%;">
+                        Last edit &ndash; <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script>.
+                    </div>
                 </td>
             </tr>
         </table>
     </form>
 </div>
-<div style="font-size: 0.9rem; font-style: italic; margin: 1rem 0;">
-    Last update: <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script>
+<div style="margin-top: 1rem;">
+    <form method="post" action="/api/v1/auth/logout">
+        <button type="submit" class="danger">Log-out</button>
+    </form>
 </div>
-<form method="post" action="/api/v1/auth/logout">
-    <button type="submit" class="danger">Log-out</button>
-</form>
 {%- endblock -%}

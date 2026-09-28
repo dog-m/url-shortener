@@ -243,6 +243,7 @@ option:hover {
 /* errors and message boxes */
 
 .error-highlight {
+    color: #f00 !important;
     border-color: #f00 !important;
 }
 
