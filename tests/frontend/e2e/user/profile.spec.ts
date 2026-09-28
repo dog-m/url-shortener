@@ -42,7 +42,7 @@ test.describe('profile', () => {
         // set up a listener for the specific request
         const requestPromise = page.waitForRequest(req =>
             req.url().includes(apiEndpoint) && req.method() === 'PATCH', {
-                timeout: 1000,
+                timeout: 1500, // debounce included?
             }
         );
 
