@@ -56,3 +56,17 @@ function replaceHashtagsIn(element, baseUrl) {
     }
 }
 
+
+// error handling
+
+function extractInvalidFieldName(err) {
+    let res = null;
+    try {
+        // grab element name that failed Pydantic validation
+        res = err.detail[0].loc[1];
+    } catch {
+        // ignore
+    }
+    return res;
+}
+

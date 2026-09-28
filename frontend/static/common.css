@@ -1,3 +1,5 @@
+/* parametrization */
+
 :root {
     --bgColor: #fff;
     --bgPage: #f6f6f6;
@@ -16,6 +18,13 @@
 
         --fgColor: #fff;
     }
+}
+
+
+/* general */
+
+*:required:invalid {
+    border-color: #f00;
 }
 
 body {
@@ -75,10 +84,6 @@ input, button, textarea, select {
     color: var(--fgColor);
 }
 
-*:required:invalid {
-    border-color: #f00;
-}
-
 button {
     cursor: pointer;
     font-weight: 600;
@@ -116,6 +121,7 @@ button.create:active {
 a {
     color: var(--fgColor);
 }
+
 
 /* handles for tabs/pages */
 
@@ -166,7 +172,9 @@ option:hover {
 
 .page {
     /* inspired by https://stackoverflow.com/a/72465193 */
-    background: linear-gradient(var(--bgPage), var(--bgPage)) padding-box, linear-gradient(#0001, #0008, #0001) border-box;
+    background:
+        linear-gradient(var(--bgPage), var(--bgPage)) padding-box,
+        linear-gradient(#0001, #0008, #0001) border-box;
     border: 2px dashed var(--bgColor);
     border-top: none;
     border-bottom: none;
@@ -181,9 +189,12 @@ option:hover {
 
 @media (prefers-color-scheme:dark) {
     .page {
-        background: linear-gradient(var(--bgPage), var(--bgPage)) padding-box, linear-gradient(#fff1, #fff8, #fff1) border-box;
+        background:
+            linear-gradient(var(--bgPage), var(--bgPage)) padding-box,
+            linear-gradient(#fff1, #fff8, #fff1) border-box;
     }
 }
+
 
 /* pagination */
 
@@ -198,6 +209,7 @@ option:hover {
     padding: 5px 10px;
     user-select: none;
 }
+
 
 /* labels */
 
@@ -219,6 +231,7 @@ option:hover {
 .label-expired  { border-color: #b84; }
 .label-disabled { border-color: #b44; }
 
+
 /* search keywords/hashtags */
 
 .hashtag {
@@ -226,7 +239,35 @@ option:hover {
     text-decoration: underline solid var(--fgColor) 2px;
 }
 
-/* utilities and shortcuts */
+
+/* errors and message boxes */
+
+.error-highlight {
+    border-color: #f00 !important;
+}
+
+.msg-ok {
+    display: inline-block !important;
+    color: #080;
+    border-color: #8f88;
+    background-color: #cfc8;
+}
+.msg-ok::before {
+    content: '✅';
+}
+
+.msg-err {
+    display: inline-block !important;
+    color: #f008;
+    border-color: #f008;
+    background-color: #f001;
+}
+.msg-err::before {
+    content: '❌';
+}
+
+
+/* misc utilities and shortcuts */
 
 .round-corners {
     border-radius: 1.0em;
@@ -241,9 +282,9 @@ option:hover {
 }
 
 .ellipsis-text {
-  white-space: nowrap;      /* Keeps the text on a single line */
-  overflow: hidden;         /* Hides the text that overflows */
-  text-overflow: ellipsis;  /* Adds the "..." at the end */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .no-drag {

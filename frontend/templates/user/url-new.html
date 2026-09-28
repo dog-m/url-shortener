@@ -11,20 +11,10 @@
         border: 3px solid;
         border-radius: 10px;
         padding: 5px;
+        margin-left: 0.5rem;
     }
-
-    .msg-ok {
-        display: inline-block !important;
-        color: #080;
-        border-color: #8f8;
-        background-color: #cfc;
-    }
-
-    .msg-err {
-        display: inline-block !important;
-        color: #800;
-        border-color: #f88;
-        background-color: #fcc;
+    #msg::before {
+        margin-right: 0.25rem;
     }
 
     form input:not([type=checkbox]), form textarea {
@@ -35,19 +25,51 @@
     form textarea {
         min-height: 140px;
     }
-
-    .error-highlight {
-        border-color: #f00;
-    }
 </style>
 <script lang="javascript">
     const CLS_MSG_OK    = 'msg-ok';
     const CLS_MSG_ERROR = 'msg-err';
 
-    function createUrl(form) {
+    const ID_FORM    = 'main-form';
+    const ID_MESSAGE = 'msg';
+
+    function on_success(urlInfo) {
+        // disable form editing and prevent further attempts at creating an URL
+        document.getElementById(ID_FORM).inert = true;
+
+        // show a happy message and then redirect
+        const msgElement = document.getElementById(ID_MESSAGE);
+        msgElement.innerText = 'OK!';
+        msgElement.classList.add(CLS_MSG_OK);
+        setTimeout(() => {
+            window.location.pathname = `/urls/${urlInfo.id}/overview`;
+        }, 750);
+    };
+
+    function on_error(reason, fieldId) {
+        reason = reason ?? 'Something went wrong';
+        if (fieldId) {
+            const field = document.getElementById(fieldId);
+            field.classList.add('error-highlight');
+            const oldHandler = field.oninput;
+            field.oninput = () => {
+                field.classList.remove('error-highlight');
+                field.oninput = oldHandler;
+            };
+        }
+
+        const msgElement = document.getElementById(ID_MESSAGE);
+        msgElement.innerText = reason;
+        msgElement.classList.add(CLS_MSG_ERROR);
+        setTimeout(() => {
+            msgElement.classList.remove(CLS_MSG_ERROR);
+        }, 2500);
+    };
+
+    const createUrl = debounce(() => {
         // prepare the data
-        let extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
-        console.debug(form);
+        const form = new FormData(document.getElementById(ID_FORM));
+        const extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
         let data = {
             original_url:   form.get('original_url'),
             is_active:      !!form.get('is_active'),
@@ -56,38 +78,11 @@
             description:    form.get('description'),
             expires_at:     extract_datetime(form.get('expires_at')),
         };
-        console.debug(data);
 
-        const msgElement = document.getElementById('msg');
-        msgElement.classList.remove(CLS_MSG_OK, CLS_MSG_ERROR);
+        // clear last message
+        document.getElementById(ID_MESSAGE).classList.remove(CLS_MSG_OK, CLS_MSG_ERROR);
 
-        const on_success = (info) => {
-            // disable form editing and prevent further attempts at creating an URL
-            document.getElementById('main-form').inert = true;
-
-            // show a happy message and then redirect
-            msgElement.innerText = 'Success!';
-            msgElement.classList.add(CLS_MSG_OK);
-            setTimeout(() => {
-                window.location.pathname = `/urls/${info.id}/overview`;
-            }, 750);
-        };
-
-        const on_error = (reason, fieldId) => {
-            reason = reason ?? 'something went wrong';
-            if (fieldId) {
-                const field = document.getElementById(fieldId);
-                field.classList.add('error-highlight');
-                field.oninput = () => field.classList.remove('error-highlight');
-            }
-
-            msgElement.innerText = `Error: ${reason}.`;
-            msgElement.classList.add(CLS_MSG_ERROR);
-            setTimeout(() => {
-                msgElement.classList.remove(CLS_MSG_ERROR);
-            }, 2500);
-        };
-
+        // poke the API
         fetch(
             '/api/v1/urls', {
                 method: 'POST',
@@ -99,22 +94,23 @@
                 credentials: 'same-origin',
                 signal: AbortSignal.timeout(5 * 1000),  // TODO: abort on page unload
             }
-        ).then((res) => {
+        ).then(async (res) => {
             if (res.ok) {
-                res.json().then(on_success).catch(on_error);
+                on_success(await res.json());
             } else {
-                res.json()
-                .then(err => on_error('unacceptable input', err.detail[0].loc[1]))  // TODO: better Pydantic parsing?
-                .catch(e => on_error());
+                try {
+                    const errElement = extractInvalidFieldName(await res.json());
+                    on_error('Unacceptable input', errElement);
+                } catch {
+                    on_error();
+                }
             }
-        }).catch(e => on_error());
-    }
-
-    const createUrlDebounced = debounce(createUrl, 750);
+        }).catch(async (e) => on_error());
+    }, 500);
 
     function formHandler(e) {
         e.preventDefault();
-        createUrlDebounced(new FormData(e.srcElement));
+        createUrl();
         return false;
     }
 </script>
@@ -145,7 +141,7 @@
                 </span>
                 <br>
                 <span>
-                    <input name="is_open_access" id="is_open_access" type="checkbox" />
+                    <input name="is_open_access" id="is_open_access" type="checkbox" checked />
                     <label for="is_open_access">Openly accessible</label>
                 </span>
             </td>
