@@ -6,14 +6,23 @@
 
 {%- block head -%}
 <style>
+    #msg {
+        display: none;
+        border: 3px solid;
+        border-radius: 10px;
+        padding: 5px;
+        margin-left: 0.5rem;
+    }
+    #msg::before {
+        margin-right: 0.25rem;
+    }
+
     table {
         border: 1px solid var(--fgColor);
         padding: 15px;
     }
 </style>
 <script lang="javascript">
-    var patch_version = parseInt('{{ user.version }}');
-
     function update_profile(e) {
         // prepare for the upload
         e.preventDefault();
@@ -29,7 +38,7 @@
 
         const on_err = (reason) => {
             msg.classList.add('msg-err');
-            msg.textContent = `Unable to update the entry.`;
+            msg.textContent = 'Unable to update the entry.';
             console.error('Entry update error', reason);
         };
 
@@ -50,7 +59,7 @@
         // make the request only if there is something to upload, otherwise do nothing
         if (Object.keys(patch).length !== 0) {
             fetch(
-                `/api/v1/user/{{ user.id }}?v=${patch_version}`, {
+                `/api/v1/user/{{ user.id }}?v={{ user.version }}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -100,11 +109,14 @@
                 <td colspan="2" style="height: 15px;"><!--[empty space]--></td>
             </tr>
             <tr>
-                <td colspan="2"><button type="submit" style="width: 100%;">Update</button></td>
+                <td colspan="2">
+                    <button type="submit" style="width: 100%;">Update</button>
+                    <br>
+                    <div id="msg"></div>
+                </td>
             </tr>
         </table>
     </form>
-    <div id="msg"></div>
 </div>
 <p>
     <small>
