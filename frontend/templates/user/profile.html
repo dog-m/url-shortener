@@ -140,11 +140,9 @@
         </table>
     </form>
 </div>
-<p>
-    <small>
-        <i>Last updated: <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script></i>
-    </small>
-</p>
+<div style="font-size: 0.9rem; font-style: italic; margin: 1rem 0;">
+    Last update: <script lang="javascript"> localize_time('{{- user.updated_at -}}'); </script>
+</div>
 <form method="post" action="/api/v1/auth/logout">
     <button type="submit" class="danger">Log-out</button>
 </form>

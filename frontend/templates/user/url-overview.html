@@ -208,6 +208,33 @@
             btn.inert = false;
         }, 1000);
     }
+
+    function deleteUrl() {
+        if (!confirm('Do you really want to delete this URL?'))
+            return;
+
+        let on_err = (reason) => {
+            console.error('URL removal failure', reason);
+            alert('Unable to delete the URL.\nCheck browser console for more details.');
+        };
+
+        fetch(
+            '/api/v1/urls/{{ url.id }}', {
+                method: 'DELETE',
+                redirect: 'error',
+                credentials: 'same-origin',
+                signal: AbortSignal.timeout(5 * 1000),
+            }
+        )
+        .then(async (value) => {
+            if (value.ok) {
+                window.location.pathname = '/urls';
+            } else {
+                on_err(await value.json());
+            }
+        })
+        .catch(on_err);
+    }
 </script>
 {% endblock %}
 
@@ -278,10 +305,24 @@
         </tr>
     </table>
 </div>
+<div style="font-size: 0.9rem; font-style: italic; margin: 0.5rem 0;">
+    <span>
+        Created &ndash; <noscript>{{ url.created_at }} UTC</noscript>
+        <script lang="javascript"> localize_time("{{ url.created_at }}"); </script>;
+    </span>
+    <span>
+        updated &ndash;
+        <noscript>{{ url.updated_at }} UTC</noscript>
+        <script lang="javascript"> localize_time("{{ url.updated_at }}"); </script>.
+    </span>
+</div>
 <h3>
     Statistics:
 </h3>
 <div id="stats-container">
     <p class="stats-msg">Loading, please wait...</p>
+</div>
+<div style="margin-top: 1rem;">
+    <button class="danger" onclick="deleteUrl()">Delete</button>
 </div>
 {%- endblock -%}

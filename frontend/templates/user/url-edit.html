@@ -36,8 +36,6 @@
     const ID_MESSAGE = 'msg';
 
     function on_success() {
-        document.getElementById('last-update-timestamp').innerText = new Date().toLocaleString();
-
         const msgElement = document.getElementById(ID_MESSAGE);
         msgElement.innerText = 'Updated successfully!';
         msgElement.classList.add(CLS_MSG_OK);
@@ -113,33 +111,6 @@
         updateUrl();
         return false;
     }
-
-    function delete_url() {
-        if (!confirm('Do you really want to delete this URL?'))
-            return;
-
-        let on_err = (reason) => {
-            console.error('URL removal failure', reason);
-            alert('Unable to delete the URL.\nCheck browser console for more details.');
-        };
-
-        fetch(
-            '/api/v1/urls/{{ url.id }}', {
-                method: 'DELETE',
-                redirect: 'error',
-                credentials: 'same-origin',
-                signal: AbortSignal.timeout(5 * 1000),
-            }
-        )
-        .then(async (value) => {
-            if (value.ok) {
-                window.location.pathname = '/urls';
-            } else {
-                on_err(await value.json());
-            }
-        })
-        .catch(on_err);
-    }
 </script>
 {%- endblock -%}
 
@@ -207,31 +178,6 @@
                 <span id="msg"></span>
             </td>
         </tr>
-        <tr>
-            <td>
-                Last edit:
-            </td>
-            <td>
-                <small id="last-update-timestamp">
-                    <noscript>{{ url.updated_at }} UTC</noscript>
-                    <script lang="javascript"> localize_time("{{ url.updated_at }}"); </script>
-                </small>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                Created at:
-            </td>
-            <td>
-                <small>
-                    <noscript>{{ url.created_at }} UTC</noscript>
-                    <script lang="javascript"> localize_time("{{ url.created_at }}"); </script>
-                </small>
-            </td>
-        </tr>
     </table>
 </form>
-<div>
-    <button class="danger" onclick="delete_url()">Delete</button>
-</div>
 {%- endblock -%}
