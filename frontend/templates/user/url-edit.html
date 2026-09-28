@@ -29,23 +29,46 @@
 <script lang="javascript">
     var patch_version = parseInt('{{ url.version }}');
 
-    function update_url(e) {
-        // prepare for the upload
-        e.preventDefault();
-        let msg = document.getElementById('msg');
-        msg.classList.remove('msg-ok', 'msg-err');
-        msg.textContent = '';
+    const CLS_MSG_OK    = 'msg-ok';
+    const CLS_MSG_ERROR = 'msg-err';
 
-        let on_err = (reason) => {
-            msg.classList.add('msg-err');
-            msg.textContent = 'Unable to update the entry.';
-            console.error('Entry update error', reason);
-        };
+    const ID_FORM    = 'main-form';
+    const ID_MESSAGE = 'msg';
 
-        // collect the data
-        let form = new FormData(e.srcElement);
-        let extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
-        console.debug(form);
+    function on_success() {
+        document.getElementById('last-update-timestamp').innerText = new Date().toLocaleString();
+
+        const msgElement = document.getElementById(ID_MESSAGE);
+        msgElement.innerText = 'Updated successfully!';
+        msgElement.classList.add(CLS_MSG_OK);
+        setTimeout(() => { msgElement.classList.remove(CLS_MSG_OK); }, 1500);
+    };
+
+    function on_error(reason, fieldId) {
+        reason = reason ?? 'Something went wrong';
+
+        if (fieldId) {
+            const field = document.getElementById(fieldId);
+            field.classList.add('error-highlight');
+            const oldHandler = field.oninput;
+            field.oninput = () => {
+                field.classList.remove('error-highlight');
+                field.oninput = oldHandler;
+            };
+        }
+
+        const msgElement = document.getElementById(ID_MESSAGE);
+        msgElement.innerText = reason;
+        msgElement.classList.add(CLS_MSG_ERROR);
+        setTimeout(() => {
+            msgElement.classList.remove(CLS_MSG_ERROR);
+        }, 2500);
+    };
+
+    const updateUrl = debounce(() => {
+        // prepare the data
+        const form = new FormData(document.getElementById(ID_FORM));
+        const extract_datetime = (str) => str == '' ? null : new Date(str).toISOString();
         let patch = {
             original_url:   form.get('original_url'),
             is_active:      !!form.get('is_active'),
@@ -54,8 +77,11 @@
             description:    form.get('description'),
             expires_at:     extract_datetime(form.get('expires_at')),
         };
-        console.debug(patch);
 
+        // clear last message
+        document.getElementById(ID_MESSAGE).classList.remove(CLS_MSG_OK, CLS_MSG_ERROR);
+
+        // poke the API
         fetch(
             `/api/v1/urls/{{ url.id }}?v=${patch_version}`, {
                 method: 'PATCH',
@@ -67,23 +93,24 @@
                 credentials: 'same-origin',
                 signal: AbortSignal.timeout(5 * 1000),  // TODO: abort on page unload
             }
-        )
-        .then(async (value) => {
-            if (value.ok) {
-                data = await value.json();
-                patch_version = data.version;
-
-                document.getElementById('last-update-timestamp').innerText = new Date().toLocaleString();
-
-                msg.classList.add('msg-ok');
-                msg.textContent = 'Updated successfully!';
-                setTimeout(() => { msg.classList.remove('msg-ok'); }, 1500);
+        ).then(async (res) => {
+            if (res.ok) {
+                patch_version = (await res.json()).version;
+                on_success();
             } else {
-                on_err(await value.json());
+                try {
+                    const errElement = extractInvalidFieldName(await res.json());
+                    on_error('Unacceptable input', errElement);
+                } catch {
+                    on_error();
+                }
             }
-        })
-        .catch(on_err);
+        }).catch(async (e) => on_error());
+    }, 500);
 
+    function formHandler(e) {
+        e.preventDefault();
+        updateUrl();
         return false;
     }
 
@@ -120,7 +147,7 @@
 <h3>
     /u/{{ url.id }}
 </h3>
-<form id="main-form" onsubmit="return update_url(event);">
+<form id="main-form" onsubmit="return formHandler(event);" autocomplete="off">
     <table>
         <tr>
             <td>
@@ -156,7 +183,7 @@
         </tr>
         <tr>
             <td colspan="2">
-                <textarea name="description" placeholder="Description..." spellcheck="true">
+                <textarea name="description" id="description" placeholder="Description..." spellcheck="true">
                     {{- url.description | e -}}
                 </textarea>
             </td>
@@ -204,7 +231,6 @@
         </tr>
     </table>
 </form>
-<div id="msg"></div>
 <div>
     <button class="danger" onclick="delete_url()">Delete</button>
 </div>
