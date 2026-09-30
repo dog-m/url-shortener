@@ -18,7 +18,7 @@ from backend.api.dependencies import require_admin
 from backend.db.database import get_db_session
 from backend.frontend.common import frontend_templates
 from backend.models.user import User
-from backend.services.user import get_all_users_batched, get_user_by_id
+from backend.services.user import find_users_batched, get_user_by_id
 
 #
 
@@ -28,10 +28,10 @@ router = APIRouter(tags=['admin'])
 
 
 @router.get('/users', response_class=HTMLResponse)
-async def admin_user_list(
+async def get_user_list(
     req: Request,
     db: Annotated[AsyncSession, Depends(get_db_session)],
-    user: Annotated[User, Depends(require_admin)],
+    admin: Annotated[User, Depends(require_admin)],
     page: Annotated[str, Query()] = '1',
 ) -> Response:
     # parameter cleanup
@@ -40,11 +40,14 @@ async def admin_user_list(
     page_size  = 50
 
     # fetch
-    users = await get_all_users_batched(
-        db,
-        batch_size=page_size,
-        offset_items=(page_index - 1) * page_size,
-    )
+    if page_index > 0:
+        users = await find_users_batched(
+            db,
+            batch_size=page_size,
+            offset_items=(page_index - 1) * page_size,
+        )
+    else:
+        users = []
 
     # page rendering
     return frontend_templates.TemplateResponse(
@@ -52,7 +55,7 @@ async def admin_user_list(
         name='admin/user-list.html',
         media_type='text/html',
         context={
-            'user': user,
+            'user': admin,  # pages/tabs jinja logic relies on 'user' being present
             'page': page_index,
             'page_size': page_size,
             'users': users,
@@ -61,22 +64,21 @@ async def admin_user_list(
 
 
 
-@router.get('/user/{user_id}/profile', response_class=HTMLResponse)
-async def admin_user_profile(
+@router.get('/users/{user_id}/profile', response_class=HTMLResponse)
+async def get_user_profile(
     req: Request,
     user_id: Annotated[UUID, Path()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
-    user: Annotated[User, Depends(require_admin)],
+    admin: Annotated[User, Depends(require_admin)],
 ) -> Response:
     # validation
-    profile = await get_user_by_id(db, user_id)
-    if profile is None:
+    if (profile := await get_user_by_id(db, user_id)) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
         )
 
     # conveniences
-    if user_id == user.id:
+    if user_id == admin.id:
         return RedirectResponse(
             url='/profile',
         )
@@ -87,7 +89,7 @@ async def admin_user_profile(
         name='admin/user-profile-edit.html',
         media_type='text/html',
         context={
-            'user': user,
+            'user': admin,  # pages/tabs jinja logic relies on 'user' being present
             'profile': profile,
         }
     )

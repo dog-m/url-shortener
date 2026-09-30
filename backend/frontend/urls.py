@@ -55,7 +55,7 @@ async def url_search(
     owner = user_id if user_id and user.is_superuser else user
 
     # fetch
-    if page_index >= 1:
+    if page_index > 0:
         urls = await find_urls_batched(
             db,
             text=query,

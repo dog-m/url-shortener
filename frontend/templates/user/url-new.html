@@ -118,7 +118,7 @@
 
 {%- block page_content -%}
 <h3>
-    New URL
+    New short link
 </h3>
 <form id="main-form" onsubmit="return formHandler(event);" autocomplete="off">
     <table>
@@ -158,13 +158,13 @@
             <td colspan="2">
                 <textarea name="description" id="description" placeholder="Description..." spellcheck="true"></textarea>
                 <div style="font-size: 0.9rem; font-style: italic; margin-bottom: 0.3rem;">
-                    Hint: you can use <u>#hashtags</u> for organizing multiple links together.
+                    Hint: you can use <u>#hashtags</u> for organizing links.
                 </div>
             </td>
         </tr>
         <tr>
             <td>
-                <label for="expires_at">Expires at:</label>
+                <label for="expires_at">Expires:</label>
             </td>
             <td>
                 <input name="expires_at" id="expires_at" type="datetime-local" />

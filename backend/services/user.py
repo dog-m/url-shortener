@@ -85,7 +85,7 @@ async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
 
 
 
-async def get_all_users_batched(db: AsyncSession, *, offset_items: int = 0, batch_size: int = 50) -> Sequence[User]:
+async def find_users_batched(db: AsyncSession, *, offset_items: int = 0, batch_size: int = 50) -> Sequence[User]:
     assert batch_size >= 0
     assert offset_items >= 0
 
