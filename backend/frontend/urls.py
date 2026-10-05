@@ -21,6 +21,7 @@ from backend.models.user import User
 from backend.services.url import (
     URL_ID_PATTERN,
     URL_SORTING_CRITERIA,
+    UrlCategory,
     find_url_by_id,
     find_urls_batched,
 )
@@ -41,15 +42,18 @@ async def url_search(
     page: Annotated[str, Query(alias='p')] = '1',  # using "natural" numbers instead of zero-based indexing
     sort: Annotated[str, Query()] = 'updated',
     asc: Annotated[str, Query()] = 'off',
+    category: Annotated[str, Query(alias='c')] = '',
     user_id: Annotated[UUID | None, Query(min_length=1, max_length=38)] = None,  # MS GUID format
 ) -> Response:
     # parameter cleanup
-    page       = page.strip()
-    page_index = int(page) if page.isnumeric() else 0
-    query      = query[:500].strip()
-    sort       = sort.strip().lower()
-    sort_asc   = asc == 'on'
-    page_size  = 20
+    page         = page.strip()
+    page_index   = int(page) if page.isnumeric() else 0
+    query        = query[:500].strip()
+    sort         = sort.strip().lower()
+    sort_asc     = asc == 'on'
+    now_utc      = now_UTC().replace(tzinfo=None)
+    url_category = UrlCategory(category) if category else None
+    page_size    = 20
 
     # access checks
     owner = user_id if user_id and user.is_superuser else user
@@ -64,6 +68,8 @@ async def url_search(
             sort_asc=sort_asc,
             batch_size=page_size,
             offset_items=(page_index - 1) * page_size,
+            url_category=url_category,
+            now_utc=now_utc,
         )
     else:
         urls = []
@@ -83,6 +89,7 @@ async def url_search(
             'sort': sort,
             'sort_asc': sort_asc,
             'URL_SORTING_CRITERIA': URL_SORTING_CRITERIA.keys(),
+            'category': category,
         }
     )
 

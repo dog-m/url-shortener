@@ -84,8 +84,8 @@
                 <a href="/urls/{{- url.id -}}/overview">[<code>u/{{ url.id }}</code>] <span>{{ url.title | e }}</span></a>
             </div>
             <div class="ellipsis-text two-lines">
-                {%- macro label(type, text) -%}
-                    <a href="/urls?type={{ type }}"><span class="category-label label-{{ type }}">{{ text }}</span></a>
+                {%- macro label(category, text) -%}
+                    <a href="/urls?c={{ category }}"><span class="category-label label-{{ category }}">{{ text }}</span></a>
                 {%- endmacro -%}
                 {%- if url.is_open_access -%}
                     {{ label('open', 'open') }}
@@ -115,9 +115,10 @@
     {%- endfor -%}
 </ul>
 {% set search_suffix %}
-    {{- ('&sort=' + sort)   if sort     -}}
-    {{- '&asc=on'           if sort_asc -}}
-    {{- '&q=' + (query | e) if query    -}}
+    {{- ('&sort=' + sort)        if sort     -}}
+    {{-  '&asc=on'               if sort_asc -}}
+    {{- ('&c=' + (category | e)) if category -}}
+    {{- ('&q=' + (query | e))    if query    -}}
 {% endset %}
 <div class="pagination-panel">
     <span class="pagination-group">

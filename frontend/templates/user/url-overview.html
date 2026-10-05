@@ -272,8 +272,8 @@
         <tr>
             <td>Status:</td>
             <td>
-                {%- macro label(type, text) -%}
-                    <span class="category-label label-{{ type }}">{{ text }}</span>
+                {%- macro label(category, text) -%}
+                    <span class="category-label label-{{ category }}">{{ text }}</span>
                 {%- endmacro -%}
                 {%- if url.is_open_access -%}
                     {{ label('open', 'open') }}

@@ -3,11 +3,14 @@ import re
 import string
 import uuid
 from collections.abc import Sequence
+from datetime import datetime
+from enum import StrEnum, auto
 
-from sqlalchemy import func, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.db.database import now_UTC
 from backend.models.click import ClickEvent, UrlVisitorMetadata
 from backend.models.url import Url
 from backend.models.user import User
@@ -62,8 +65,45 @@ URL_SORTING_CRITERIA: dict[str, object] = {
     'url':     Url.original_url,
     # others make little to no sense (to me) or require using join(s)
 }
-
 URL_SORTING_CRITERIA_DEFAULT = Url.updated_at
+
+
+class UrlCategory(StrEnum):
+    OPEN     = auto()
+    PRIVATE  = auto()
+    ACTIVE   = auto()
+    EXPIRED  = auto()
+    DISABLED = auto()
+
+    @classmethod
+    def _missing_(cls, _: object) -> 'UrlCategory | None':
+        return UrlCategory.OPEN
+
+
+def _apply_category_filter(stmt: Select, category: UrlCategory | None, now_utc: datetime) -> Select:
+    if category is None:
+        return stmt
+    match category:
+        case UrlCategory.OPEN:
+            return stmt.where(
+                Url.is_open_access
+            )
+        case UrlCategory.PRIVATE:
+            return stmt.where(
+                ~Url.is_open_access
+            )
+        case UrlCategory.ACTIVE:
+            return stmt.where(
+                Url.is_active & (Url.expires_at.is_(None) | (now_utc < Url.expires_at))
+            )
+        case UrlCategory.EXPIRED:
+            return stmt.where(
+                Url.is_active & (Url.expires_at <= now_utc)
+            )
+        case UrlCategory.DISABLED:
+            return stmt.where(
+                ~Url.is_active
+            )
 
 
 async def find_urls_batched(
@@ -75,6 +115,8 @@ async def find_urls_batched(
     text: str = '',
     sort_criteria: str = 'updated',
     sort_asc: bool = False,
+    url_category: UrlCategory | None = None,
+    now_utc: datetime | None = None,
 ) -> Sequence[Url]:
     stmt = select(Url)
 
@@ -89,6 +131,10 @@ async def find_urls_batched(
         text = text.replace('%', '\\%')
         text = '%'.join(text.split())
         stmt = stmt.where(Url.title.icontains(text) | Url.description.icontains(text) | (Url.id == text))
+
+    # type label filtering
+    if url_category is not None:
+        stmt = _apply_category_filter(stmt, url_category, now_utc or now_UTC())
 
     # ordering/sorting
     criteria = URL_SORTING_CRITERIA.get(sort_criteria.lower(), URL_SORTING_CRITERIA_DEFAULT)
