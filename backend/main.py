@@ -16,7 +16,7 @@ from backend.core.exceptions import rate_limit_exceeded_handler
 
 #from backend.core.logging_config import logger
 from backend.core.security import limiter
-from backend.db.database import init_db
+from backend.db.database import get_db_session_context, init_db
 from backend.frontend import frontend_router
 from backend.frontend.errors import not_found_error_handler
 from backend.models.click import ClickEvent
@@ -24,7 +24,7 @@ from backend.models.url import Url
 from backend.models.user import User
 from backend.services.audit import task_event_upload
 from backend.services.auth import task_remove_stale_sessions
-from backend.services.user import upsert_default_users
+from backend.services.user import UserService
 
 #
 
@@ -35,7 +35,8 @@ async def on_startup(app: FastAPI) -> None:  # noqa: ARG001
     await init_db()
     await init_caches()
     #
-    await upsert_default_users()
+    async with get_db_session_context() as db:
+        await UserService(db).upsert_default_users()
     #
     asyncio.create_task(task_event_upload())
     asyncio.create_task(task_remove_stale_sessions())

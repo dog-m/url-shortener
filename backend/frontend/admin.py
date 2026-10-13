@@ -12,13 +12,11 @@ from fastapi import (
     status,
 )
 from fastapi.responses import HTMLResponse, RedirectResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.dependencies import require_admin
-from backend.db.database import get_db_session
 from backend.frontend.common import frontend_templates
 from backend.models.user import User
-from backend.services.user import find_users_batched, get_user_by_id
+from backend.services.user import UserService
 
 #
 
@@ -30,8 +28,8 @@ router = APIRouter(tags=['admin'])
 @router.get('/users', response_class=HTMLResponse)
 async def get_user_list(
     req: Request,
-    db: Annotated[AsyncSession, Depends(get_db_session)],
     admin: Annotated[User, Depends(require_admin)],
+    user_service: Annotated[UserService, Depends()],
     page: Annotated[str, Query()] = '1',
 ) -> Response:
     # parameter cleanup
@@ -41,8 +39,7 @@ async def get_user_list(
 
     # fetch
     if page_index > 0:
-        users = await find_users_batched(
-            db,
+        users = await user_service.find_users_batched(
             batch_size=page_size,
             offset_items=(page_index - 1) * page_size,
         )
@@ -68,11 +65,11 @@ async def get_user_list(
 async def get_user_profile(
     req: Request,
     user_id: Annotated[UUID, Path()],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
     admin: Annotated[User, Depends(require_admin)],
+    user_service: Annotated[UserService, Depends()],
 ) -> Response:
     # validation
-    if (profile := await get_user_by_id(db, user_id)) is None:
+    if (profile := await user_service.get_user_by_id(user_id)) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
         )

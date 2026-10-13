@@ -3,12 +3,10 @@ from typing import Annotated
 
 from fastapi import Cookie, Depends, HTTPException, Response, status
 from fastapi.responses import HTMLResponse
-from sqlalchemy.ext.asyncio.session import AsyncSession
 
-from backend.db.database import get_db_session
-from backend.models.session import Session
+from backend.models.session import SESSION_ID_MAX_LEN, Session
 from backend.models.user import User
-from backend.services.auth import get_active_session_by_id, get_user_by_session
+from backend.services.auth import AuthService
 
 #
 
@@ -17,7 +15,7 @@ def html_redirect(target_url: str, *, delay_sec: int = 1) -> Response:
     assert delay_sec >= 0
 
     return HTMLResponse(
-        content=f'''<!DOCTYPE html>
+        content=f"""<!DOCTYPE html>
         <html>
             <head>
                 <title>...</title>
@@ -30,7 +28,7 @@ def html_redirect(target_url: str, *, delay_sec: int = 1) -> Response:
                 </style>
             </head>
             <body></body>
-        </html>''',
+        </html>""",
     )
 
 
@@ -39,33 +37,30 @@ SESSION_COOKIE_NAME = 'u_session'
 
 
 async def get_current_session_id(
-    u_session: Annotated[str | None, Cookie()] = None,
+    u_session: Annotated[str | None, Cookie(max_length=SESSION_ID_MAX_LEN)] = None,
 ) -> str | None:
     return u_session
 
 
 async def get_current_session(
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    auth_service: Annotated[AuthService, Depends()],
     session_id: Annotated[str | None, Depends(get_current_session_id)] = None,
 ) -> Session | None:
     if session_id is None:
         return None
 
-    return await get_active_session_by_id(db, session_id)
+    return await auth_service.get_active_session_by_id(session_id)
 
 
 
 async def get_current_user(
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    auth_service: Annotated[AuthService, Depends()],
     session: Annotated[Session | None, Depends(get_current_session)] = None,
 ) -> User | None:
-    if session is None:
+    if session and (user := await auth_service.get_user_by_session(session)) and user.is_active:
+        return user
+    else:
         return None
-
-    if not (user := await get_user_by_session(db, session)) or not user.is_active:
-        return None
-
-    return user
 
 
 
