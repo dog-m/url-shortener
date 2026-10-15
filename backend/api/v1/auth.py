@@ -37,7 +37,7 @@ async def login(
     if not redirect.startswith('/'):  # only allow endpoints on this site
         redirect = FRONTEND_USER_MAIN
 
-    user = await user_service.get_user_by_email(form_data.username)
+    user = await user_service.find_user_by_email(form_data.username)
     if not user or not user.hashed_password or not password_verify(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

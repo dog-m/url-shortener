@@ -4,13 +4,17 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import StaleDataError
 
 from backend.core.config import settings
 from backend.core.security import password_get_hash
 from backend.models.user import User
+from backend.schemas.user import UserUpdate
 from backend.services.base import BaseService
+from backend.services.exceptions import ConcurrentUpdateError, UserNotFoundError
 
 #
+
 
 logger = logging.getLogger()
 
@@ -63,13 +67,18 @@ class UserService(BaseService):
         return user
 
 
-    async def get_user_by_id(self, user_id: UUID) -> User | None:
-        assert user_id is not None
-
+    async def find_user_by_id(self, user_id: UUID) -> User | None:
         return await self.db.get(User, user_id)
 
 
-    async def get_user_by_email(self, email: str) -> User | None:
+    async def get_user_by_id(self, user_id: UUID) -> User:
+        if user := await self.find_user_by_id(user_id):
+            return user
+        else:
+            raise UserNotFoundError(user_id)
+
+
+    async def find_user_by_email(self, email: str) -> User | None:
         assert email
 
         res = await self.db.execute(
@@ -78,12 +87,37 @@ class UserService(BaseService):
         return res.scalar_one_or_none()
 
 
+    async def update_user_profile(self, user: User, patch: UserUpdate, version: int) -> None:
+        # concurrency checks
+        if version != user.version:
+            raise ConcurrentUpdateError()
+
+        # in-place corrections
+        patch_data = patch.model_dump(mode='json', exclude_unset=True)
+        if pwd := patch_data.get('password'):
+            del patch_data['password']
+            patch_data['hashed_password'] = password_get_hash(pwd)
+
+        # improving UX by fixing user error (same email)
+        if user.email == patch_data.get('email'):
+            del patch_data['email']
+
+        # apply changes
+        try:
+            for name, value in patch_data.items():
+                setattr(user, name, value)
+
+            await self.db.commit()
+        except (StaleDataError, IntegrityError):
+            raise ConcurrentUpdateError()
+
+
     async def find_users_batched(self, *, offset_items: int = 0, batch_size: int = 50) -> Sequence[User]:
         assert batch_size >= 0
         assert offset_items >= 0
 
         stmt = select(User)
-
+        # TODO: add proper search functionality similar to URLs
         stmt = stmt.order_by(User.name, User.id).offset(offset_items).limit(batch_size)
 
         res = await self.db.execute(stmt)

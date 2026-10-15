@@ -74,7 +74,7 @@
             document.getElementById(ID_MESSAGE).classList.remove(CLS_MSG_OK, CLS_MSG_ERROR);
 
             fetch(
-                `/api/v1/user/{{ user.id }}?v={{ user.version }}`, {
+                `/api/v1/me?v={{ user.version }}`, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',

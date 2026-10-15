@@ -1,12 +1,13 @@
 from html import escape
 from typing import Annotated
 
-from fastapi import Cookie, Depends, HTTPException, Response, status
+from fastapi import Cookie, Depends, Response
 from fastapi.responses import HTMLResponse
 
 from backend.models.session import SESSION_ID_MAX_LEN, Session
 from backend.models.user import User
 from backend.services.auth import AuthService
+from backend.services.exceptions import AccessDeniedError
 
 #
 
@@ -70,9 +71,7 @@ async def require_user(
     if user:
         return user
     else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
+        raise AccessDeniedError()
 
 
 
@@ -82,6 +81,4 @@ async def require_admin(
     if user.is_superuser:
         return user
     else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
+        raise AccessDeniedError()

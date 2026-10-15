@@ -1,4 +1,5 @@
 from abc import ABC
+from uuid import UUID
 
 
 class DomainError(Exception, ABC):
@@ -17,9 +18,14 @@ class AccessDeniedError(DomainError):
 
 
 class UserNotFoundError(DomainError):
-    def __init__(self, user_id: str) -> None:
+    def __init__(self, user_id: UUID) -> None:
         self.user_id = user_id
         super().__init__(f"User not found: {user_id}")
+
+
+class ConcurrentUpdateError(DomainError):
+    def __init__(self) -> None:
+        super().__init__('Concurrent update or stale data')
 
 
 class SessionNotFoundError(DomainError):

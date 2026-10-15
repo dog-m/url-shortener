@@ -69,7 +69,7 @@ async def get_user_profile(
     user_service: Annotated[UserService, Depends()],
 ) -> Response:
     # validation
-    if (profile := await user_service.get_user_by_id(user_id)) is None:
+    if (profile := await user_service.find_user_by_id(user_id)) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
         )

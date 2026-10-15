@@ -4,7 +4,6 @@ from fastapi.responses import HTMLResponse
 #
 
 
-
 RATE_LIMITER_DEFAULT_RESPONSE = '''
 <!DOCTYPE html>
 <html>
@@ -24,3 +23,18 @@ def rate_limit_exceeded_handler(request: Request, _: Exception) -> Response:
     )
     return response  # type: ignore
 
+
+def access_denied_handler(request: Request, _: Exception) -> Response:  # noqa: ARG001
+    return Response(
+        content='Unauthorized',
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        media_type='text/plain',
+    )
+
+
+def concurrent_update_handler(request: Request, _: Exception) -> Response:  # noqa: ARG001
+    return Response(
+        content='Conflict',
+        status_code=status.HTTP_409_CONFLICT,
+        media_type='text/plain',
+    )

@@ -22,14 +22,13 @@ test.describe('profile', () => {
 
 
     test('update JSON payload', async ({ page, profilePage }) => {
-        const apiEndpoint        = '/api/v1/user/';
-        const apiEndpointPattern = `${apiEndpoint}**`;
+        const apiEndpoint = '/api/v1/me';
         const testName  = 'John Doe';
         const testEmail = `john+${randomUUID()}@example.com`;
         const testPwd   = 'qwerty$:123';
 
         // setup interception
-        await page.route(apiEndpointPattern, async (route, request) => {
+        await page.route(apiEndpoint, async (route, request) => {
             if (request.method() === 'PATCH')
                 await route.fulfill({
                     status: 200,
