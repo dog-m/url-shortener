@@ -24,10 +24,18 @@ def rate_limit_exceeded_handler(request: Request, _: Exception) -> Response:
     return response  # type: ignore
 
 
-def access_denied_handler(request: Request, _: Exception) -> Response:  # noqa: ARG001
+def access_control_handler(request: Request, _: Exception) -> Response:  # noqa: ARG001
     return Response(
         content='Unauthorized',
         status_code=status.HTTP_401_UNAUTHORIZED,
+        media_type='text/plain',
+    )
+
+
+def insufficient_privileges_handler(request: Request, _: Exception) -> Response:  # noqa: ARG001
+    return Response(
+        content='Forbidden',
+        status_code=status.HTTP_403_FORBIDDEN,
         media_type='text/plain',
     )
 

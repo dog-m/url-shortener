@@ -11,7 +11,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.db.database import now_UTC
-from backend.models.click import ClickEvent, UrlVisitorMetadata
 from backend.models.url import Url
 from backend.models.user import User
 from backend.schemas.url import UrlCreate
@@ -151,19 +150,4 @@ async def find_urls_batched(
     # fetch
     rows = await db.execute(stmt)
     return rows.scalars().all()
-
-
-
-async def register_url_visit(db: AsyncSession, url_id: str, visitor: UrlVisitorMetadata) -> None:
-    click = ClickEvent(
-        id=uuid.uuid1(),  # FIXME: use UUID7 on later Python versions
-        url_id=url_id,
-        user_addr=visitor.ip,
-        headers_user_agent=visitor.headers_user_agent,
-        headers_referer_domain=visitor.headers_referer_domain,
-        headers_accept_language=visitor.headers_accept_language,
-    )
-    db.add(click)
-    await db.commit()
-    # TODO: batch insertion?
 

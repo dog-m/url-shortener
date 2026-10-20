@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 from backend.models.session import SESSION_ID_MAX_LEN, Session
 from backend.models.user import User
 from backend.services.auth import AuthService
-from backend.services.exceptions import AccessDeniedError
+from backend.services.exceptions import AccessDeniedError, InsufficientPrivilegesError
 
 #
 
@@ -81,4 +81,4 @@ async def require_admin(
     if user.is_superuser:
         return user
     else:
-        raise AccessDeniedError()
+        raise InsufficientPrivilegesError()

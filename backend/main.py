@@ -13,8 +13,9 @@ from backend.api.urls_primary import primary_endpoint
 from backend.api.v1 import api_router
 from backend.core.caching import clear_caches, init_caches
 from backend.core.exceptions import (
-    access_denied_handler,
+    access_control_handler,
     concurrent_update_handler,
+    insufficient_privileges_handler,
     rate_limit_exceeded_handler,
 )
 
@@ -29,8 +30,9 @@ from backend.models.user import User
 from backend.services.audit import task_event_upload
 from backend.services.auth import task_remove_stale_sessions
 from backend.services.exceptions import (
-    AccessDeniedError,
+    AccessControlError,
     ConcurrentUpdateError,
+    InsufficientPrivilegesError,
     UserNotFoundError,
 )
 from backend.services.user import UserService
@@ -94,11 +96,12 @@ app.include_router(api_router)
 app.mount('/static', StaticFiles(directory='frontend/static'), name='static')
 
 # errors
-app.add_exception_handler(RateLimitExceeded,         rate_limit_exceeded_handler)
-app.add_exception_handler(AccessDeniedError,         access_denied_handler)
-app.add_exception_handler(ConcurrentUpdateError,     concurrent_update_handler)
-app.add_exception_handler(UserNotFoundError,         not_found_error_handler)
-app.add_exception_handler(status.HTTP_404_NOT_FOUND, not_found_error_handler)
+app.add_exception_handler(RateLimitExceeded,           rate_limit_exceeded_handler)
+app.add_exception_handler(InsufficientPrivilegesError, insufficient_privileges_handler)
+app.add_exception_handler(AccessControlError,          access_control_handler)
+app.add_exception_handler(ConcurrentUpdateError,       concurrent_update_handler)
+app.add_exception_handler(UserNotFoundError,           not_found_error_handler)
+app.add_exception_handler(status.HTTP_404_NOT_FOUND,   not_found_error_handler)
 
 # application-wide middleware stack (order matters)
 app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)

@@ -5,12 +5,10 @@ from fastapi import (
     APIRouter,
     Body,
     Depends,
-    HTTPException,
     Path,
     Query,
     Request,
     Response,
-    status,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.exc import StaleDataError
@@ -22,7 +20,12 @@ from backend.models.user import User
 from backend.schemas.api_base import ApiOk
 from backend.schemas.clicks import ClickActivityStats
 from backend.schemas.url import UrlCreate, UrlInfo, UrlUpdate, UrlUpdateResult
-from backend.services.clicks import get_click_activity_by_date
+from backend.services.clicks import ClicksService
+from backend.services.exceptions import (
+    ConcurrentUpdateError,
+    InsufficientPrivilegesError,
+    UrlNotFoundError,
+)
 from backend.services.url import (
     URL_ID_PATTERN,
     create_new_url,
@@ -68,19 +71,13 @@ async def edit_url(
 ) -> object:
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
+        raise UrlNotFoundError(url_id)
     if url.owner_id != user.id and not user.is_superuser:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
+        raise InsufficientPrivilegesError()
 
     # concurrency checks
     if url_version != url.version:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-        )
+        raise ConcurrentUpdateError()
 
     # apply changes
     try:
@@ -90,9 +87,7 @@ async def edit_url(
 
         await db.commit()
     except StaleDataError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-        )
+        raise ConcurrentUpdateError()
 
     return UrlUpdateResult(version=url_version + 1)  # skipping instance refresh
 
@@ -106,13 +101,9 @@ async def remove_url(
 ) -> object:
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
+        raise UrlNotFoundError(url_id)
     if url.owner_id != user.id and not user.is_superuser:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
+        raise InsufficientPrivilegesError()
 
     # apply the change
     await db.delete(url)
@@ -128,16 +119,13 @@ async def get_url_stats_last_activity(
     up_to: Annotated[datetime, Query(default_factory=now_UTC)],  # TODO: possible issues with timezones?
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
+    clicks_service: Annotated[ClicksService, Depends()],
 ) -> object:
     # validation and access checks
     if (url := await find_url_by_id(db, url_id)) is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
+        raise UrlNotFoundError(url_id)
     if url.owner_id != user.id and not user.is_superuser:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
+        raise InsufficientPrivilegesError()
 
     # prepare selection criteria
     week_count = 2 * 4  # last two months
@@ -145,6 +133,6 @@ async def get_url_stats_last_activity(
 
     # fetch and return
     return ClickActivityStats(
-        dates=await get_click_activity_by_date(db, url.id, up_to, days=day_count),
+        dates=await clicks_service.get_click_activity_by_date(url.id, up_to, days=day_count),
     )
 
