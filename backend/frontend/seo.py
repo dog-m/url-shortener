@@ -24,3 +24,11 @@ async def sitemap(req: Request) -> Response:
         scope=req.scope,
     )
 
+
+@router.api_route('/llms.txt', methods=['GET', 'HEAD'], response_class=FileResponse)
+async def llms_txt(req: Request) -> Response:
+    return await frontend_files.get_response(
+        path=req.url.path[1:],
+        scope=req.scope,
+    )
+

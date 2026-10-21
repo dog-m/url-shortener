@@ -11,6 +11,7 @@ This project is currently under active development and serves as an exploration 
 - Track click events and usage statistics.
 - Rate Limiting.
 - Basic asyncio-based background jobs.
+- SEO support via robots.txt, sitemap.xml, and llms.txt.
 
 ## Tech Stack
 

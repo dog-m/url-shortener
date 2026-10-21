@@ -1,0 +1,42 @@
+# LLMs.txt for [service name]
+
+## What is this?
+
+This is a machine-readable description of the URL shortener service at [example.com].
+
+## Site structure
+
+- `/` - Homepage / login page
+- `/urls` - URL management dashboard (authentication required)
+- `/urls/new` - Create a new shortened URL
+- `/urls/{url_id}/overview` - View analytics for a shortened URL
+- `/urls/{url_id}/edit` - Edit a shortened URL
+- `/profile` - User profile page (authentication required)
+- `/users` - Admin panel for user management (admin access required)
+- `/u/{url_id}` - Redirect endpoint for shortened URLs
+
+## API
+
+The service provides a REST API available at `/api/v1/` with the following endpoints:
+
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/logout` - User logout
+- `GET /api/v1/urls` - List user URLs
+- `POST /api/v1/urls` - Create a new URL
+- `PATCH /api/v1/urls/{url_id}` - Edit a URL
+- `DELETE /api/v1/urls/{url_id}` - Delete a URL
+- `GET /api/v1/urls/{url_id}/stats/last-activity` - View click activity stats
+- `GET /api/v1/me` - Get current user profile
+- `PATCH /api/v1/me` - Edit current user profile
+
+## Authentication
+
+Access to user-specific pages and the API requires a session cookie (`u_session`) obtained via login.
+
+## Rate limiting
+
+Some API endpoints are rate-limited. Check headers for rate limit information.
+
+## Terms
+
+By using this service, you agree to comply with the site's terms of service.
