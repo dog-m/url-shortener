@@ -4,27 +4,19 @@ from uuid import UUID
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException,
     Path,
     Query,
     Request,
     Response,
-    status,
 )
 from fastapi.responses import HTMLResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.api.dependencies import require_user
-from backend.db.database import get_db_session, now_UTC
+from backend.db.database import now_UTC
 from backend.frontend.common import frontend_templates
 from backend.models.user import User
-from backend.services.url import (
-    URL_ID_PATTERN,
-    URL_SORTING_CRITERIA,
-    UrlCategory,
-    find_url_by_id,
-    find_urls_batched,
-)
+from backend.services.exceptions import UrlNotFoundError
+from backend.services.url import UrlCategory, UrlService
 
 #
 
@@ -36,7 +28,7 @@ router = APIRouter(prefix='/urls', tags=['urls'])
 @router.get('', response_class=HTMLResponse)
 async def url_search(
     req: Request,
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    url_service: Annotated[UrlService, Depends()],
     user: Annotated[User, Depends(require_user)],
     query: Annotated[str, Query(alias='q')] = '',
     page: Annotated[str, Query(alias='p')] = '1',  # using "natural" numbers instead of zero-based indexing
@@ -60,8 +52,7 @@ async def url_search(
 
     # fetch
     if page_index > 0:
-        urls = await find_urls_batched(
-            db,
+        urls = await url_service.find_urls_batched(
             text=query,
             owner=owner,
             sort_criteria=sort,
@@ -88,7 +79,6 @@ async def url_search(
             'query': query,
             'sort': sort,
             'sort_asc': sort_asc,
-            'URL_SORTING_CRITERIA': URL_SORTING_CRITERIA.keys(),
             'category': category,
         }
     )
@@ -115,16 +105,14 @@ async def url_new(
 @router.get('/{url_id}/overview', response_class=HTMLResponse)
 async def url_overview(
     req: Request,
-    url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    url_id: Annotated[str, Path()],
+    url_service: Annotated[UrlService, Depends()],
     user: Annotated[User, Depends(require_user)],
 ) -> Response:
     # parameter validation and access checks
-    url = await find_url_by_id(db, url_id)
-    if url is None or (url.owner_id != user.id and not user.is_superuser):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
+    url = await url_service.get_url_by_id(url_id)
+    if url.owner_id != user.id and not user.is_superuser:
+        raise UrlNotFoundError(url_id)
 
     # page rendering
     return frontend_templates.TemplateResponse(
@@ -143,16 +131,14 @@ async def url_overview(
 @router.get('/{url_id}/edit', response_class=HTMLResponse)
 async def url_edit(
     req: Request,
-    url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    url_id: Annotated[str, Path()],
+    url_service: Annotated[UrlService, Depends()],
     user: Annotated[User, Depends(require_user)],
 ) -> Response:
     # parameter validation and access checks
-    url = await find_url_by_id(db, url_id)
-    if url is None or (url.owner_id != user.id and not user.is_superuser):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
+    url = await url_service.get_url_by_id(url_id)
+    if url.owner_id != user.id and not user.is_superuser:
+        raise UrlNotFoundError(url_id)
 
     # page rendering
     return frontend_templates.TemplateResponse(

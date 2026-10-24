@@ -24,14 +24,8 @@ from backend.services.clicks import ClicksService
 from backend.services.exceptions import (
     ConcurrentUpdateError,
     InsufficientPrivilegesError,
-    UrlNotFoundError,
 )
-from backend.services.url import (
-    URL_ID_PATTERN,
-    create_new_url,
-    find_url_by_id,
-    find_urls_batched,
-)
+from backend.services.url import URL_ID_PATTERN, UrlService
 
 #
 
@@ -42,20 +36,20 @@ router = APIRouter(prefix='/urls', tags=['url'])
 
 @router.get('', response_model=list[UrlInfo])
 async def list_urls(
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    url_service: Annotated[UrlService, Depends()],
     user: Annotated[User, Depends(require_user)],
 ) -> object:
-    return await find_urls_batched(db, owner=user)
+    return await url_service.find_urls_batched(owner=user)
 
 
 
 @router.post('', response_model=UrlInfo)
 async def add_new_url(
     new_url: Annotated[UrlCreate, Body()],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
     owner: Annotated[User, Depends(require_user)],
+    url_service: Annotated[UrlService, Depends()],
 ) -> object:
-    return await create_new_url(db, owner, new_url)
+    return await url_service.create_new_url(owner, new_url)
 
 
 
@@ -67,11 +61,11 @@ async def edit_url(
     patch: Annotated[UrlUpdate, Body()],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
+    url_service: Annotated[UrlService, Depends()],
     request: Request, response: Response,  # noqa: ARG001 - rate limiting
 ) -> object:
     # validation and access checks
-    if (url := await find_url_by_id(db, url_id)) is None:
-        raise UrlNotFoundError(url_id)
+    url = await url_service.get_url_by_id(url_id)
     if url.owner_id != user.id and not user.is_superuser:
         raise InsufficientPrivilegesError()
 
@@ -98,10 +92,10 @@ async def remove_url(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
+    url_service: Annotated[UrlService, Depends()],
 ) -> object:
     # validation and access checks
-    if (url := await find_url_by_id(db, url_id)) is None:
-        raise UrlNotFoundError(url_id)
+    url = await url_service.get_url_by_id(url_id)
     if url.owner_id != user.id and not user.is_superuser:
         raise InsufficientPrivilegesError()
 
@@ -117,13 +111,12 @@ async def remove_url(
 async def get_url_stats_last_activity(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     up_to: Annotated[datetime, Query(default_factory=now_UTC)],  # TODO: possible issues with timezones?
-    db: Annotated[AsyncSession, Depends(get_db_session)],
+    url_service: Annotated[UrlService, Depends()],
     user: Annotated[User, Depends(require_user)],
     clicks_service: Annotated[ClicksService, Depends()],
 ) -> object:
     # validation and access checks
-    if (url := await find_url_by_id(db, url_id)) is None:
-        raise UrlNotFoundError(url_id)
+    url = await url_service.get_url_by_id(url_id)
     if url.owner_id != user.id and not user.is_superuser:
         raise InsufficientPrivilegesError()
 

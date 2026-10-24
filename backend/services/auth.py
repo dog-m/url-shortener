@@ -51,7 +51,6 @@ class AuthService(BaseService):
         return None
 
 
-
     async def get_user_by_session(self, session: Session) -> User | None:
         rows = await self.db.execute(
             select(User).where(User.id == session.user_id)

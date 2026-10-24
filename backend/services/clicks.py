@@ -58,7 +58,6 @@ class ClicksService(BaseService):
         return result
 
 
-
     async def get_click_activity_by_weekday(self, url_id: str, now: datetime, *, days: int = 30) -> ClickActivityWeekly:
         assert days > 0
 
@@ -96,5 +95,4 @@ class ClicksService(BaseService):
         self.db.add(click)
         await self.db.commit()
         # TODO: batch insertion?
-
 
