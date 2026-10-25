@@ -100,8 +100,11 @@ async def remove_url(
         raise InsufficientPrivilegesError()
 
     # apply the change
-    await db.delete(url)
-    await db.commit()  # TODO: errors?
+    try:
+        await db.delete(url)
+        await db.commit()
+    except StaleDataError:
+        raise ConcurrentUpdateError()
 
     return ApiOk()
 
