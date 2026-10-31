@@ -10,21 +10,16 @@ from fastapi import (
     Request,
     Response,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm.exc import StaleDataError
 
 from backend.api.dependencies import require_user
 from backend.core.security import limiter
-from backend.db.database import get_db_session, now_UTC
+from backend.db.database import now_UTC
 from backend.models.user import User
 from backend.schemas.api_base import ApiOk
 from backend.schemas.clicks import ClickActivityStats
 from backend.schemas.url import UrlCreate, UrlInfo, UrlUpdate, UrlUpdateResult
 from backend.services.clicks import ClicksService
-from backend.services.exceptions import (
-    ConcurrentUpdateError,
-    InsufficientPrivilegesError,
-)
+from backend.services.security import SecurityService
 from backend.services.url import URL_ID_PATTERN, UrlService
 
 #
@@ -59,53 +54,29 @@ async def edit_url(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     url_version: Annotated[int, Query(alias='v')],
     patch: Annotated[UrlUpdate, Body()],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
     url_service: Annotated[UrlService, Depends()],
+    security_service: Annotated[SecurityService, Depends()],
     request: Request, response: Response,  # noqa: ARG001 - rate limiting
 ) -> object:
-    # validation and access checks
     url = await url_service.get_url_by_id(url_id)
-    if url.owner_id != user.id and not user.is_superuser:
-        raise InsufficientPrivilegesError()
-
-    # concurrency checks
-    if url_version != url.version:
-        raise ConcurrentUpdateError()
-
-    # apply changes
-    try:
-        # NOTE: no 'mode=json' here because of datetimes
-        for name, value in patch.model_dump(exclude_unset=True).items():
-            setattr(url, name, value)
-
-        await db.commit()
-    except StaleDataError:
-        raise ConcurrentUpdateError()
-
-    return UrlUpdateResult(version=url_version + 1)  # skipping instance refresh
+    await security_service.can_manage_url(user, url)
+    new_version = await url_service.update_url(url, patch, url_version)
+    return UrlUpdateResult(version=new_version)
 
 
 
 @router.delete('/{url_id}', response_model=ApiOk)
 async def remove_url(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
-    db: Annotated[AsyncSession, Depends(get_db_session)],
     user: Annotated[User, Depends(require_user)],
     url_service: Annotated[UrlService, Depends()],
+    security_service: Annotated[SecurityService, Depends()],
 ) -> object:
     # validation and access checks
     url = await url_service.get_url_by_id(url_id)
-    if url.owner_id != user.id and not user.is_superuser:
-        raise InsufficientPrivilegesError()
-
-    # apply the change
-    try:
-        await db.delete(url)
-        await db.commit()
-    except StaleDataError:
-        raise ConcurrentUpdateError()
-
+    await security_service.can_manage_url(user, url)
+    await url_service.delete_url(url)
     return ApiOk()
 
 
@@ -114,21 +85,19 @@ async def remove_url(
 async def get_url_stats_last_activity(
     url_id: Annotated[str, Path(pattern=URL_ID_PATTERN)],
     up_to: Annotated[datetime, Query(default_factory=now_UTC)],  # TODO: possible issues with timezones?
-    url_service: Annotated[UrlService, Depends()],
     user: Annotated[User, Depends(require_user)],
+    url_service: Annotated[UrlService, Depends()],
+    security_service: Annotated[SecurityService, Depends()],
     clicks_service: Annotated[ClicksService, Depends()],
 ) -> object:
     # validation and access checks
     url = await url_service.get_url_by_id(url_id)
-    if url.owner_id != user.id and not user.is_superuser:
-        raise InsufficientPrivilegesError()
+    await security_service.can_manage_url(user, url)
 
     # prepare selection criteria
     week_count = 2 * 4  # last two months
     day_count  = 7 * week_count - (7 - (up_to.weekday() + 1)) + 1
 
     # fetch and return
-    return ClickActivityStats(
-        dates=await clicks_service.get_click_activity_by_date(url.id, up_to, days=day_count),
-    )
+    return await clicks_service.get_click_activity_by_date(url.id, up_to, days=day_count)
 

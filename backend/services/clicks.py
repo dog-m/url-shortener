@@ -9,6 +9,7 @@ from backend.models.click import ClickEvent, UrlVisitorMetadata
 from backend.schemas.clicks import (
     WEEKDAY_INDEX_TO_ATTR_NAME,
     ClickActivityDaily,
+    ClickActivityStats,
     ClickActivityWeekly,
 )
 from backend.services.base import BaseService
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class ClicksService(BaseService):
 
-    async def get_click_activity_by_date(self, url_id: str, now: datetime, *, days: int = 30) -> list[ClickActivityDaily]:
+    async def get_click_activity_by_date(self, url_id: str, now: datetime, *, days: int = 0) -> ClickActivityStats:
         assert days > 0
 
         # fetch the data
@@ -42,7 +43,7 @@ class ClicksService(BaseService):
         }
 
         # fill-in the gaps (days without clicks)
-        result: list[ClickActivityDaily] = []
+        result = ClickActivityStats(dates=[])
         for i in range(days):
             day = (now - timedelta(days=i)).date()
             day_str = day.isoformat()  # possible format mismatch issue here?
@@ -50,10 +51,10 @@ class ClicksService(BaseService):
                 date=day_str,
                 count=click_map.get(day_str, 0),
             )
-            result.append(entry)
+            result.dates.append(entry)
 
         # order things manually lowering strain on the DB
-        result.sort(key=lambda x: x.date)
+        result.dates.sort(key=lambda x: x.date)
 
         return result
 

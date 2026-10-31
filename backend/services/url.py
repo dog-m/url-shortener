@@ -8,13 +8,14 @@ from enum import StrEnum, auto
 
 from sqlalchemy import Select, func, select
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm.exc import StaleDataError
 
 from backend.db.database import now_UTC
 from backend.models.url import Url
 from backend.models.user import User
-from backend.schemas.url import UrlCreate
+from backend.schemas.url import UrlCreate, UrlUpdate
 from backend.services.base import BaseService
-from backend.services.exceptions import UrlNotFoundError
+from backend.services.exceptions import ConcurrentUpdateError, UrlNotFoundError
 
 #
 
@@ -84,6 +85,33 @@ class UrlService(BaseService):
             raise UrlNotFoundError(url_id)
         else:
             return url
+
+
+    async def update_url(self, url: Url, patch: UrlUpdate, url_version: int) -> int:
+        # concurrency checks
+        if url_version != url.version:
+            raise ConcurrentUpdateError()
+
+        # apply changes
+        try:
+            # NOTE: no 'mode=json' here because of datetimes
+            for name, value in patch.model_dump(exclude_unset=True).items():
+                setattr(url, name, value)
+
+            await self.db.commit()
+        except StaleDataError:
+            raise ConcurrentUpdateError()
+
+        return url_version + 1  # skipping instance refresh
+
+
+    async def delete_url(self, url: Url) -> None:
+        # apply the change
+        try:
+            await self.db.delete(url)
+            await self.db.commit()
+        except StaleDataError:
+            raise ConcurrentUpdateError()
 
 
     @staticmethod
