@@ -25,7 +25,7 @@ class SecurityService(BaseService):
         return url.is_open_access
 
 
-    async def can_url_be_visited_by(self, user: User | None, url: Url) -> bool:
+    async def is_visible_for(self, user: User | None, url: Url) -> bool:
         # TODO: unnecessary? other rules?
         return url.is_open_access or user is not None
 

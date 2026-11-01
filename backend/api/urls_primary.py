@@ -78,7 +78,7 @@ async def visit_url(
     if not await security_service.is_url_freely_accessible(url):
         session = await get_current_session(auth_service, session_id)
         user    = await get_current_user(auth_service, session)
-        if not await security_service.can_url_be_visited_by(user, url):
+        if not await security_service.is_visible_for(user, url):
             return RedirectResponse(
                 url=f"{FRONTEND_LOGIN_PAGE}?{urlencode({ 'redirect': req.url.path })}",
                 status_code=status.HTTP_307_TEMPORARY_REDIRECT,
