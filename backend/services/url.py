@@ -102,6 +102,8 @@ class UrlService(BaseService):
         except StaleDataError:
             raise ConcurrentUpdateError()
 
+        pass  # TODO: update/invalidate caches
+
         return url_version + 1  # skipping instance refresh
 
 
@@ -112,6 +114,8 @@ class UrlService(BaseService):
             await self.db.commit()
         except StaleDataError:
             raise ConcurrentUpdateError()
+
+        pass  # TODO: update/invalidate caches
 
 
     @staticmethod
@@ -185,5 +189,5 @@ class UrlService(BaseService):
 
         # fetch
         rows = await self.db.execute(stmt)
-        return rows.scalars().all()
+        return rows.scalars().all()  # TODO: cache the result maybe?
 

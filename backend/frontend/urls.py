@@ -15,7 +15,7 @@ from backend.api.dependencies import require_user
 from backend.db.database import now_UTC
 from backend.frontend.common import frontend_templates
 from backend.models.user import User
-from backend.services.exceptions import UrlNotFoundError
+from backend.services.security import SecurityService
 from backend.services.url import UrlCategory, UrlService
 
 #
@@ -107,12 +107,12 @@ async def url_overview(
     req: Request,
     url_id: Annotated[str, Path()],
     url_service: Annotated[UrlService, Depends()],
+    security_service: Annotated[SecurityService, Depends()],
     user: Annotated[User, Depends(require_user)],
 ) -> Response:
     # parameter validation and access checks
     url = await url_service.get_url_by_id(url_id)
-    if url.owner_id != user.id and not user.is_superuser:
-        raise UrlNotFoundError(url_id)
+    await security_service.can_manage_url_or_missing(user, url)
 
     # page rendering
     return frontend_templates.TemplateResponse(
@@ -133,12 +133,12 @@ async def url_edit(
     req: Request,
     url_id: Annotated[str, Path()],
     url_service: Annotated[UrlService, Depends()],
+    security_service: Annotated[SecurityService, Depends()],
     user: Annotated[User, Depends(require_user)],
 ) -> Response:
     # parameter validation and access checks
     url = await url_service.get_url_by_id(url_id)
-    if url.owner_id != user.id and not user.is_superuser:
-        raise UrlNotFoundError(url_id)
+    await security_service.can_manage_url_or_missing(user, url)
 
     # page rendering
     return frontend_templates.TemplateResponse(

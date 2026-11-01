@@ -111,6 +111,8 @@ class UserService(BaseService):
         except (StaleDataError, IntegrityError):
             raise ConcurrentUpdateError()
 
+        pass  # TODO: update/invalidate caches
+
 
     async def find_users_batched(self, *, offset_items: int = 0, batch_size: int = 50) -> Sequence[User]:
         assert batch_size >= 0

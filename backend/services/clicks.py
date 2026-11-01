@@ -56,7 +56,7 @@ class ClicksService(BaseService):
         # order things manually lowering strain on the DB
         result.dates.sort(key=lambda x: x.date)
 
-        return result
+        return result  # TODO: cache the result maybe?
 
 
     async def get_click_activity_by_weekday(self, url_id: str, now: datetime, *, days: int = 30) -> ClickActivityWeekly:
@@ -81,7 +81,7 @@ class ClicksService(BaseService):
             day_name = WEEKDAY_INDEX_TO_ATTR_NAME[int(row.weekday_num)]
             setattr(result, day_name, row.count)
 
-        return result
+        return result  # TODO: cache the result maybe?
 
 
     async def register_url_visit(self, url_id: str, visitor: UrlVisitorMetadata) -> None:
