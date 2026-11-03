@@ -1,11 +1,11 @@
 {% extends 'user/base.html' %}
 
-{% set PAGE = 'url-edit' %}
+{% set PAGE = 'users' %}
 
 {% block title %}Edit "{{- user.name -}}" profile / {{ super() }}{% endblock %}
 
 {%- block page_content -%}
 <p>
-    Editing {{- profile.name | e -}}'s profile by {{- admin.name | e -}}.
+    Editing {{ profile.name | e }}'s profile as {{ user.name | e }}.
 </p>
 {%- endblock -%}

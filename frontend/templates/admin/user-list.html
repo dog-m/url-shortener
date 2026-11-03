@@ -33,10 +33,10 @@
 </div>
 <div>
     <ul class="user-list">
-        {%- for user in users -%}
+        {%- for profile in users -%}
         <li>
             <div class="ellipsis-text">
-                <a href="/users/{{- user.id -}}/profile">{{- user.name | e -}}</a>
+                <a href="/users/{{- profile.id -}}/profile">{{- profile.name | e -}}</a>
             </div>
         </li>
         {%- endfor -%}
