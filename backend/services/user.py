@@ -29,7 +29,9 @@ class UserService(BaseService):
                 pwd='admin',
                 is_privileged=True,
             )
+            logger.info('Added primary superuser')
         except IntegrityError:
+            await self.db.rollback()  # reset the transaction if we want to continue with this session
             logger.info('Primary superuser already present, skipping.')
 
         # adding regular user
@@ -40,6 +42,7 @@ class UserService(BaseService):
                 pwd='user',
                 is_privileged=False,
             )
+            logger.info('Added test user')
 
 
     async def _normalize_email(self, email: str) -> str:
@@ -106,9 +109,14 @@ class UserService(BaseService):
         try:
             for name, value in patch_data.items():
                 setattr(user, name, value)
-
             await self.db.commit()
-        except (StaleDataError, IntegrityError):
+
+        except IntegrityError:
+            await self.db.rollback()
+            raise ConcurrentUpdateError()  # FIXME: use different error for catching email uniqueness errors
+
+        except StaleDataError:
+            await self.db.rollback()
             raise ConcurrentUpdateError()
 
         pass  # TODO: update/invalidate caches

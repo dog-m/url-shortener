@@ -56,24 +56,29 @@ class UrlCategory(StrEnum):
 
 class UrlService(BaseService):
 
+    async def _generate_url_id(self) -> str:
+        return ''.join(random.choices(_URL_ID_CHARACTERS, k=URL_ID_MAX_LEN))
+
+
     async def create_new_url(self, owner: User, url_info: UrlCreate) -> Url:
         while True:
             try:
-                url_id = ''.join(random.choices(_URL_ID_CHARACTERS, k=URL_ID_MAX_LEN))
-
                 url = Url(
-                    id=url_id,
+                    id=await self._generate_url_id(),
                     owner_id=owner.id,
                     **url_info.model_dump(),
                 )
 
                 self.db.add(url)
                 await self.db.commit()
-
                 await self.db.refresh(url)
-                return url  # TODO: cache?
+
+                pass  # TODO: cache url info?
+
+                return url
+
             except IntegrityError:
-                pass
+                await self.db.rollback()  # reset the transaction to continue using it
 
 
     async def find_url_by_id(self, url_id: str) -> Url | None:
@@ -97,9 +102,10 @@ class UrlService(BaseService):
             # NOTE: no 'mode=json' here because of datetimes
             for name, value in patch.model_dump(exclude_unset=True).items():
                 setattr(url, name, value)
-
             await self.db.commit()
+
         except StaleDataError:
+            await self.db.rollback()
             raise ConcurrentUpdateError()
 
         pass  # TODO: update/invalidate caches
@@ -112,7 +118,9 @@ class UrlService(BaseService):
         try:
             await self.db.delete(url)
             await self.db.commit()
+
         except StaleDataError:
+            await self.db.rollback()
             raise ConcurrentUpdateError()
 
         pass  # TODO: update/invalidate caches

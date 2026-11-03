@@ -18,26 +18,30 @@ from backend.services.base import BaseService
 
 class AuthService(BaseService):
 
+    async def _generate_session_id(self) -> str:
+        nbytes = math.ceil(SESSION_ID_MAX_LEN * 3 / 4)
+        return secrets.token_urlsafe(nbytes)[:SESSION_ID_MAX_LEN]
+
+
     async def new_session(self, user: User) -> Session:
         while True:
             try:
-                nbytes = math.ceil(SESSION_ID_MAX_LEN * 3 / 4)
-                session_id = secrets.token_urlsafe(nbytes)[:SESSION_ID_MAX_LEN]
-
                 session = Session(
-                    id=session_id,
+                    id=await self._generate_session_id(),
                     user_id=user.id,
                     expires_at=datetime.now(UTC) + timedelta(days=settings.user_session_expire_days),
                 )
 
                 self.db.add(session)
                 await self.db.commit()
-
                 await self.db.refresh(session)
-                # TODO: cache?
+
+                pass # TODO: cache session info?
+
                 return session
+
             except IntegrityError:
-                pass
+                await self.db.rollback()  # clear transaction to continue using the same session
 
 
     async def get_active_session_by_id(self, session_id: str) -> Session | None:
