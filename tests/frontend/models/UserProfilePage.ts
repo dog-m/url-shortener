@@ -3,9 +3,9 @@ import { BasePage } from './BasePage';
 
 
 export interface UserInfoPatch {
-    name?: string;
-    email?: string;
-    password?: string;
+    name: string;
+    email: string;
+    password: string;
 }
 
 
@@ -34,7 +34,7 @@ export class UserProfilePage extends BasePage {
         await this.gotoSafe('/profile');
     }
 
-    async updateProfile(patch: UserInfoPatch) {
+    async updateProfile(patch: Partial<UserInfoPatch>) {
         if (patch.name)     await this.name.fill(patch.name);
         if (patch.email)    await this.email.fill(patch.email);
         if (patch.password) await this.password.fill(patch.password);
